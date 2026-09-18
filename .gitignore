@@ -14,5 +14,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# User data
+# User data & databases
 data/*.pdf
+*.db
+backend/*.db

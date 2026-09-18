@@ -422,6 +422,30 @@
                     <i data-lucide="volume-2" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
                     <span class="hidden sm:inline">Audio Read</span>
                 </button>
+
+                <div class="h-5 w-[1px] bg-slate-200 dark:bg-slate-700/60 mx-1"></div>
+
+                <!-- Sign In / User Profile Button & Dropdown -->
+                <div id="auth-container" class="relative">
+                    <button id="auth-login-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-semibold shadow-sm shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span>Sign In</span>
+                    </button>
+
+                    <!-- User Profile Dropdown (Hidden initially) -->
+                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl glass-panel border border-slate-200/90 dark:border-slate-800/90 shadow-2xl py-2 z-50 animate-fade-in backdrop-blur-xl bg-white/95 dark:bg-slate-900/95">
+                        <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800/80">
+                            <p id="user-display-name" class="text-xs font-bold text-slate-900 dark:text-white truncate">User Name</p>
+                            <p id="user-display-email" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">user@email.com</p>
+                        </div>
+                        <div class="px-2 py-1">
+                            <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -539,6 +563,95 @@
         </div>
 
     </main>
+
+    <!-- Auth Modal (Sign In / Sign Up) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-3xl glass-panel border border-slate-200/90 dark:border-slate-800/90 shadow-2xl p-6 sm:p-8 bg-white/95 dark:bg-slate-900/95 overflow-hidden animate-fade-in">
+            
+            <!-- Close Button -->
+            <button id="close-auth-modal" class="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Brand Header -->
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-3 ring-4 ring-blue-500/10">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
+                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
+                        <circle cx="12" cy="12.5" r="2" fill="white"/>
+                    </svg>
+                </div>
+                <h3 id="auth-modal-title" class="text-xl font-bold text-slate-900 dark:text-white">Welcome to Cognify</h3>
+                <p id="auth-modal-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sign in to save and access your study workspace</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-5 border border-slate-200 dark:border-slate-700/60">
+                <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm">
+                    Sign In
+                </button>
+                <button id="tab-register" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                    Create Account
+                </button>
+            </div>
+
+            <!-- Alert Message Box -->
+            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border items-center gap-2"></div>
+
+            <!-- Sign In Form -->
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="email" id="login-email" required placeholder="you@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit-login" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+                    <span>Sign In to Cognify</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </form>
+
+            <!-- Sign Up Form (Hidden initially) -->
+            <form id="form-register" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="text" id="register-name" required placeholder="Alex Mercer" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="email" id="register-email" required placeholder="alex@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Create Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit-register" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+                    <span>Create Account</span>
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Application Script -->
     <script>
@@ -1052,6 +1165,235 @@
             div.innerText = string;
             return div.innerHTML;
         }
+
+        // ==================== AUTHENTICATION LOGIC ====================
+        const authModal = document.getElementById('auth-modal');
+        const authLoginBtn = document.getElementById('auth-login-btn');
+        const closeAuthModal = document.getElementById('close-auth-modal');
+        const userProfileMenu = document.getElementById('user-profile-menu');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userDisplayEmail = document.getElementById('user-display-email');
+        const logoutBtn = document.getElementById('logout-btn');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const formLogin = document.getElementById('form-login');
+        const formRegister = document.getElementById('form-register');
+        const authAlert = document.getElementById('auth-alert');
+        const authModalTitle = document.getElementById('auth-modal-title');
+        const authModalDesc = document.getElementById('auth-modal-desc');
+
+        let currentUser = null;
+
+        function openAuthModal(tab = 'login') {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+            switchAuthTab(tab);
+            hideAuthAlert();
+        }
+
+        function closeAuthModalHandler() {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+            hideAuthAlert();
+        }
+
+        function showAuthAlert(msg, type = 'error') {
+            authAlert.innerHTML = `
+                <i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle-2'}" class="w-4 h-4 shrink-0"></i>
+                <span>${msg}</span>
+            `;
+            authAlert.className = `mb-4 p-3 rounded-xl text-xs font-medium border flex items-center gap-2 ${
+                type === 'error'
+                    ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40'
+            }`;
+            lucide.createIcons();
+        }
+
+        function hideAuthAlert() {
+            authAlert.classList.add('hidden');
+            authAlert.innerHTML = '';
+        }
+
+        function switchAuthTab(tab) {
+            hideAuthAlert();
+            if (tab === 'login') {
+                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm";
+                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+                authModalTitle.innerText = "Welcome Back to Cognify";
+                authModalDesc.innerText = "Sign in to access your study history and materials";
+            } else {
+                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm";
+                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+                authModalTitle.innerText = "Create Your Cognify Account";
+                authModalDesc.innerText = "Start saving study sessions and personalized AI notes";
+            }
+        }
+
+        function updateAuthUI(user) {
+            currentUser = user;
+            if (user) {
+                // Logged In: Show user avatar pill
+                const firstName = user.name.split(' ')[0];
+                authLoginBtn.innerHTML = `
+                    <div class="w-5 h-5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-[10px] uppercase">
+                        ${user.name.charAt(0)}
+                    </div>
+                    <span>${escapeHtml(firstName)}</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
+                `;
+                userDisplayName.innerText = user.name;
+                userDisplayEmail.innerText = user.email;
+            } else {
+                // Logged Out
+                authLoginBtn.innerHTML = `
+                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                    <span>Sign In</span>
+                `;
+                userProfileMenu.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        async function checkAuthSession() {
+            const token = localStorage.getItem('cognify_token');
+            if (!token) {
+                updateAuthUI(null);
+                return;
+            }
+            try {
+                const res = await fetch(`/auth/me?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    updateAuthUI(data.user);
+                } else {
+                    localStorage.removeItem('cognify_token');
+                    updateAuthUI(null);
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
+            }
+        }
+
+        // Event Listeners for Auth
+        authLoginBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentUser) {
+                userProfileMenu.classList.toggle('hidden');
+            } else {
+                openAuthModal('login');
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (userProfileMenu && !userProfileMenu.contains(e.target) && !authLoginBtn.contains(e.target)) {
+                userProfileMenu.classList.add('hidden');
+            }
+        });
+
+        closeAuthModal.addEventListener('click', closeAuthModalHandler);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) closeAuthModalHandler();
+        });
+
+        tabLogin.addEventListener('click', () => switchAuthTab('login'));
+        tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+        // Handle Sign In Submit
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-submit-login');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Signing In...</span>`;
+
+            try {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    localStorage.setItem('cognify_token', data.token);
+                    updateAuthUI(data.user);
+                    closeAuthModalHandler();
+                    formLogin.reset();
+                } else {
+                    showAuthAlert(data.error || "Invalid email or password.");
+                }
+            } catch (err) {
+                showAuthAlert("Network error. Please ensure the backend server is running.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Sign In to Cognify</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+            }
+        });
+
+        // Handle Sign Up Submit
+        formRegister.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const btn = document.getElementById('btn-submit-register');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Creating Account...</span>`;
+
+            try {
+                const res = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    localStorage.setItem('cognify_token', data.token);
+                    updateAuthUI(data.user);
+                    closeAuthModalHandler();
+                    formRegister.reset();
+                } else {
+                    showAuthAlert(data.error || "Could not create account.");
+                }
+            } catch (err) {
+                showAuthAlert("Network error. Please ensure the backend server is running.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Create Account</span><i data-lucide="user-plus" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+            }
+        });
+
+        // Handle Sign Out
+        logoutBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('cognify_token');
+            if (token) {
+                try {
+                    await fetch('/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token })
+                    });
+                } catch (err) {}
+            }
+            localStorage.removeItem('cognify_token');
+            updateAuthUI(null);
+            userProfileMenu.classList.add('hidden');
+        });
+
+        // Check authentication state on page load
+        checkAuthSession();
     </script>
 </body>
 </html>

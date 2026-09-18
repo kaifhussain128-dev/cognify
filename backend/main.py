@@ -11,6 +11,7 @@ from google.genai import errors
 # Ensure backend directory is in python search path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf
+from auth import register_user, login_user, get_user_by_token, logout_user
 
 load_dotenv()
 
@@ -20,6 +21,18 @@ class ChatRequest(BaseModel):
     question: str
     provider: str = "antigravity"
     pdf_text: str = ""
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class LogoutRequest(BaseModel):
+    token: str = ""
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +51,36 @@ def serve_ui():
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "Cognify StudyMate AI"}
+
+# ==================== AUTHENTICATION ENDPOINTS ====================
+
+@app.post("/auth/register")
+def auth_register(req: RegisterRequest):
+    try:
+        result = register_user(req.name, req.email, req.password)
+        return {"success": True, **result}
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/auth/login")
+def auth_login(req: LoginRequest):
+    try:
+        result = login_user(req.email, req.password)
+        return {"success": True, **result}
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/auth/me")
+def auth_me(token: str = Query(None)):
+    user = get_user_by_token(token)
+    if not user:
+        return {"authenticated": False, "user": None}
+    return {"authenticated": True, "user": user}
+
+@app.post("/auth/logout")
+def auth_logout(req: LogoutRequest):
+    logout_user(req.token)
+    return {"success": True, "message": "Logged out successfully."}
 
 def get_genai_client():
     api_key = os.getenv("GEMINI_API_KEY")
