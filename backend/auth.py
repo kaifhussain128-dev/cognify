@@ -188,3 +188,47 @@ def logout_user(token: str) -> bool:
         cursor.execute("DELETE FROM sessions WHERE token = ?", (token,))
         conn.commit()
     return True
+
+def google_auth_user(name: str, email: str) -> dict:
+    """Authenticates or registers a user via their own Google email directly in SQLite."""
+    clean_email = email.strip().lower()
+    if not clean_email or "@" not in clean_email or "." not in clean_email:
+        raise ValueError("Please provide a valid Google email address.")
+
+    clean_name = name.strip() if name else ""
+    if not clean_name:
+        clean_name = clean_email.split("@")[0].replace(".", " ").title()
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, email FROM users WHERE email = ?", (clean_email,))
+        row = cursor.fetchone()
+        if row:
+            token = create_session(row["id"])
+            return {
+                "user": {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "email": row["email"]
+                },
+                "token": token
+            }
+
+        # User does not exist yet: create in SQLite database
+        pwd_hash, salt = hash_password(secrets.token_hex(16))
+        cursor.execute(
+            "INSERT INTO users (name, email, password_hash, salt) VALUES (?, ?, ?, ?)",
+            (clean_name, clean_email, pwd_hash, salt)
+        )
+        user_id = cursor.lastrowid
+        conn.commit()
+        token = create_session(user_id)
+        return {
+            "user": {
+                "id": user_id,
+                "name": clean_name,
+                "email": clean_email
+            },
+            "token": token
+        }
+

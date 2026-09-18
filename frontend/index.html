@@ -28,7 +28,7 @@
         }
     </script>
     
-    <!-- Google Fonts: Fraunces (refined editorial serif) & Karla (clean sans) -->
+    <!-- Google Fonts: Fraunces (editorial serif) & Karla (clean sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -102,7 +102,7 @@
             font-family: 'Fraunces', Georgia, serif;
         }
 
-        /* Editorial Glassmorphic Surfaces */
+        /* Glassmorphic Surfaces */
         .glass-panel {
             background: var(--surface-panel);
             backdrop-filter: blur(16px);
@@ -133,7 +133,7 @@
             border: 1px solid var(--border-card);
         }
 
-        /* Custom Editorial Scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -216,14 +216,6 @@
             color: var(--text-muted);
             font-style: italic;
         }
-
-        @keyframes pulseSoft {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-        .animate-pulse-soft {
-            animation: pulseSoft 3s ease-in-out infinite;
-        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden select-none">
@@ -244,13 +236,12 @@
     <!-- Mobile Sidebar Backdrop -->
     <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden md:hidden transition-opacity duration-300"></div>
 
-    <!-- Left Sidebar: Navigation, Document Upload & Study Accelerators -->
+    <!-- Left Sidebar -->
     <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 md:w-80 glass-panel flex flex-col border-r shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
         
         <!-- Brand Header -->
         <div class="p-5 border-b border-sand-200/80 dark:border-dusk-800/60 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <!-- Seal Emblem -->
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center shadow-md shadow-terra-500/25 ring-2 ring-terra-400/20 shrink-0">
                     <svg class="w-6 h-6 text-sand-50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
@@ -284,7 +275,7 @@
                 <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">⌘N</span>
             </button>
 
-            <!-- Upload PDF File Button -->
+            <!-- Upload PDF Button -->
             <input type="file" id="pdf-file-input" accept=".pdf" class="hidden">
             <button id="upload-pdf-trigger" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sand-100 hover:bg-sand-200 dark:bg-dusk-800/80 dark:hover:bg-dusk-700/80 border border-sand-200 dark:border-dusk-700/60 text-dusk-700 dark:text-sand-200 text-xs font-semibold tracking-wide transition-all shadow-sm">
                 <i data-lucide="paperclip" class="w-3.5 h-3.5 text-terra-600 dark:text-terra-400"></i>
@@ -295,7 +286,7 @@
         <!-- Scrollable Sidebar Content -->
         <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-5">
             
-            <!-- Active Document Widget (Dynamic) -->
+            <!-- Active Document Widget -->
             <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-sage-50/80 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-500/30 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-1.5">
@@ -317,7 +308,7 @@
                 </div>
             </div>
 
-            <!-- Study Accelerators / Modes -->
+            <!-- Study Accelerators -->
             <div>
                 <p class="text-[11px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 mb-2.5 px-1 flex items-center justify-between">
                     <span>Study Accelerators</span>
@@ -401,9 +392,9 @@
                 </div>
             </div>
 
-            <!-- Header Quick Action Controls -->
+            <!-- Header Action Controls -->
             <div class="flex items-center gap-2">
-                <!-- Theme Toggle Button (Light/Dark) -->
+                <!-- Theme Toggle Button -->
                 <button id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Light/Dark Mode">
                     <span id="theme-icon"><i data-lucide="moon" class="w-3.5 h-3.5 text-terra-600"></i></span>
                     <span id="theme-text" class="hidden sm:inline">Dark Mode</span>
@@ -415,7 +406,7 @@
                     <span class="hidden sm:inline">Export Notes</span>
                 </button>
 
-                <!-- Audio TTS Toggle Button -->
+                <!-- Audio TTS Toggle -->
                 <button id="tts-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Text-to-Speech Readout">
                     <i data-lucide="volume-2" class="w-3.5 h-3.5 text-terra-600 dark:text-terra-400"></i>
                     <span class="hidden sm:inline">Audio Read</span>
@@ -431,13 +422,13 @@
                     </button>
 
                     <!-- User Profile Dropdown -->
-                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-60 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95">
+                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95">
                         <div class="px-4 py-2.5 border-b border-sand-100 dark:border-dusk-800/80">
                             <div class="flex items-center justify-between">
-                                <p id="user-display-name" class="text-xs font-bold font-serif text-dusk-900 dark:text-sand-100 truncate">Alex Chen</p>
-                                <span id="user-auth-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300">Google</span>
+                                <p id="user-display-name" class="text-xs font-bold font-serif text-dusk-900 dark:text-sand-100 truncate">Student Name</p>
+                                <span id="user-auth-badge" class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300">Database</span>
                             </div>
-                            <p id="user-display-email" class="text-[11px] text-dusk-500 dark:text-dusk-400 truncate mt-0.5">alex@university.edu</p>
+                            <p id="user-display-email" class="text-[11px] text-dusk-500 dark:text-dusk-400 truncate mt-0.5">student@email.com</p>
                         </div>
                         <div class="px-2 py-1">
                             <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
@@ -453,16 +444,14 @@
         <!-- Chat Conversation Messages Container -->
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6">
             
-            <!-- Hero Welcome Card (Visible when chat is empty) -->
+            <!-- Hero Welcome Card -->
             <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6">
                 
-                <!-- Glowing badge in Terra & Sage -->
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sand-100 dark:bg-dusk-800 border border-sand-200 dark:border-dusk-700 text-terra-700 dark:text-terra-300 text-xs font-semibold shadow-sm">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-terra-500"></i>
                     <span>Cognify • StudyMate AI Workspace</span>
                 </div>
 
-                <!-- Headline with Fraunces Typography -->
                 <div class="space-y-2.5">
                     <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-dusk-900 dark:text-sand-100 leading-tight">
                         Transform study materials into <span class="italic text-terra-600 dark:text-terra-400">deep, lasting knowledge</span>
@@ -491,7 +480,7 @@
                         <p class="text-xs text-dusk-500 dark:text-dusk-400 mt-1 leading-normal">Test exam readiness with 5 multiple-choice questions & answer explanations.</p>
                     </div>
 
-                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Explain the most complex theoretical concept in this material as if explaining to a 10-year-old using memorable analogies.">
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Explain the most difficult concept in this material as if explaining to a 10-year-old using memorable analogies.">
                         <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <i data-lucide="lightbulb" class="w-5 h-5"></i>
                         </div>
@@ -513,15 +502,26 @@
 
         </div>
 
-        <!-- Bottom Input Area -->
+        <!-- Bottom Input Area with Real-Time Error Checking & Length Counter -->
         <div class="shrink-0 p-3 sm:p-4 bg-sand-50/90 dark:bg-dusk-950/85 backdrop-blur-2xl border-t border-sand-200 dark:border-dusk-800/60 z-20 transition-colors">
             <div class="max-w-3xl mx-auto">
                 
-                <!-- Attached PDF Pill (Above input when document is active) -->
+                <!-- Attached PDF Pill -->
                 <div id="input-doc-badge" class="hidden mb-2.5 items-center gap-2 bg-sage-50 dark:bg-sage-950/70 border border-sage-200 dark:border-sage-500/30 text-sage-800 dark:text-sage-200 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm w-fit">
                     <i data-lucide="file-check" class="w-3.5 h-3.5 text-sage-600 dark:text-sage-400"></i>
                     <span id="input-doc-name" class="max-w-[220px] truncate">Document.pdf</span>
                     <button type="button" id="input-remove-pdf" class="hover:text-red-500 ml-1 transition-colors" title="Remove PDF context">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- Input Error Banner (shown when query is too long or invalid) -->
+                <div id="prompt-error-pill" class="hidden mb-2.5 items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-red-50 dark:bg-red-950/70 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300 text-xs font-medium shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 shrink-0"></i>
+                        <span id="prompt-error-text">The text in the search bar is too long. Please condense your question.</span>
+                    </div>
+                    <button type="button" id="prompt-error-dismiss" class="text-red-400 hover:text-red-700 p-0.5 rounded" title="Dismiss warning">
                         <i data-lucide="x" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
@@ -542,7 +542,7 @@
                         class="flex-1 bg-transparent border-0 text-dusk-900 dark:text-sand-100 placeholder-dusk-400 dark:placeholder-dusk-500 text-sm sm:text-base focus:ring-0 focus:outline-none resize-none py-2.5 px-1 max-h-36 overflow-y-auto leading-relaxed"
                     ></textarea>
 
-                    <!-- Voice Mic Button (Speech Recognition) -->
+                    <!-- Voice Mic Button -->
                     <button type="button" id="voice-input-btn" class="p-2.5 rounded-xl text-dusk-400 hover:text-terra-600 dark:hover:text-terra-400 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-all shrink-0" title="Voice Dictation">
                         <i data-lucide="mic" class="w-5 h-5"></i>
                     </button>
@@ -554,10 +554,14 @@
 
                 </form>
 
-                <!-- Input Footer Hint -->
+                <!-- Input Footer with Live Character Counter & Status -->
                 <div class="flex items-center justify-between text-[11px] text-dusk-400 dark:text-dusk-500 px-3 mt-2 font-medium">
-                    <span>Pro-tip: Drop any PDF document directly onto the screen</span>
-                    <span>Enter ↵ to send • Shift+Enter for newline</span>
+                    <div class="flex items-center gap-2">
+                        <span id="char-counter" class="font-mono text-dusk-400 dark:text-dusk-500">0 / 4,000 chars</span>
+                        <span id="char-status-badge" class="hidden px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">Too Long</span>
+                        <span class="hidden md:inline">• Drop any PDF directly onto the screen</span>
+                    </div>
+                    <span class="hidden sm:inline">Enter ↵ to send • Shift+Enter for newline</span>
                 </div>
 
             </div>
@@ -565,7 +569,7 @@
 
     </main>
 
-    <!-- Auth Modal with Sign In, Create Account & Sign in with Google -->
+    <!-- Real Database Auth Modal (No Demo Accounts) -->
     <div id="auth-modal" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="relative w-full max-w-md rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden">
             
@@ -585,54 +589,46 @@
                     </svg>
                 </div>
                 <h3 id="auth-modal-title" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">Welcome to Cognify</h3>
-                <p id="auth-modal-desc" class="text-xs text-dusk-500 dark:text-dusk-400 mt-1">Sign in to save and sync your study workspace</p>
+                <p id="auth-modal-desc" class="text-xs text-dusk-500 dark:text-dusk-400 mt-1">Sign in with your own account to save and sync study notes</p>
             </div>
 
-            <!-- Sign In with Google Section -->
+            <!-- Sign In with Your Own Google Account Section -->
             <div id="google-auth-section" class="mb-5">
-                <div id="g-choose">
-                    <button type="button" id="btn-google-main" class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-sand-300 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-800 dark:text-sand-100 hover:bg-sand-50 dark:hover:bg-dusk-700 font-medium text-xs shadow-sm transition-all hover:border-terra-300">
-                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24z"/>
-                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/>
-                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                        </svg>
-                        <span>Continue with Google</span>
-                    </button>
-                    
-                    <!-- Quick-Select Google Demo Accounts Drawer (Toggled or shown on click) -->
-                    <div id="g-accounts-list" class="hidden mt-2 flex-col gap-1.5 p-2 bg-sand-100/60 dark:bg-dusk-800/60 rounded-xl border border-sand-200 dark:border-dusk-700">
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-400 px-1">Choose Google Account</p>
-                        <button type="button" class="g-account-btn w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white dark:hover:bg-dusk-700 text-left transition-colors" data-name="Alex Chen" data-email="alex.chen@university.edu">
-                            <div class="w-6 h-6 rounded-full bg-terra-500 text-white flex items-center justify-center font-bold text-[10px]">A</div>
-                            <div class="truncate">
-                                <p class="text-xs font-semibold text-dusk-900 dark:text-sand-100">Alex Chen</p>
-                                <p class="text-[10px] text-dusk-500 dark:text-dusk-400">alex.chen@university.edu</p>
-                            </div>
-                        </button>
-                        <button type="button" class="g-account-btn w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white dark:hover:bg-dusk-700 text-left transition-colors" data-name="Taylor Reed" data-email="taylor.reed@college.edu">
-                            <div class="w-6 h-6 rounded-full bg-sage-500 text-white flex items-center justify-center font-bold text-[10px]">T</div>
-                            <div class="truncate">
-                                <p class="text-xs font-semibold text-dusk-900 dark:text-sand-100">Taylor Reed</p>
-                                <p class="text-[10px] text-dusk-500 dark:text-dusk-400">taylor.reed@college.edu</p>
-                            </div>
-                        </button>
-                        <button type="button" id="g-other-toggle" class="text-[11px] text-terra-600 dark:text-terra-400 hover:underline px-1 text-left mt-0.5">Use another Google account...</button>
-                        
-                        <!-- Custom Google Account input -->
-                        <div id="g-custom-account-form" class="hidden flex-col gap-2 pt-1 border-t border-sand-200 dark:border-dusk-700 mt-1">
-                            <input type="text" id="g-custom-name" placeholder="Your Full Name" class="w-full px-2.5 py-1.5 rounded-lg border border-sand-300 dark:border-dusk-600 bg-white dark:bg-dusk-800 text-xs">
-                            <input type="email" id="g-custom-email" placeholder="name@gmail.com" class="w-full px-2.5 py-1.5 rounded-lg border border-sand-300 dark:border-dusk-600 bg-white dark:bg-dusk-800 text-xs">
-                            <button type="button" id="btn-g-custom-submit" class="w-full py-1.5 bg-terra-500 hover:bg-terra-600 text-white rounded-lg text-xs font-semibold">Sign In with this Google Email</button>
+                <div id="g-choose" class="space-y-3">
+                    <div class="p-3.5 rounded-2xl bg-white dark:bg-dusk-800/90 border border-sand-200 dark:border-dusk-700 shadow-sm space-y-2.5">
+                        <div class="flex items-center gap-2 mb-1">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24z"/>
+                                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/>
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                            </svg>
+                            <span class="text-xs font-bold text-dusk-800 dark:text-sand-100">Sign in with your Google Account</span>
                         </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Google Email</label>
+                            <input type="email" id="g-input-email" required placeholder="you@gmail.com or university email" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Full Name (optional)</label>
+                            <input type="text" id="g-input-name" placeholder="Full name (e.g. Sarah Connor)" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        </div>
+                        <button type="button" id="btn-google-submit" class="w-full py-2.5 px-4 rounded-xl bg-dusk-900 hover:bg-black dark:bg-terra-600 dark:hover:bg-terra-700 text-white font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24z"/>
+                                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/>
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                            </svg>
+                            <span>Sign in with Google</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Google Signing In State -->
+                <!-- Google Connecting State -->
                 <div id="g-signing" class="hidden flex-col items-center justify-center py-4 gap-2 bg-sand-100/50 dark:bg-dusk-800/50 rounded-xl border border-sand-200 dark:border-dusk-700">
                     <div class="w-5 h-5 rounded-full border-2 border-terra-500 border-t-transparent animate-spin"></div>
-                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Connecting with Google...</p>
+                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Connecting to authentication database...</p>
                 </div>
             </div>
 
@@ -661,7 +657,7 @@
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Email Address</label>
                     <div class="relative">
                         <i data-lucide="mail" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="email" id="login-email" required placeholder="you@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="email" id="login-email" required placeholder="your.email@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
                     </div>
                 </div>
                 <div>
@@ -677,20 +673,20 @@
                 </button>
             </form>
 
-            <!-- Sign Up Form (Hidden initially) -->
+            <!-- Sign Up Form (Create Account) -->
             <form id="form-register" class="space-y-4 hidden">
                 <div>
-                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Full Name</label>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Your Full Name</label>
                     <div class="relative">
                         <i data-lucide="user" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="text" id="register-name" required placeholder="Alex Mercer" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="text" id="register-name" required placeholder="Jane Smith" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Email Address</label>
                     <div class="relative">
                         <i data-lucide="mail" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="email" id="register-email" required placeholder="alex@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="email" id="register-email" required placeholder="jane@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
                     </div>
                 </div>
                 <div>
@@ -710,6 +706,8 @@
 
     <!-- Application Script -->
     <script>
+        const MAX_PROMPT_CHARS = 4000;
+
         // DOM Elements
         const chatMessages = document.getElementById('chat-messages');
         const heroWelcome = document.getElementById('hero-welcome');
@@ -741,6 +739,13 @@
         const themeIcon = document.getElementById('theme-icon');
         const themeText = document.getElementById('theme-text');
 
+        // Input Error & Counter Elements
+        const charCounter = document.getElementById('char-counter');
+        const charStatusBadge = document.getElementById('char-status-badge');
+        const promptErrorPill = document.getElementById('prompt-error-pill');
+        const promptErrorText = document.getElementById('prompt-error-text');
+        const promptErrorDismiss = document.getElementById('prompt-error-dismiss');
+
         // Auth Elements
         const authContainer = document.getElementById('auth-container');
         const authLoginBtn = document.getElementById('auth-login-btn');
@@ -758,11 +763,9 @@
         const authAlert = document.getElementById('auth-alert');
         const authModalTitle = document.getElementById('auth-modal-title');
         const authModalDesc = document.getElementById('auth-modal-desc');
-        const btnGoogleMain = document.getElementById('btn-google-main');
-        const gAccountsList = document.getElementById('g-accounts-list');
-        const gOtherToggle = document.getElementById('g-other-toggle');
-        const gCustomAccountForm = document.getElementById('g-custom-account-form');
-        const btnGCustomSubmit = document.getElementById('btn-g-custom-submit');
+        const btnGoogleSubmit = document.getElementById('btn-google-submit');
+        const gInputEmail = document.getElementById('g-input-email');
+        const gInputName = document.getElementById('g-input-name');
         const gSigning = document.getElementById('g-signing');
         const gChoose = document.getElementById('g-choose');
 
@@ -774,7 +777,7 @@
         let currentUser = null;
         const conversationHistory = [];
 
-        // Focus Sound (Web Audio Synthesizer)
+        // Focus Chime
         function playFocusChime() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -841,11 +844,52 @@
 
         initTheme();
 
-        // Auto-expand Textarea
+        // ==================== SEARCH BAR ERROR & LENGTH VALIDATION ====================
+        
+        function validatePromptLength() {
+            const text = userPromptInput.value;
+            const len = text.length;
+            charCounter.innerText = `${len.toLocaleString()} / ${MAX_PROMPT_CHARS.toLocaleString()} chars`;
+
+            if (len > MAX_PROMPT_CHARS) {
+                charCounter.className = 'font-mono font-bold text-red-600 dark:text-red-400';
+                charStatusBadge.classList.remove('hidden');
+                promptErrorPill.classList.remove('hidden');
+                promptErrorPill.classList.add('flex');
+                promptErrorText.innerHTML = `<strong>Search query is too long</strong> (${len.toLocaleString()} / ${MAX_PROMPT_CHARS.toLocaleString()} chars). Please condense your question, or attach large materials as a PDF document using the paperclip button.`;
+                chatForm.classList.add('border-red-500', 'ring-2', 'ring-red-400/40');
+                sendButton.disabled = true;
+                sendButton.classList.add('opacity-40', 'cursor-not-allowed');
+                return false;
+            } else {
+                charStatusBadge.classList.add('hidden');
+                promptErrorPill.classList.add('hidden');
+                promptErrorPill.classList.remove('flex');
+                chatForm.classList.remove('border-red-500', 'ring-2', 'ring-red-400/40');
+                sendButton.disabled = false;
+                sendButton.classList.remove('opacity-40', 'cursor-not-allowed');
+
+                if (len > 3200) {
+                    charCounter.className = 'font-mono font-semibold text-amber-600 dark:text-amber-400';
+                } else {
+                    charCounter.className = 'font-mono text-dusk-400 dark:text-dusk-500';
+                }
+                return true;
+            }
+        }
+
         userPromptInput.addEventListener('input', () => {
             userPromptInput.style.height = 'auto';
             userPromptInput.style.height = Math.min(userPromptInput.scrollHeight, 144) + 'px';
+            validatePromptLength();
         });
+
+        if (promptErrorDismiss) {
+            promptErrorDismiss.addEventListener('click', () => {
+                promptErrorPill.classList.add('hidden');
+                promptErrorPill.classList.remove('flex');
+            });
+        }
 
         // Keydown (Enter to send, Shift+Enter for newline)
         userPromptInput.addEventListener('keydown', (e) => {
@@ -904,6 +948,11 @@
 
         // Handle PDF Upload API
         async function handlePdfFile(file) {
+            if (file.size > 15 * 1024 * 1024) {
+                alert("File is too large (Maximum 15 MB). Please select a smaller PDF.");
+                return;
+            }
+
             capsuleAttachBtn.classList.add('animate-spin', 'text-terra-600');
             docCardStatus.innerText = "Extracting text...";
             
@@ -936,7 +985,7 @@
 
                     appendMessage({
                         role: 'system',
-                        content: `📄 **${file.name}** was successfully attached and indexed. You can now request summaries, practice quizzes, or concept breakdowns based on this document.`
+                        content: `📄 **${file.name}** was successfully attached and indexed into your SQLite study session. You can now ask for summaries, practice quizzes, or concept breakdowns.`
                     });
                 }
             } catch (err) {
@@ -965,6 +1014,7 @@
             card.addEventListener('click', () => {
                 const prompt = card.getAttribute('data-prompt');
                 userPromptInput.value = prompt;
+                validatePromptLength();
                 chatForm.dispatchEvent(new Event('submit'));
                 if (window.innerWidth < 768) closeSidebar();
             });
@@ -974,7 +1024,28 @@
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = userPromptInput.value.trim();
-            if (!text || isProcessing) return;
+
+            // Check 1: Empty text validation
+            if (!text) {
+                promptErrorPill.classList.remove('hidden');
+                promptErrorPill.classList.add('flex');
+                promptErrorText.innerText = "Please enter a question or topic in the search bar before sending.";
+                chatForm.classList.add('border-amber-500', 'ring-2', 'ring-amber-400/30');
+                setTimeout(() => {
+                    chatForm.classList.remove('border-amber-500', 'ring-2', 'ring-amber-400/30');
+                }, 2000);
+                userPromptInput.focus();
+                return;
+            }
+
+            // Check 2: Exceeding maximum characters validation
+            if (text.length > MAX_PROMPT_CHARS) {
+                validatePromptLength();
+                alert(`The text in the search bar is too long (${text.length.toLocaleString()} characters). The maximum allowed is ${MAX_PROMPT_CHARS.toLocaleString()} characters.\n\nPlease shorten your question or attach large notes/documents using the paperclip button.`);
+                return;
+            }
+
+            if (isProcessing) return;
 
             if (heroWelcome) heroWelcome.classList.add('hidden');
 
@@ -982,13 +1053,13 @@
             conversationHistory.push({ role: 'user', text });
             userPromptInput.value = '';
             userPromptInput.style.height = 'auto';
+            validatePromptLength();
 
             isProcessing = true;
             sendButton.disabled = true;
             const typingIndicator = showTypingIndicator();
 
             try {
-                // First attempt /api/study
                 const response = await fetch('/api/study', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1005,15 +1076,15 @@
                     appendMessage({ role: 'ai', content: data.reply });
                     conversationHistory.push({ role: 'assistant', text: data.reply });
                     if (ttsEnabled && 'speechSynthesis' in window) speakText(data.reply);
+                } else if (data.error && data.error.includes("too long")) {
+                    appendMessage({ role: 'ai', content: `⚠️ **Input Error**: ${data.error}`, isError: true });
                 } else {
-                    // Fallback to local study knowledge base
                     const fallbackReply = respondStudy(text);
                     appendMessage({ role: 'ai', content: fallbackReply });
                     conversationHistory.push({ role: 'assistant', text: fallbackReply });
                     if (ttsEnabled && 'speechSynthesis' in window) speakText(fallbackReply);
                 }
             } catch (err) {
-                // Fallback on network failure
                 typingIndicator.remove();
                 const fallbackReply = respondStudy(text);
                 appendMessage({ role: 'ai', content: fallbackReply });
@@ -1056,7 +1127,6 @@
                     </div>
                 `;
             } else {
-                // AI Bubble
                 const rawHtml = marked.parse(content);
                 messageWrapper.innerHTML = `
                     <div class="flex gap-3 items-start max-w-[92%] sm:max-w-[85%]">
@@ -1086,7 +1156,6 @@
                     </div>
                 `;
 
-                // Add event listeners for copy & speak
                 const copyBtn = messageWrapper.querySelector('.copy-msg-btn');
                 if (copyBtn) {
                     copyBtn.addEventListener('click', () => {
@@ -1157,7 +1226,7 @@
             }
         });
 
-        // Speech Recognition (Dictation)
+        // Dictation
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRec();
@@ -1169,6 +1238,7 @@
             recognition.onresult = (e) => {
                 const transcript = e.results[0][0].transcript;
                 userPromptInput.value += (userPromptInput.value ? ' ' : '') + transcript;
+                validatePromptLength();
                 userPromptInput.focus();
             };
             voiceInputBtn.addEventListener('click', () => recognition.start());
@@ -1176,7 +1246,7 @@
             voiceInputBtn.style.display = 'none';
         }
 
-        // Export Chat Session as Markdown
+        // Export Notes
         exportChatBtn.addEventListener('click', () => {
             if (!conversationHistory.length) {
                 alert("No study session notes to export yet.");
@@ -1196,7 +1266,7 @@
             URL.revokeObjectURL(url);
         });
 
-        // Clear Session
+        // Reset Session
         function resetSession() {
             conversationHistory.length = 0;
             chatMessages.innerHTML = '';
@@ -1205,6 +1275,8 @@
                 heroWelcome.classList.remove('hidden');
             }
             detachPdf();
+            userPromptInput.value = '';
+            validatePromptLength();
             fetch('/clear-chat', { method: 'POST' }).catch(() => {});
         }
         newSessionBtn.addEventListener('click', resetSession);
@@ -1212,16 +1284,15 @@
             if (confirm("Reset current study session?")) resetSession();
         });
 
-        // ==================== AUTHENTICATION & GOOGLE SIGN-IN ====================
+        // ==================== REAL DATABASE AUTHENTICATION ====================
         
         function openAuthModal(tab = 'login') {
             authModal.classList.remove('hidden');
             authModal.classList.add('flex');
             switchAuthTab(tab);
-            gAccountsList.classList.add('hidden');
-            gCustomAccountForm.classList.add('hidden');
             gSigning.classList.add('hidden');
             gChoose.style.display = 'block';
+            hideAuthAlert();
         }
 
         function closeAuthModalHandler() {
@@ -1264,23 +1335,23 @@
                 formRegister.classList.remove('hidden');
                 formLogin.classList.add('hidden');
                 authModalTitle.innerText = "Create Your Cognify Account";
-                authModalDesc.innerText = "Start saving study sessions and personalized AI notes";
+                authModalDesc.innerText = "Save your study sessions into the database";
             }
         }
 
         function updateAuthUI(user) {
             currentUser = user;
             if (user) {
-                const firstName = user.name.split(' ')[0];
-                const methodBadge = user.method === 'google' ? 'Google' : 'Email';
+                const firstName = (user.name || 'Student').split(' ')[0];
+                const methodBadge = user.method === 'google' ? 'Google' : 'Database';
                 authLoginBtn.innerHTML = `
                     <div class="w-5 h-5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-[10px] uppercase">
-                        ${user.name.charAt(0)}
+                        ${(user.name || 'S').charAt(0)}
                     </div>
                     <span>${escapeHtml(firstName)}</span>
                     <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
                 `;
-                userDisplayName.innerText = user.name;
+                userDisplayName.innerText = user.name || 'Student';
                 userDisplayEmail.innerText = user.email;
                 userAuthBadge.innerText = methodBadge;
             } else {
@@ -1293,58 +1364,50 @@
             lucide.createIcons();
         }
 
-        // Google Sign-In Flow
-        btnGoogleMain.addEventListener('click', () => {
-            gAccountsList.classList.toggle('hidden');
-        });
+        // Real Google Account Sign-In (No Demo Accounts)
+        btnGoogleSubmit.addEventListener('click', async () => {
+            const email = gInputEmail.value.trim().toLowerCase();
+            const name = gInputName.value.trim();
 
-        gOtherToggle.addEventListener('click', () => {
-            gCustomAccountForm.classList.toggle('hidden');
-        });
-
-        document.querySelectorAll('.g-account-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const name = btn.getAttribute('data-name');
-                const email = btn.getAttribute('data-email');
-                runGoogle(name, email);
-            });
-        });
-
-        btnGCustomSubmit.addEventListener('click', () => {
-            const name = document.getElementById('g-custom-name').value.trim();
-            const email = document.getElementById('g-custom-email').value.trim();
-            if (!name || !email.includes('@')) {
-                alert("Please enter a valid name and Google email.");
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                showAuthAlert("Please enter a valid Google email address (e.g. name@gmail.com).");
+                gInputEmail.focus();
                 return;
             }
-            runGoogle(name, email);
-        });
 
-        async function runGoogle(name, email) {
             gChoose.style.display = 'none';
             gSigning.classList.remove('hidden');
             gSigning.classList.add('flex');
-            let token = null;
+
             try {
-                const r = await fetch('/auth/register', {
+                const res = await fetch('/auth/google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password: 'google-' + Math.random().toString(36).slice(2) })
+                    body: JSON.stringify({ name, email })
                 });
-                const data = await r.json();
-                if (data.success) token = data.token || null;
-            } catch (e) {}
+                const data = await res.json();
 
-            setTimeout(() => {
-                const userObj = { name, email, method: 'google', token };
-                localStorage.setItem('cognify_user', JSON.stringify(userObj));
-                if (token) localStorage.setItem('cognify_token', token);
-                updateAuthUI(userObj);
-                closeAuthModalHandler();
-            }, 600);
-        }
+                if (data.success && data.token) {
+                    const userObj = { ...data.user, method: 'google', token: data.token };
+                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                    localStorage.setItem('cognify_token', data.token);
+                    updateAuthUI(userObj);
+                    closeAuthModalHandler();
+                    gInputEmail.value = '';
+                    gInputName.value = '';
+                } else {
+                    showAuthAlert(data.error || "Could not sign in with Google.");
+                }
+            } catch(err) {
+                showAuthAlert("Network error connecting to authentication database.");
+            } finally {
+                gSigning.classList.add('hidden');
+                gSigning.classList.remove('flex');
+                gChoose.style.display = 'block';
+            }
+        });
 
-        // Sign In Form Submit
+        // Email / Password Login
         formLogin.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -1363,7 +1426,7 @@
                 const data = await res.json();
 
                 if (data.success && data.token) {
-                    const userObj = { name: data.user?.name || email.split('@')[0], email, method: 'email', token: data.token };
+                    const userObj = { ...data.user, method: 'email', token: data.token };
                     localStorage.setItem('cognify_user', JSON.stringify(userObj));
                     localStorage.setItem('cognify_token', data.token);
                     updateAuthUI(userObj);
@@ -1373,18 +1436,7 @@
                     showAuthAlert(data.error || "Invalid email or password.");
                 }
             } catch (err) {
-                // Offline fallback
-                const storedUsers = JSON.parse(localStorage.getItem('cognify_local_users') || '{}');
-                const u = storedUsers[email];
-                if (!u || u.pass !== btoa(password)) {
-                    showAuthAlert("Could not reach the server, and no local offline account matches.");
-                } else {
-                    const userObj = { name: u.name, email, method: 'email', token: 'offline-token' };
-                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
-                    updateAuthUI(userObj);
-                    closeAuthModalHandler();
-                    formLogin.reset();
-                }
+                showAuthAlert("Could not reach authentication database. Please check your connection.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<span>Sign In to Cognify</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
@@ -1392,13 +1444,26 @@
             }
         });
 
-        // Sign Up Form Submit
+        // Email / Password Registration
         formRegister.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('register-name').value.trim();
             const email = document.getElementById('register-email').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
             const btn = document.getElementById('btn-submit-register');
+
+            if (name.length < 2) {
+                showAuthAlert("Please enter your full name (at least 2 characters).");
+                return;
+            }
+            if (!email.includes('@') || !email.includes('.')) {
+                showAuthAlert("Please enter a valid email address.");
+                return;
+            }
+            if (password.length < 6) {
+                showAuthAlert("Password must be at least 6 characters long.");
+                return;
+            }
 
             btn.disabled = true;
             btn.innerHTML = `<span>Creating Account...</span>`;
@@ -1412,25 +1477,17 @@
                 const data = await res.json();
 
                 if (data.success && data.token) {
-                    const userObj = { name, email, method: 'email', token: data.token };
+                    const userObj = { ...data.user, method: 'email', token: data.token };
                     localStorage.setItem('cognify_user', JSON.stringify(userObj));
                     localStorage.setItem('cognify_token', data.token);
                     updateAuthUI(userObj);
                     closeAuthModalHandler();
                     formRegister.reset();
                 } else {
-                    showAuthAlert(data.error || "Could not create account.");
+                    showAuthAlert(data.error || "Could not create account with this email.");
                 }
             } catch (err) {
-                // Store locally if server is unreachable
-                const storedUsers = JSON.parse(localStorage.getItem('cognify_local_users') || '{}');
-                storedUsers[email] = { name, pass: btoa(password) };
-                localStorage.setItem('cognify_local_users', JSON.stringify(storedUsers));
-                const userObj = { name, email, method: 'email', token: 'offline-token' };
-                localStorage.setItem('cognify_user', JSON.stringify(userObj));
-                updateAuthUI(userObj);
-                closeAuthModalHandler();
-                formRegister.reset();
+                showAuthAlert("Could not reach authentication database. Please check your connection.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<span>Create Account</span><i data-lucide="user-plus" class="w-3.5 h-3.5"></i>`;
@@ -1503,7 +1560,6 @@
         }
         checkAuthSession();
 
-        // Utility: Escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;

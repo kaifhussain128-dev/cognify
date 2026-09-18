@@ -10,7 +10,7 @@ from google.genai import errors, types
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf
-from auth import register_user, login_user, get_user_by_token, logout_user
+from auth import register_user, login_user, get_user_by_token, logout_user, google_auth_user
 
 load_dotenv()
 
@@ -31,6 +31,10 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class GoogleAuthRequest(BaseModel):
+    name: str = ""
+    email: str
 
 class LogoutRequest(BaseModel):
     token: str = ""
@@ -92,6 +96,14 @@ def auth_login(req: LoginRequest):
     except ValueError as e:
         return {"success": False, "error": str(e)}
 
+@app.post("/auth/google")
+def auth_google(req: GoogleAuthRequest):
+    try:
+        result = google_auth_user(req.name, req.email)
+        return {"success": True, **result}
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/auth/me")
 def auth_me(token: str = Query(None)):
     user = get_user_by_token(token)
@@ -126,8 +138,20 @@ STYLE:
 - Clean Markdown formatting: use bold keywords, bulleted lists, code blocks, or LaTeX math when relevant.
 - Tone: warm, encouraging, intellectually rigorous, and unhurried. No gimmicks, no fluff."""
 
+MAX_PROMPT_CHARS = 4000
+
 @app.post("/api/study")
 def study_chat(req: StudyRequest):
+    clean_msg = req.message.strip()
+    if not clean_msg:
+        return {"success": False, "error": "Your question cannot be empty. Please enter a question or topic to study."}
+    
+    if len(clean_msg) > MAX_PROMPT_CHARS:
+        return {
+            "success": False,
+            "error": f"Text written in search bar is too long ({len(clean_msg):,} / {MAX_PROMPT_CHARS:,} characters). Please condense your question or attach large passages as a PDF document using the paperclip button."
+        }
+
     contents = []
     
     # Document context injection
@@ -139,7 +163,7 @@ def study_chat(req: StudyRequest):
         role = "model" if m.role == "assistant" else "user"
         contents.append({"role": role, "parts": [{"text": m.text}]})
     
-    user_message = doc_prefix + req.message if doc_prefix and not contents else req.message
+    user_message = doc_prefix + clean_msg if doc_prefix and not contents else clean_msg
     contents.append({"role": "user", "parts": [{"text": user_message}]})
 
     try:
@@ -159,7 +183,7 @@ def study_chat(req: StudyRequest):
 def sage_alias(req: SageRequest):
     return study_chat(StudyRequest(message=req.message, history=[StudyMessage(role=m.role, text=m.text) for m in req.history]))
 
-# ==================== LEGACY STUDY ENDPOINTS (unused by new UI) ====================
+# ==================== LEGACY STUDY ENDPOINTS ====================
 
 chat_history = []
 
@@ -172,7 +196,14 @@ def clear_chat():
 @app.post("/ask-ai")
 def ask_ai(request: ChatRequest):
     global chat_history
-    prompt = request.question
+    prompt = request.question.strip()
+    if not prompt:
+        return {"provider": "Cognify AI", "error": "Your question cannot be empty."}
+    if len(prompt) > MAX_PROMPT_CHARS:
+        return {
+            "provider": "Cognify AI",
+            "error": f"Text written in search bar is too long ({len(prompt):,} / {MAX_PROMPT_CHARS:,} characters). Please condense your question or attach large passages as a PDF document using the paperclip button."
+        }
     if request.pdf_text:
         prompt = f"Based on the following document:\n\n{request.pdf_text}\n\nUser Question: {request.question}"
     chat_history.append({"role": "user", "parts": [{"text": prompt}]})
