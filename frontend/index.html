@@ -1,1383 +1,968 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cognify — AI-Powered Academic Copilot</title>
+    <title>Alba — Boutique Yoga Studio & Sanctuary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
+                        sage: {
+                            50: '#f4f6f4',
+                            100: '#e5eae5',
+                            200: '#ccd8cd',
+                            300: '#a7bea9',
+                            400: '#7e9f81',
+                            500: '#5b805f',
+                            600: '#47674b',
+                            700: '#38523c',
+                            800: '#2e4131',
+                            900: '#263629',
+                            950: '#141d16',
+                        },
+                        linen: {
+                            50: '#faf9f6',
+                            100: '#f4f1eb',
+                            200: '#e8e2d6',
+                            300: '#d7cdba',
+                            400: '#c2b399',
+                            500: '#b19f81',
+                            600: '#9e8a6d',
+                            700: '#7f6d55',
+                            800: '#685947',
+                            900: '#564a3c',
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Marked.js for Markdown Rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Highlight.js for Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
-        /* CSS Variables for Dynamic Light / Dark Theming with Blue Palette */
         :root {
-            --bg-base: #f8fafc;
-            --bg-mesh-1: rgba(37, 99, 235, 0.08);
-            --bg-mesh-2: rgba(14, 165, 233, 0.06);
-            --surface-glass: rgba(255, 255, 255, 0.85);
-            --surface-card: rgba(255, 255, 255, 0.75);
-            --surface-card-hover: rgba(255, 255, 255, 0.95);
-            --surface-input: rgba(255, 255, 255, 0.95);
-            --border-subtle: rgba(226, 232, 240, 0.85);
-            --border-card: rgba(226, 232, 240, 0.8);
-            --border-hover: rgba(37, 99, 235, 0.4);
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-            --card-shadow-hover: 0 12px 30px -5px rgba(37, 99, 235, 0.12);
-            --code-bg: #0f172a;
-            --code-text: #f1f5f9;
-            --ai-bubble-bg: #ffffff;
-            --ai-bubble-border: rgba(226, 232, 240, 0.9);
-            --sidebar-bg: rgba(255, 255, 255, 0.88);
-            --input-bg: rgba(255, 255, 255, 0.92);
+            --bg-body: #faf8f5;
+            --bg-card: rgba(255, 255, 255, 0.88);
+            --border-card: rgba(126, 159, 129, 0.2);
+            --text-heading: #1c241e;
+            --text-body: #4a544d;
+            --sage-accent: #47674b;
+            --sage-soft: #e5eae5;
         }
 
         html.dark {
-            --bg-base: #070a13;
-            --bg-mesh-1: rgba(37, 99, 235, 0.14);
-            --bg-mesh-2: rgba(14, 165, 233, 0.10);
-            --surface-glass: rgba(12, 17, 31, 0.75);
-            --surface-card: rgba(20, 28, 48, 0.6);
-            --surface-card-hover: rgba(28, 38, 64, 0.8);
-            --surface-input: rgba(12, 17, 31, 0.88);
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --border-card: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(59, 130, 246, 0.4);
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-            --card-shadow-hover: 0 12px 30px -10px rgba(37, 99, 235, 0.25);
-            --code-bg: #090d16;
-            --code-text: #e2e8f0;
-            --ai-bubble-bg: rgba(20, 28, 48, 0.65);
-            --ai-bubble-border: rgba(255, 255, 255, 0.08);
-            --sidebar-bg: rgba(12, 17, 31, 0.75);
-            --input-bg: rgba(12, 17, 31, 0.85);
+            --bg-body: #151a17;
+            --bg-card: rgba(26, 34, 29, 0.85);
+            --border-card: rgba(167, 190, 169, 0.15);
+            --text-heading: #f0f4f1;
+            --text-body: #a8b5ab;
+            --sage-accent: #7e9f81;
+            --sage-soft: #232d26;
         }
 
         body {
+            background-color: var(--bg-body);
+            color: var(--text-body);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-base);
-            background-image: 
-                radial-gradient(circle at 15% 15%, var(--bg-mesh-1) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, var(--bg-mesh-2) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 55%);
-            background-attachment: fixed;
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* Glassmorphic Surfaces */
-        .glass-panel {
-            background: var(--surface-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-color: var(--border-subtle);
+        .font-serif {
+            font-family: 'Cormorant Garamond', Georgia, serif;
         }
 
         .glass-card {
-            background: var(--surface-card);
+            background: var(--bg-card);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-card);
-            box-shadow: var(--card-shadow);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .glass-card:hover {
-            transform: translateY(-2px);
-            background: var(--surface-card-hover);
-            border-color: var(--border-hover);
-            box-shadow: var(--card-shadow-hover);
+        .sage-glow {
+            box-shadow: 0 10px 30px -10px rgba(91, 128, 95, 0.25);
         }
 
-        .glass-input {
-            background: var(--input-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-card);
-        }
-
-        /* Custom Scrollbar */
+        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
-            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.3);
+            background: rgba(126, 159, 129, 0.3);
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(148, 163, 184, 0.5);
-        }
-
-        /* Markdown Content Styling */
-        .prose-content {
-            font-size: 0.9375rem;
-            line-height: 1.7;
-            color: var(--text-secondary);
-        }
-        .prose-content h1, .prose-content h2, .prose-content h3, .prose-content h4 {
-            color: var(--text-primary);
-            font-weight: 700;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .prose-content h1 { font-size: 1.35rem; }
-        .prose-content h2 { font-size: 1.2rem; }
-        .prose-content h3 { font-size: 1.05rem; }
-        .prose-content p { margin-bottom: 0.75rem; }
-        .prose-content ul, .prose-content ol {
-            margin-left: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-        .prose-content ul { list-style-type: disc; }
-        .prose-content ol { list-style-type: decimal; }
-        .prose-content li { margin-bottom: 0.25rem; }
-        .prose-content strong { color: var(--text-primary); font-weight: 600; }
-        .prose-content code:not(pre code) {
-            background: rgba(37, 99, 235, 0.10);
-            color: #2563eb;
-            padding: 0.15rem 0.4rem;
-            border-radius: 0.375rem;
-            font-size: 0.85em;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        html.dark .prose-content code:not(pre code) {
-            color: #93c5fd;
-            background: rgba(37, 99, 235, 0.2);
-        }
-        .prose-content pre {
-            background: var(--code-bg) !important;
-            color: var(--code-text);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin: 0.75rem 0;
-            overflow-x: auto;
-            position: relative;
-        }
-        .prose-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0.75rem 0;
-            font-size: 0.875rem;
-        }
-        .prose-content th, .prose-content td {
-            border: 1px solid var(--border-subtle);
-            padding: 0.5rem 0.75rem;
-            text-align: left;
-        }
-        .prose-content th {
-            background: rgba(37, 99, 235, 0.05);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .prose-content blockquote {
-            border-left: 3px solid #2563eb;
-            padding-left: 0.875rem;
-            margin: 0.75rem 0;
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        /* Drag Overlay */
-        #drag-overlay.active {
-            display: flex;
+            background: rgba(126, 159, 129, 0.5);
         }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden select-none">
+<body class="min-h-screen flex flex-col antialiased selection:bg-sage-200 dark:selection:bg-sage-800">
 
-    <!-- Drag & Drop Fullscreen Overlay -->
-    <div id="drag-overlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center border-4 border-dashed border-blue-500/60 m-4 rounded-3xl transition-all duration-300">
-        <div class="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl border border-blue-500/30 shadow-2xl flex flex-col items-center gap-4 animate-bounce">
-            <div class="w-16 h-16 rounded-2xl bg-blue-500/15 text-blue-600 flex items-center justify-center">
-                <i data-lucide="file-up" class="w-8 h-8"></i>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Drop Study Material PDF</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Cognify AI will automatically process & index your document</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Sidebar Backdrop -->
-    <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden md:hidden transition-opacity duration-300"></div>
-
-    <!-- Left Sidebar -->
-    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 md:w-80 glass-panel flex flex-col border-r shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
-        
-        <!-- Cognify Brand Header -->
-        <div class="p-5 border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <!-- Custom SVG Cognify Logo in Blue & Cyan -->
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/20 shrink-0">
-                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Stylized Geometric "C" with Synapse Node -->
-                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
-                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
-                        <circle cx="12" cy="12.5" r="2" fill="white"/>
-                        <path d="M12 12.5L16 7M12 12.5L16 18" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" stroke-linecap="round"/>
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-sage-200/50 dark:border-sage-800/40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between py-3.5">
+            
+            <!-- Logo & Studio Identity -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sage-700 via-sage-600 to-sage-400 flex items-center justify-center text-white shadow-sm shadow-sage-900/10 group-hover:scale-105 transition-transform duration-300">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2C6.5 2 2 6.5 2 12c0 5 3.5 9 8 9.8V14h-2v-2h2V9.5C10 7.6 11.2 6.5 13 6.5c.9 0 1.8.1 2 .2v2h-1.2c-1 0-1.3.5-1.3 1.2V12h2.4l-.4 2h-2v7.8c4.5-.8 8-4.8 8-9.8 0-5.5-4.5-10-10-10z"/>
+                        <path d="M12 3v18"/>
                     </svg>
                 </div>
                 <div>
-                    <div class="flex items-center gap-1.5">
-                        <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-600 dark:from-blue-400 dark:to-cyan-300">
-                            Cognify
-                        </h1>
-                        <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20">AI</span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Cognitive Study Copilot</p>
+                    <span class="font-serif text-2xl font-bold tracking-wider text-slate-900 dark:text-white group-hover:text-sage-700 dark:group-hover:text-sage-300 transition-colors">ALBA</span>
+                    <span class="text-[10px] tracking-widest uppercase block text-sage-600 dark:text-sage-400 font-medium -mt-1">Yoga Sanctuary</span>
                 </div>
-            </div>
-            <button id="close-sidebar-btn" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
+            </a>
 
-        <!-- Action Buttons -->
-        <div class="p-4 flex flex-col gap-2.5">
-            <button id="new-session-btn" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/20 transition-all transform active:scale-[0.98]">
-                <div class="flex items-center gap-2.5">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span>New Study Session</span>
-                </div>
-                <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">⌘N</span>
-            </button>
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-7 text-xs font-semibold tracking-wide uppercase text-slate-600 dark:text-slate-300">
+                <a href="#schedule" class="hover:text-sage-700 dark:hover:text-sage-300 transition-colors">Schedule</a>
+                <a href="#practices" class="hover:text-sage-700 dark:hover:text-sage-300 transition-colors">Practices</a>
+                <a href="#teachers" class="hover:text-sage-700 dark:hover:text-sage-300 transition-colors">Teachers</a>
+                <a href="#pricing" class="hover:text-sage-700 dark:hover:text-sage-300 transition-colors">Pricing</a>
+                <a href="#studio" class="hover:text-sage-700 dark:hover:text-sage-300 transition-colors">The Studio</a>
+                <button id="nav-ask-sage-btn" class="text-sage-700 dark:text-sage-300 font-bold flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sage-500"></i>
+                    Ask Sage
+                </button>
+            </nav>
 
-            <!-- Upload PDF File Button -->
-            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden">
-            <button id="upload-pdf-trigger" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-semibold tracking-wide transition-all shadow-sm">
-                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                <span>Attach Study Notes / PDF</span>
-            </button>
-        </div>
+            <!-- Actions: Theme Toggle & Sign In -->
+            <div class="flex items-center gap-3">
+                
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-sage-100/60 dark:hover:bg-sage-900/40 transition-colors" title="Toggle Theme">
+                    <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                </button>
 
-        <!-- Scrollable Sidebar Content -->
-        <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-5">
-            
-            <!-- Active Document Widget (Dynamic) -->
-            <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300">Active Document</span>
-                    </div>
-                    <button id="remove-pdf-btn" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-black/5 dark:hover:bg-white/5" title="Remove PDF">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <!-- Member Button / User Profile -->
+                <div id="user-nav-container" class="relative">
+                    <button id="open-auth-btn" class="px-4 py-2 rounded-xl bg-sage-700 hover:bg-sage-800 dark:bg-sage-600 dark:hover:bg-sage-500 text-white text-xs font-semibold tracking-wide transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span id="user-btn-text">Member Sign In</span>
                     </button>
-                </div>
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <p id="doc-card-title" class="text-xs font-semibold text-slate-800 dark:text-white truncate">Document.pdf</p>
-                        <p id="doc-card-status" class="text-[10px] text-slate-500 dark:text-slate-400">Context indexed & ready</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Study Modes / Accelerators -->
-            <div>
-                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 px-1 flex items-center justify-between">
-                    <span>Study Accelerators</span>
-                    <i data-lucide="zap" class="w-3 h-3 text-amber-500"></i>
-                </p>
-                <div class="grid grid-cols-1 gap-1.5">
-                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Summarize the core concepts and key takeaways of this material into clear bullet points.">
-                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0"></i>
-                        <span class="truncate">Executive Summary</span>
-                    </button>
-                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Generate 5 multiple-choice questions with answer explanations to test my comprehension.">
-                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0"></i>
-                        <span class="truncate">Practice Quiz (5 Qs)</span>
-                    </button>
-                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Explain the most difficult or important concept in this topic using simple, real-world analogies.">
-                        <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
-                        <span class="truncate">Concept Explainer</span>
-                    </button>
-                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Extract all formulas, scripts, or step-by-step algorithms mentioned in this document with concise code blocks.">
-                        <i data-lucide="code-2" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
-                        <span class="truncate">Code & Formulas</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Session History -->
-            <div class="flex-1">
-                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-1 flex items-center justify-between">
-                    <span>Recent Discussions</span>
-                    <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
-                </p>
-                <div id="session-history-list" class="flex flex-col gap-1">
-                    <div class="px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-700 dark:text-blue-300 font-medium flex items-center justify-between">
-                        <div class="flex items-center gap-2 truncate">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0"></i>
-                            <span class="truncate">Current Session</span>
+                    <!-- User Dropdown (Hidden initially) -->
+                    <div id="user-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl glass-card p-2 shadow-xl border border-sage-200 dark:border-sage-800 animate-fade-in z-50">
+                        <div class="px-3 py-2 border-b border-sage-100 dark:border-sage-800">
+                            <p id="user-menu-name" class="text-xs font-bold text-slate-900 dark:text-white truncate">Member</p>
+                            <p id="user-menu-email" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">member@email.com</p>
                         </div>
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                        <button id="logout-btn" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl mt-1 flex items-center gap-2 transition-colors">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span>Sign Out</span>
+                        </button>
                     </div>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
 
-        <!-- Sidebar Footer -->
-        <div class="p-4 border-t border-slate-200/80 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-blue-600 dark:text-blue-300">
-                        ⚡
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-nav" class="hidden md:hidden px-6 pt-2 pb-6 space-y-3 border-t border-sage-200/40 dark:border-sage-800/40 bg-white/95 dark:bg-sage-950/95">
+            <a href="#schedule" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 py-1">Schedule</a>
+            <a href="#practices" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 py-1">Practices</a>
+            <a href="#teachers" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 py-1">Teachers</a>
+            <a href="#pricing" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 py-1">Pricing</a>
+            <a href="#studio" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 py-1">The Studio</a>
+            <button id="mobile-ask-sage-btn" class="text-sm font-bold text-sage-700 dark:text-sage-300 py-1 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                Chat with Sage
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Studio Content -->
+    <main class="flex-1">
+
+        <!-- Hero Sanctuary Banner -->
+        <section class="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden">
+            <!-- Ambient Sage Glow -->
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-sage-300/20 dark:bg-sage-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+                
+                <!-- Studio Location Badge -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sage-100 dark:bg-sage-900/50 border border-sage-300/40 dark:border-sage-700/40 text-sage-800 dark:text-sage-200 text-xs font-semibold mb-6">
+                    <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
+                    <span>14 Alder Lane • Behind the sage-green door</span>
+                </div>
+
+                <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-semibold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-6">
+                    A quiet sanctuary for <span class="italic font-normal text-sage-700 dark:text-sage-300">unhurried movement</span> and deep breath.
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10 font-normal">
+                    The antidote to high-intensity gym culture. We never push, never shout, and never rush. 
+                    Bare feet on warm cork, small classes capped at 14 mats, and hot herbal tea waiting by the door.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#schedule" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-sage-700 hover:bg-sage-800 dark:bg-sage-600 dark:hover:bg-sage-500 text-white font-semibold text-sm transition-all shadow-md sage-glow hover:scale-[1.02] active:scale-[0.98]">
+                        View Weekly Rhythm
+                    </a>
+                    <button id="hero-talk-sage-btn" class="w-full sm:w-auto px-7 py-3.5 rounded-2xl glass-card hover:bg-sage-100/60 dark:hover:bg-sage-900/40 text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all border border-sage-300/40 dark:border-sage-700/40 flex items-center justify-center gap-2">
+                        <i data-lucide="message-circle" class="w-4 h-4 text-sage-600 dark:text-sage-400"></i>
+                        <span>Speak with Sage (Resident Companion)</span>
+                    </button>
+                </div>
+
+                <!-- Three Studio Pillars -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16 pt-12 border-t border-sage-200/50 dark:border-sage-800/50 text-left">
+                    <div class="glass-card p-6 rounded-3xl">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-sage-600 dark:text-sage-400 mb-3"></i>
+                        <h4 class="font-serif text-lg font-bold text-slate-900 dark:text-white">Your First Class is Free</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">No pressure, no sales pitches. Simply book a mat and arrive 15 minutes before practice.</p>
                     </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-800 dark:text-slate-200">Cognify Engine</p>
-                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                            Online & Ready
+                    <div class="glass-card p-6 rounded-3xl">
+                        <i data-lucide="feather" class="w-5 h-5 text-sage-600 dark:text-sage-400 mb-3"></i>
+                        <h4 class="font-serif text-lg font-bold text-slate-900 dark:text-white">Nothing to Bring</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Manduka mats, organic bolsters, cork blocks, straps, and herbal tea are all provided for you.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-sage-600 dark:text-sage-400 mb-3"></i>
+                        <h4 class="font-serif text-lg font-bold text-slate-900 dark:text-white">Capped at 14 Mats</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Spacious personal room to stretch and breathe. Cancel up to 2 hours before with zero fees.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="schedule" class="py-20 bg-sage-50/50 dark:bg-sage-950/20 border-y border-sage-200/40 dark:border-sage-800/40">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span class="text-xs uppercase tracking-widest text-sage-600 dark:text-sage-400 font-bold">Weekly Rhythm</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white mt-1">Class Schedule</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Doors open 15 minutes before class begins. Tap any class to reserve your mat or ask Sage to hold a spot.</p>
+                </div>
+
+                <!-- Day Selector Tabs -->
+                <div class="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-8" id="day-tabs">
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sage-700 text-white shadow-sm" data-day="Mon">Mon</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Tue">Tue</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Wed">Wed</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Thu">Thu</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Fri">Fri</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Sat">Sat</button>
+                    <button class="day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900" data-day="Sun">Sun</button>
+                </div>
+
+                <!-- Schedule Card List Container -->
+                <div id="schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Practices Section -->
+        <section id="practices" class="py-20">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-2xl mx-auto mb-14">
+                    <span class="text-xs uppercase tracking-widest text-sage-600 dark:text-sage-400 font-bold">Offerings</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white mt-1">Our Four Practices</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Thoughtfully curated styles for grounding, restoration, and intentional strength.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">Warm Room • 60 Min</span>
+                            <h3 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mt-4">Vinyasa Flow</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
+                                Continuous movement synchronized with steady breath. Gentle heat to encourage joint mobility and circulation without exhaustion.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-sage-100 dark:border-sage-800 text-[11px] text-sage-700 dark:text-sage-300 font-medium">
+                            Teacher: Maren Kolstad
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">Cool Room • 75 Min</span>
+                            <h3 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mt-4">Yin Yoga</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
+                                Passive, long-held floor poses supported by props. Deep release for fascia, hips, and lower back in a soothing, unheated room.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-sage-100 dark:border-sage-800 text-[11px] text-sage-700 dark:text-sage-300 font-medium">
+                            Teacher: Theo Adebayo
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">Bolsters & Blankets • 60 Min</span>
+                            <h3 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mt-4">Restorative</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
+                                Complete physical stillness and effortless support. Calms an overstimulated nervous system and restores deep energetic reserves.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-sage-100 dark:border-sage-800 text-[11px] text-sage-700 dark:text-sage-300 font-medium">
+                            Teachers: Priya Raman & Theo
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">Seated • 45 Min</span>
+                            <h3 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mt-4">Breathwork</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
+                                Grounding pranayama and structured conscious breath techniques. Clears mental fog and naturally down-regulates stress response.
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-sage-100 dark:border-sage-800 text-[11px] text-sage-700 dark:text-sage-300 font-medium">
+                            Teacher: Maren Kolstad
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teachers Section -->
+        <section id="teachers" class="py-20 bg-sage-50/50 dark:bg-sage-950/20 border-t border-sage-200/40 dark:border-sage-800/40">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-2xl mx-auto mb-14">
+                    <span class="text-xs uppercase tracking-widest text-sage-600 dark:text-sage-400 font-bold">Guidance</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white mt-1">Our Resident Guides</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Teachers who prioritize your comfort, bodily intuition, and personal peace.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Priya Raman -->
+                    <div class="glass-card p-6 rounded-3xl text-center">
+                        <div class="w-20 h-20 rounded-full bg-sage-200 dark:bg-sage-800 mx-auto mb-4 flex items-center justify-center text-sage-700 dark:text-sage-300 font-serif text-2xl font-bold">
+                            PR
+                        </div>
+                        <h4 class="font-serif text-xl font-bold text-slate-900 dark:text-white">Priya Raman</h4>
+                        <p class="text-xs text-sage-600 dark:text-sage-400 font-semibold mb-3">Restorative & Foundations</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Warm and deeply patient. Priya's Saturday 10:30 <span class="font-bold text-slate-700 dark:text-slate-300">Foundations</span> class is our studio's designated sanctuary for complete beginners.
+                        </p>
+                    </div>
+
+                    <!-- Maren Kolstad -->
+                    <div class="glass-card p-6 rounded-3xl text-center">
+                        <div class="w-20 h-20 rounded-full bg-sage-200 dark:bg-sage-800 mx-auto mb-4 flex items-center justify-center text-sage-700 dark:text-sage-300 font-serif text-2xl font-bold">
+                            MK
+                        </div>
+                        <h4 class="font-serif text-xl font-bold text-slate-900 dark:text-white">Maren Kolstad</h4>
+                        <p class="text-xs text-sage-600 dark:text-sage-400 font-semibold mb-3">Vinyasa & Breathwork</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Focuses on gentle fluid transitions and rhythmic breath. Guides our weekday Sunrise Vinyasa and evening Breathwork sessions.
+                        </p>
+                    </div>
+
+                    <!-- Theo Adebayo -->
+                    <div class="glass-card p-6 rounded-3xl text-center">
+                        <div class="w-20 h-20 rounded-full bg-sage-200 dark:bg-sage-800 mx-auto mb-4 flex items-center justify-center text-sage-700 dark:text-sage-300 font-serif text-2xl font-bold">
+                            TA
+                        </div>
+                        <h4 class="font-serif text-xl font-bold text-slate-900 dark:text-white">Theo Adebayo</h4>
+                        <p class="text-xs text-sage-600 dark:text-sage-400 font-semibold mb-3">Yin & Restorative</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Specializes in therapeutic deep floor holds, acoustic singing bowl sound baths, and calming evening restorative practices.
                         </p>
                     </div>
                 </div>
-                <button id="clear-all-btn" class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors" title="Reset Session">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                </button>
             </div>
-        </div>
-    </aside>
+        </section>
 
-    <!-- Main Workspace Area -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
-        
-        <!-- Top App Navigation Bar -->
-        <header class="h-16 glass-panel border-b border-slate-200/80 dark:border-slate-800/60 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
-            <div class="flex items-center gap-3">
-                <button id="open-sidebar-btn" class="md:hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <i data-lucide="menu" class="w-5 h-5"></i>
-                </button>
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 tracking-wide hidden sm:inline">Model:</span>
-                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
-                        Gemini 3 Flash
-                    </span>
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-20">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-2xl mx-auto mb-14">
+                    <span class="text-xs uppercase tracking-widest text-sage-600 dark:text-sage-400 font-bold">Honest Pricing</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white mt-1">Simple, Transparent Rates</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Zero signup fees. Zero cancellation penalties. Unlimited pass can be paused anytime.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- First Class -->
+                    <div class="glass-card p-6 rounded-3xl border border-sage-300/40 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-sage-600 dark:text-sage-400 tracking-wider">Welcome Gift</span>
+                            <h3 class="font-serif text-3xl font-bold text-slate-900 dark:text-white mt-2">Free</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Experience the studio with zero obligation.</p>
+                            <ul class="mt-4 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Any regular class</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Mat & props included</li>
+                            </ul>
+                        </div>
+                        <button class="open-sage-with-prompt w-full mt-6 py-2.5 rounded-xl border border-sage-600 text-sage-700 dark:text-sage-300 hover:bg-sage-600 hover:text-white text-xs font-bold transition-all" data-prompt="I would like to try my first free class. How do I start?">
+                            Try Free Class
+                        </button>
+                    </div>
+
+                    <!-- Drop In -->
+                    <div class="glass-card p-6 rounded-3xl border border-sage-300/40 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-sage-600 dark:text-sage-400 tracking-wider">Single Session</span>
+                            <h3 class="font-serif text-3xl font-bold text-slate-900 dark:text-white mt-2">$22</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Drop in whenever your schedule allows.</p>
+                            <ul class="mt-4 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Valid for all classes</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Cancel up to 2h before</li>
+                            </ul>
+                        </div>
+                        <a href="#schedule" class="w-full mt-6 py-2.5 rounded-xl border border-sage-600 text-sage-700 dark:text-sage-300 hover:bg-sage-600 hover:text-white text-xs font-bold text-center transition-all">
+                            Book a Mat
+                        </a>
+                    </div>
+
+                    <!-- 10-Class Card -->
+                    <div class="glass-card p-6 rounded-3xl border border-sage-300/40 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-sage-600 dark:text-sage-400 tracking-wider">Flexible Card</span>
+                            <h3 class="font-serif text-3xl font-bold text-slate-900 dark:text-white mt-2">$180</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">$18 per class. Never expires and fully shareable.</p>
+                            <ul class="mt-4 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Share with a friend</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> No expiration date</li>
+                            </ul>
+                        </div>
+                        <button class="open-sage-with-prompt w-full mt-6 py-2.5 rounded-xl border border-sage-600 text-sage-700 dark:text-sage-300 hover:bg-sage-600 hover:text-white text-xs font-bold transition-all" data-prompt="I'd like to purchase a 10-class card ($180).">
+                            Get 10 Classes
+                        </button>
+                    </div>
+
+                    <!-- Unlimited Month -->
+                    <div class="glass-card p-6 rounded-3xl border-2 border-sage-600 relative flex flex-col justify-between shadow-md sage-glow">
+                        <span class="absolute -top-3 right-4 px-3 py-0.5 rounded-full bg-sage-700 text-white text-[10px] font-bold uppercase tracking-wider">Studio Favorite</span>
+                        <div>
+                            <span class="text-xs font-bold uppercase text-sage-600 dark:text-sage-400 tracking-wider">Full Freedom</span>
+                            <h3 class="font-serif text-3xl font-bold text-slate-900 dark:text-white mt-2">$110 <span class="text-xs font-sans font-normal text-slate-400">/mo</span></h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Practice as often as you wish. Pause anytime.</p>
+                            <ul class="mt-4 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Unlimited monthly practices</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> Pause or cancel anytime</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i> No contracts</li>
+                            </ul>
+                        </div>
+                        <button class="open-sage-with-prompt w-full mt-6 py-2.5 rounded-xl bg-sage-700 hover:bg-sage-800 text-white text-xs font-bold transition-all" data-prompt="Can you tell me more about the Unlimited Month ($110) membership?">
+                            Join Unlimited
+                        </button>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Header Quick Action Controls -->
-            <div class="flex items-center gap-2">
-                <!-- Theme Toggle Button (Light/Dark) -->
-                <button id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Light/Dark Theme">
-                    <span id="theme-icon"><i data-lucide="moon" class="w-3.5 h-3.5 text-blue-600"></i></span>
-                    <span id="theme-text" class="hidden sm:inline">Dark Mode</span>
-                </button>
-
-                <!-- Export Notes Button -->
-                <button id="export-chat-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Export Notes as Markdown">
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Export Notes</span>
-                </button>
-
-                <!-- Audio TTS Toggle Button -->
-                <button id="tts-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Text-to-Speech">
-                    <i data-lucide="volume-2" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                    <span class="hidden sm:inline">Audio Read</span>
-                </button>
-
-                <div class="h-5 w-[1px] bg-slate-200 dark:bg-slate-700/60 mx-1"></div>
-
-                <!-- Sign In / User Profile Button & Dropdown -->
-                <div id="auth-container" class="relative">
-                    <button id="auth-login-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-semibold shadow-sm shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                        <span>Sign In</span>
-                    </button>
-
-                    <!-- User Profile Dropdown (Hidden initially) -->
-                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-56 rounded-2xl glass-panel border border-slate-200/90 dark:border-slate-800/90 shadow-2xl py-2 z-50 animate-fade-in backdrop-blur-xl bg-white/95 dark:bg-slate-900/95">
-                        <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800/80">
-                            <p id="user-display-name" class="text-xs font-bold text-slate-900 dark:text-white truncate">User Name</p>
-                            <p id="user-display-email" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">user@email.com</p>
+        <!-- Studio Details & Policies Section -->
+        <section id="studio" class="py-16 bg-sage-100/50 dark:bg-sage-950/30 border-t border-sage-200/40 dark:border-sage-800/40">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                <div class="glass-card p-8 sm:p-10 rounded-3xl">
+                    <h3 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mb-6">Visiting Alba</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] mb-2 flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-sage-600"></i>
+                                Finding Us
+                            </h4>
+                            <p>14 Alder Lane (corner of Alder & 9th). Look for our quiet sage-green door. Street parking is available along 9th Avenue.</p>
                         </div>
-                        <div class="px-2 py-1">
-                            <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
-                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                                <span>Sign Out</span>
-                            </button>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] mb-2 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-sage-600"></i>
+                                Arrival & Policies
+                            </h4>
+                            <p>Doors open 15 minutes prior to class to allow time for tea and settling. Cancellations are free up to 2 hours before practice.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </header>
-
-        <!-- Chat Conversation Messages Container -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6">
-            
-            <!-- Hero Welcome Card (Visible when chat is empty) -->
-            <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6 animate-fade-in">
-                
-                <!-- Glowing badge in Blue -->
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                    <span>Cognify • Next-Gen AI Learning Workspace</span>
-                </div>
-
-                <!-- Headline in Blue/Cyan Gradients -->
-                <div class="space-y-2.5">
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-                        Transform study materials into <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 dark:from-blue-400 dark:via-cyan-400 dark:to-teal-300">actionable knowledge</span>
-                    </h2>
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-                        Upload lecture slides, research papers, or syllabus assignments. Cognify analyzes documents and provides instant clarity.
-                    </p>
-                </div>
-
-                <!-- 4 Dribbble-Style Hero Prompt Cards (Blue Accented) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full mt-2 text-left">
-                    
-                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Can you provide an executive summary of this material with key concepts and practical takeaways?">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <i data-lucide="file-text" class="w-5 h-5"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Executive Summary</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">High-yield bullet points, core definitions, and structured study takeaways.</p>
-                    </div>
-
-                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Generate an interactive 5-question comprehension quiz with detailed explanations for each answer.">
-                        <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Generate Practice Quiz</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Test exam readiness with 5 multiple-choice questions & answer reasoning.</p>
-                    </div>
-
-                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Explain the most complex theoretical concept in this document as if explaining to a 10-year-old.">
-                        <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <i data-lucide="brain" class="w-5 h-5"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Simplify Complex Ideas</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Break down heavy terminology using intuitive, memorable analogies.</p>
-                    </div>
-
-                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Extract all formulas, code snippets, or algorithms in this document into clean, runnable formats.">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <i data-lucide="terminal" class="w-5 h-5"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Code & Formulas Cheat Sheet</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Isolate scripts, mathematical formulas, and step-by-step logic.</p>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Bottom Input Area (Docked in normal flex flow) -->
-        <div class="shrink-0 p-3 sm:p-4 bg-white/90 dark:bg-slate-950/85 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/60 z-20 transition-colors">
-            <div class="max-w-3xl mx-auto">
-                
-                <!-- Attached PDF Pill (Above input when document is active) -->
-                <div id="input-doc-badge" class="hidden mb-2.5 items-center gap-2 bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm w-fit animate-fade-in">
-                    <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                    <span id="input-doc-name" class="max-w-[200px] truncate">Document.pdf</span>
-                    <button type="button" id="input-remove-pdf" class="hover:text-red-500 ml-1 transition-colors">
-                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                    </button>
-                </div>
-
-                <!-- Input Capsule Form (Blue Focus Ring) -->
-                <form id="chat-form" class="glass-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2 shadow-lg focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 transition-all">
-                    
-                    <!-- Attach Button -->
-                    <button type="button" id="capsule-attach-btn" class="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shrink-0" title="Attach PDF study document">
-                        <i data-lucide="paperclip" class="w-5 h-5"></i>
-                    </button>
-
-                    <!-- Text Area -->
-                    <textarea 
-                        id="user-prompt-input" 
-                        rows="1" 
-                        placeholder="Ask Cognify anything or query your document... (Press Enter to send)"
-                        class="flex-1 bg-transparent border-0 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm sm:text-base focus:ring-0 focus:outline-none resize-none py-2.5 px-1 max-h-36 overflow-y-auto leading-relaxed"
-                    ></textarea>
-
-                    <!-- Voice Mic Button (Web Speech API) -->
-                    <button type="button" id="voice-input-btn" class="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shrink-0" title="Voice Dictation">
-                        <i data-lucide="mic" class="w-5 h-5"></i>
-                    </button>
-
-                    <!-- Submit Button in Blue Gradient -->
-                    <button type="submit" id="send-button" class="p-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-md shadow-blue-500/25 transition-all transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
-                        <i data-lucide="send" class="w-5 h-5"></i>
-                    </button>
-
-                </form>
-
-                <!-- Input Footer Hint -->
-                <div class="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-3 mt-2 font-medium">
-                    <span>Pro-tip: Drop any PDF assignment directly onto the screen</span>
-                    <span>Enter ↵ to send • Shift+Enter for new line</span>
-                </div>
-
-            </div>
-        </div>
+        </section>
 
     </main>
 
-    <!-- Auth Modal (Sign In / Sign Up) -->
-    <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="relative w-full max-w-md rounded-3xl glass-panel border border-slate-200/90 dark:border-slate-800/90 shadow-2xl p-6 sm:p-8 bg-white/95 dark:bg-slate-900/95 overflow-hidden animate-fade-in">
+    <!-- Footer -->
+    <footer class="border-t border-sage-200/50 dark:border-sage-800/50 py-8 bg-white/50 dark:bg-sage-950/50 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>© 2026 Alba Yoga Studio • 14 Alder Lane • Designed with intention & peace</p>
+    </footer>
+
+    <!-- ==================== SAGE AI COMPANION DRAWER ==================== -->
+    <div id="sage-drawer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        
+        <!-- Collapsible Chat Window (Hidden initially) -->
+        <div id="sage-chat-window" class="hidden w-[92vw] sm:w-[400px] h-[520px] rounded-3xl glass-card shadow-2xl border border-sage-300/50 dark:border-sage-700/50 flex flex-col overflow-hidden mb-4 animate-fade-in bg-white/95 dark:bg-sage-950/95">
             
-            <!-- Close Button -->
-            <button id="close-auth-modal" class="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
+            <!-- Sage Chat Header -->
+            <div class="px-5 py-4 border-b border-sage-200/60 dark:border-sage-800/60 flex items-center justify-between bg-sage-100/50 dark:bg-sage-900/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sage-700 to-sage-500 flex items-center justify-center text-white text-sm font-serif font-bold shadow-sm">
+                        S
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            Sage
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                        </h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Resident Companion • Alba Studio</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="clear-sage-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-sage-200/50 dark:hover:bg-sage-800" title="Clear Conversation">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button id="close-sage-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-sage-200/50 dark:hover:bg-sage-800" title="Close Chat">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="sage-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs leading-relaxed">
+                <!-- Welcome greeting from Sage -->
+                <div class="flex items-start gap-2.5 max-w-[90%]">
+                    <div class="w-6 h-6 rounded-full bg-sage-600 text-white flex items-center justify-center text-[10px] font-serif font-bold shrink-0 mt-0.5">S</div>
+                    <div class="p-3.5 rounded-2xl rounded-tl-sm bg-sage-100/70 dark:bg-sage-900/60 text-slate-800 dark:text-slate-200 border border-sage-200/40 dark:border-sage-800/40">
+                        Hello. I'm Sage, the resident companion here at Alba. Whether you're brand new to yoga or curious about our evening sound sessions, take your time. How can I help you today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="px-4 py-2 border-t border-sage-100 dark:border-sage-800/60 flex items-center gap-1.5 overflow-x-auto bg-slate-50/50 dark:bg-slate-900/30">
+                <button class="chip-btn shrink-0 text-[10px] px-2.5 py-1 rounded-full bg-sage-100 dark:bg-sage-900 text-sage-800 dark:text-sage-200 hover:bg-sage-200 dark:hover:bg-sage-800 border border-sage-200 dark:border-sage-800 transition-colors">Complete beginner?</button>
+                <button class="chip-btn shrink-0 text-[10px] px-2.5 py-1 rounded-full bg-sage-100 dark:bg-sage-900 text-sage-800 dark:text-sage-200 hover:bg-sage-200 dark:hover:bg-sage-800 border border-sage-200 dark:border-sage-800 transition-colors">What to bring?</button>
+                <button class="chip-btn shrink-0 text-[10px] px-2.5 py-1 rounded-full bg-sage-100 dark:bg-sage-900 text-sage-800 dark:text-sage-200 hover:bg-sage-200 dark:hover:bg-sage-800 border border-sage-200 dark:border-sage-800 transition-colors">Hold a mat</button>
+            </div>
+
+            <!-- Chat Input Area -->
+            <form id="sage-form" class="p-3 border-t border-sage-200/60 dark:border-sage-800/60 flex items-center gap-2 bg-white dark:bg-sage-950">
+                <input type="text" id="sage-input" placeholder="Ask Sage anything about Alba..." class="flex-1 px-3.5 py-2 rounded-xl border border-sage-200 dark:border-sage-700 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-sage-500/20 focus:border-sage-600 transition-all">
+                <button type="submit" id="sage-send-btn" class="p-2 rounded-xl bg-sage-700 hover:bg-sage-800 text-white transition-all shadow-sm">
+                    <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Floating Launch Button -->
+        <button id="toggle-sage-btn" class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-sage-700 hover:bg-sage-800 text-white font-semibold text-xs shadow-xl sage-glow transition-all hover:scale-105 active:scale-95">
+            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>Talk with Sage</span>
+        </button>
+    </div>
+
+    <!-- ==================== MEMBER AUTH MODAL ==================== -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-3xl glass-card p-6 sm:p-8 border border-sage-300/40 dark:border-sage-700/40 shadow-2xl bg-white/95 dark:bg-sage-950/95 overflow-hidden animate-fade-in">
+            
+            <!-- Close Modal -->
+            <button id="close-modal-btn" class="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-sage-100 dark:hover:bg-sage-900">
+                <i data-lucide="x" class="w-4 h-4"></i>
             </button>
 
             <!-- Brand Header -->
-            <div class="flex flex-col items-center text-center mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-3 ring-4 ring-blue-500/10">
-                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
-                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
-                        <circle cx="12" cy="12.5" r="2" fill="white"/>
-                    </svg>
-                </div>
-                <h3 id="auth-modal-title" class="text-xl font-bold text-slate-900 dark:text-white">Welcome to Cognify</h3>
-                <p id="auth-modal-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sign in to save and access your study workspace</p>
+            <div class="text-center mb-6">
+                <span class="font-serif text-3xl font-bold tracking-wider text-slate-900 dark:text-white">ALBA</span>
+                <p class="text-[11px] text-sage-600 dark:text-sage-400 font-medium tracking-wider uppercase mt-0.5">Member Sanctuary</p>
             </div>
 
-            <!-- Tab Switcher -->
-            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-5 border border-slate-200 dark:border-slate-700/60">
-                <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm">
+            <!-- Tab Buttons -->
+            <div class="flex rounded-xl bg-sage-100 dark:bg-sage-900/80 p-1 mb-5 border border-sage-200/50 dark:border-sage-800/50">
+                <button id="tab-login-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-sage-800 text-sage-800 dark:text-sage-200 shadow-sm">
                     Sign In
                 </button>
-                <button id="tab-register" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                <button id="tab-register-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
                     Create Account
                 </button>
             </div>
 
-            <!-- Alert Message Box -->
-            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border items-center gap-2"></div>
+            <!-- Alert Container -->
+            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border border-red-200 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40"></div>
 
-            <!-- Sign In Form -->
-            <form id="form-login" class="space-y-4">
+            <!-- Form 1: Sign In -->
+            <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
-                    <div class="relative">
-                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                        <input type="email" id="login-email" required placeholder="you@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                    <input type="email" id="login-email" required placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-sage-200 dark:border-sage-800 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-                    <div class="relative">
-                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-sage-200 dark:border-sage-800 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
                 </div>
-                <button type="submit" id="btn-submit-login" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
-                    <span>Sign In to Cognify</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-sage-700 hover:bg-sage-800 text-white text-xs font-bold transition-all shadow-sm">
+                    Sign In to Alba
                 </button>
             </form>
 
-            <!-- Sign Up Form (Hidden initially) -->
-            <form id="form-register" class="space-y-4 hidden">
+            <!-- Form 2: Register (Hidden initially) -->
+            <form id="register-form" class="space-y-4 hidden">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
-                    <div class="relative">
-                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                        <input type="text" id="register-name" required placeholder="Alex Mercer" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="reg-name" required placeholder="Claire Vance" class="w-full px-3.5 py-2.5 rounded-xl border border-sage-200 dark:border-sage-800 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
-                    <div class="relative">
-                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                        <input type="email" id="register-email" required placeholder="alex@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                    <input type="email" id="reg-email" required placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-sage-200 dark:border-sage-800 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Create Password</label>
-                    <div class="relative">
-                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                    <input type="password" id="reg-password" minlength="6" required placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 rounded-xl border border-sage-200 dark:border-sage-800 bg-slate-50 dark:bg-sage-900/60 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
                 </div>
-                <button type="submit" id="btn-submit-register" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
-                    <span>Create Account</span>
-                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-sage-700 hover:bg-sage-800 text-white text-xs font-bold transition-all shadow-sm">
+                    Create Member Account
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
-        // DOM Elements
-        const chatMessages = document.getElementById('chat-messages');
-        const heroWelcome = document.getElementById('hero-welcome');
-        const chatForm = document.getElementById('chat-form');
-        const userPromptInput = document.getElementById('user-prompt-input');
-        const sendButton = document.getElementById('send-button');
-        const pdfFileInput = document.getElementById('pdf-file-input');
-        const uploadPdfTrigger = document.getElementById('upload-pdf-trigger');
-        const capsuleAttachBtn = document.getElementById('capsule-attach-btn');
-        const activeDocCard = document.getElementById('active-document-card');
-        const docCardTitle = document.getElementById('doc-card-title');
-        const docCardStatus = document.getElementById('doc-card-status');
-        const removePdfBtn = document.getElementById('remove-pdf-btn');
-        const inputDocBadge = document.getElementById('input-doc-badge');
-        const inputDocName = document.getElementById('input-doc-name');
-        const inputRemovePdf = document.getElementById('input-remove-pdf');
-        const newSessionBtn = document.getElementById('new-session-btn');
-        const clearAllBtn = document.getElementById('clear-all-btn');
-        const exportChatBtn = document.getElementById('export-chat-btn');
-        const ttsToggleBtn = document.getElementById('tts-toggle-btn');
-        const voiceInputBtn = document.getElementById('voice-input-btn');
-        const dragOverlay = document.getElementById('drag-overlay');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        const openSidebarBtn = document.getElementById('open-sidebar-btn');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-        const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const themeIcon = document.getElementById('theme-icon');
-        const themeText = document.getElementById('theme-text');
+        // DOM Helper Selectors
+        const $ = s => document.querySelector(s);
+        const $$ = s => document.querySelectorAll(s);
 
-        // State
-        let currentPdfText = "";
-        let currentPdfFileName = "";
-        let ttsEnabled = false;
-        let isProcessing = false;
-        const chatHistoryStore = [];
+        // Studio Schedule Facts Data
+        const studioSchedule = {
+            Mon: [
+                { name: "Sunrise Vinyasa", time: "07:00 – 08:00", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Yin + Sound", time: "18:30 – 19:45", duration: "75 min", teacher: "Theo Adebayo", type: "Yin", temp: "Cool room" }
+            ],
+            Tue: [
+                { name: "Sunrise Vinyasa", time: "07:00 – 08:00", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Restorative", time: "18:00 – 19:00", duration: "60 min", teacher: "Priya Raman", type: "Restorative", temp: "Bolsters & blankets" },
+                { name: "Breathwork", time: "19:45 – 20:30", duration: "45 min", teacher: "Maren Kolstad", type: "Breathwork", temp: "Seated" }
+            ],
+            Wed: [
+                { name: "Sunrise Vinyasa", time: "07:00 – 08:00", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Midday Yin", time: "12:15 – 13:30", duration: "75 min", teacher: "Theo Adebayo", type: "Yin", temp: "Cool room" },
+                { name: "Vinyasa II", time: "18:30 – 19:30", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" }
+            ],
+            Thu: [
+                { name: "Sunrise Vinyasa", time: "07:00 – 08:00", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Slow Flow", time: "09:30 – 10:30", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Restorative", time: "18:00 – 19:00", duration: "60 min", teacher: "Theo Adebayo", type: "Restorative", temp: "Bolsters & blankets" },
+                { name: "Breathwork", time: "19:30 – 20:15", duration: "45 min", teacher: "Maren Kolstad", type: "Breathwork", temp: "Seated" }
+            ],
+            Fri: [
+                { name: "Sunrise Vinyasa", time: "07:00 – 08:00", duration: "60 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Unwind Yin", time: "17:30 – 18:45", duration: "75 min", teacher: "Theo Adebayo", type: "Yin", temp: "Cool room" }
+            ],
+            Sat: [
+                { name: "Long Slow Vinyasa", time: "08:30 – 09:45", duration: "75 min", teacher: "Maren Kolstad", type: "Vinyasa", temp: "Warm room" },
+                { name: "Foundations (Complete Beginners)", time: "10:30 – 11:30", duration: "60 min", teacher: "Priya Raman", type: "Foundations", temp: "Room temp", special: true },
+                { name: "Yoga Nidra", time: "16:00 – 17:00", duration: "60 min", teacher: "Theo Adebayo", type: "Restorative", temp: "Deep Rest" }
+            ],
+            Sun: [
+                { name: "Quiet Morning Yin", time: "09:00 – 10:15", duration: "75 min", teacher: "Theo Adebayo", type: "Yin", temp: "Cool room" },
+                { name: "Restorative + Breath", time: "11:00 – 12:00", duration: "60 min", teacher: "Priya Raman", type: "Restorative", temp: "Bolsters & blankets" },
+                { name: "Evening Unwind", time: "17:00 – 18:00", duration: "60 min", teacher: "Priya Raman", type: "Restorative", temp: "Room temp" }
+            ]
+        };
 
-        // Theme Initialization (Default to Light Mode)
-        function initTheme() {
-            const savedTheme = localStorage.getItem('cognify-theme') || 'light';
-            applyTheme(savedTheme);
-        }
-
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                themeIcon.innerHTML = `<i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>`;
-                themeText.innerText = "Light Mode";
-            } else {
-                document.documentElement.classList.remove('dark');
-                themeIcon.innerHTML = `<i data-lucide="moon" class="w-3.5 h-3.5 text-blue-600"></i>`;
-                themeText.innerText = "Dark Mode";
-            }
-            localStorage.setItem('cognify-theme', theme);
-            lucide.createIcons();
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            applyTheme(isDark ? 'light' : 'dark');
-        });
-
-        initTheme();
-
-        // Auto-expand Textarea
-        userPromptInput.addEventListener('input', () => {
-            userPromptInput.style.height = 'auto';
-            userPromptInput.style.height = Math.min(userPromptInput.scrollHeight, 144) + 'px';
-        });
-
-        // Keydown handler (Enter to send, Shift+Enter for newline)
-        userPromptInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
-
-        // Mobile Sidebar Controls
-        function openSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            sidebarBackdrop.classList.remove('hidden');
-        }
-        function closeSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            sidebarBackdrop.classList.add('hidden');
-        }
-        openSidebarBtn.addEventListener('click', openSidebar);
-        closeSidebarBtn.addEventListener('click', closeSidebar);
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-
-        // PDF Upload Triggers
-        uploadPdfTrigger.addEventListener('click', () => pdfFileInput.click());
-        capsuleAttachBtn.addEventListener('click', () => pdfFileInput.click());
-
-        pdfFileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) handlePdfFile(file);
-        });
-
-        // Drag & Drop Handlers
-        window.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            dragOverlay.classList.remove('hidden');
-            dragOverlay.classList.add('flex');
-        });
-
-        dragOverlay.addEventListener('dragover', (e) => e.preventDefault());
-
-        dragOverlay.addEventListener('dragleave', (e) => {
-            if (e.relatedTarget === null) {
-                dragOverlay.classList.add('hidden');
-                dragOverlay.classList.remove('flex');
-            }
-        });
-
-        dragOverlay.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dragOverlay.classList.add('hidden');
-            dragOverlay.classList.remove('flex');
-            const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.pdf')) {
-                handlePdfFile(file);
-            } else {
-                alert("Please drop a valid PDF document.");
-            }
-        });
-
-        // Handle PDF Upload API
-        async function handlePdfFile(file) {
-            capsuleAttachBtn.classList.add('animate-spin', 'text-blue-600');
-            docCardStatus.innerText = "Indexing text...";
+        // Render Schedule for a Day
+        function renderSchedule(day) {
+            const container = $('#schedule-list');
+            const classes = studioSchedule[day] || [];
             
-            const formData = new FormData();
-            formData.append('file', file);
+            container.innerHTML = classes.map(c => `
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-between transition-all hover:border-sage-400 ${c.special ? 'ring-2 ring-sage-400/40' : ''}">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-900 dark:text-white font-serif text-base">${c.name}</span>
+                            ${c.special ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-sage-200 dark:bg-sage-800 text-sage-800 dark:text-sage-200 font-bold uppercase">Beginners</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            <span class="font-medium text-sage-700 dark:text-sage-300">${c.time}</span>
+                            <span>•</span>
+                            <span>${c.teacher}</span>
+                            <span>•</span>
+                            <span>${c.temp}</span>
+                        </div>
+                    </div>
+                    <button class="reserve-btn px-3.5 py-1.5 rounded-xl border border-sage-600 text-sage-700 dark:text-sage-300 hover:bg-sage-700 hover:text-white text-xs font-semibold transition-all shrink-0 ml-3" data-class="${c.name} (${day} ${c.time})">
+                        Hold a Mat
+                    </button>
+                </div>
+            `).join('');
 
-            try {
-                const response = await fetch('/upload-pdf', {
-                    method: 'POST',
-                    body: formData
+            // Bind click to prompt Sage
+            $$('.reserve-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const classInfo = btn.getAttribute('data-class');
+                    openSageDrawer();
+                    sendSageMessage(`Could you please hold a mat for me for ${classInfo}?`);
                 });
-                const data = await response.json();
-
-                if (data.error) {
-                    alert("PDF Error: " + data.error);
-                } else {
-                    currentPdfText = data.extracted_text;
-                    currentPdfFileName = file.name;
-
-                    // Update UI Widgets
-                    docCardTitle.innerText = file.name;
-                    docCardStatus.innerText = `${(file.size / 1024).toFixed(0)} KB • Indexed`;
-                    activeDocCard.classList.remove('hidden');
-                    activeDocCard.classList.add('flex');
-
-                    inputDocName.innerText = file.name;
-                    inputDocBadge.classList.remove('hidden');
-                    inputDocBadge.classList.add('flex');
-
-                    userPromptInput.placeholder = `Ask Cognify anything about ${file.name}...`;
-
-                    // Push system message in chat
-                    appendMessage({
-                        role: 'system',
-                        content: `📄 **${file.name}** was successfully attached and indexed. You can now request summaries, quiz questions, or explanations based on this document!`
-                    });
-                }
-            } catch (err) {
-                alert("Failed to connect to backend server. Make sure FastAPI is running.");
-            } finally {
-                capsuleAttachBtn.classList.remove('animate-spin', 'text-blue-600');
-                pdfFileInput.value = '';
-                lucide.createIcons();
-            }
+            });
         }
 
-        // Remove PDF
-        function detachPdf() {
-            currentPdfText = "";
-            currentPdfFileName = "";
-            activeDocCard.classList.add('hidden');
-            activeDocCard.classList.remove('flex');
-            inputDocBadge.classList.add('hidden');
-            inputDocBadge.classList.remove('flex');
-            userPromptInput.placeholder = "Ask Cognify anything or query your document...";
-        }
-        removePdfBtn.addEventListener('click', detachPdf);
-        inputRemovePdf.addEventListener('click', detachPdf);
+        // Initialize default day (Mon)
+        renderSchedule('Mon');
 
-        // Prompt Chips / Hero Cards Click Handlers
-        document.querySelectorAll('.study-prompt-chip, .hero-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const prompt = card.getAttribute('data-prompt');
-                userPromptInput.value = prompt;
-                chatForm.dispatchEvent(new Event('submit'));
-                if (window.innerWidth < 768) closeSidebar();
+        // Day Tab Click Handlers
+        $$('.day-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                $$('.day-tab').forEach(b => {
+                    b.className = "day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-sage-900";
+                });
+                btn.className = "day-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sage-700 text-white shadow-sm";
+                renderSchedule(btn.getAttribute('data-day'));
             });
         });
 
-        // Chat Submission Handler
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = userPromptInput.value.trim();
-            if (!text || isProcessing) return;
+        // Theme Toggle Handler
+        $('#theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('alba-theme', isDark ? 'dark' : 'light');
+        });
 
-            // Hide Hero Welcome Card once conversation begins
-            if (heroWelcome) heroWelcome.classList.add('hidden');
+        if (localStorage.getItem('alba-theme') === 'dark' || (!localStorage.getItem('alba-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
 
-            // Render User Bubble
-            appendMessage({ role: 'user', content: text });
-            userPromptInput.value = '';
-            userPromptInput.style.height = 'auto';
+        // Mobile Menu Toggle
+        $('#mobile-menu-btn').addEventListener('click', () => {
+            $('#mobile-nav').classList.toggle('hidden');
+        });
 
-            // Show Typing Indicator
-            isProcessing = true;
-            sendButton.disabled = true;
-            const typingIndicator = showTypingIndicator();
+        // ==================== SAGE AI COMPANION LOGIC ====================
+        let sageHistory = [];
+
+        function openSageDrawer() {
+            $('#sage-chat-window').classList.remove('hidden');
+            $('#sage-input').focus();
+        }
+
+        function closeSageDrawer() {
+            $('#sage-chat-window').classList.add('hidden');
+        }
+
+        $('#toggle-sage-btn').addEventListener('click', () => {
+            $('#sage-chat-window').classList.toggle('hidden');
+        });
+        $('#close-sage-btn').addEventListener('click', closeSageDrawer);
+        $('#hero-talk-sage-btn').addEventListener('click', openSageDrawer);
+        $('#nav-ask-sage-btn').addEventListener('click', openSageDrawer);
+        $('#mobile-ask-sage-btn').addEventListener('click', () => {
+            $('#mobile-nav').classList.add('hidden');
+            openSageDrawer();
+        });
+
+        $$('.open-sage-with-prompt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const prompt = btn.getAttribute('data-prompt');
+                openSageDrawer();
+                sendSageMessage(prompt);
+            });
+        });
+
+        $$('.chip-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const text = btn.innerText;
+                if (text.includes("beginner")) {
+                    sendSageMessage("I am a complete beginner to yoga. Which class should I start with?");
+                } else if (text.includes("bring")) {
+                    sendSageMessage("What do I need to bring to class?");
+                } else {
+                    sendSageMessage("How does holding a mat work at Alba?");
+                }
+            });
+        });
+
+        $('#clear-sage-btn').addEventListener('click', () => {
+            sageHistory = [];
+            $('#sage-messages').innerHTML = `
+                <div class="flex items-start gap-2.5 max-w-[90%]">
+                    <div class="w-6 h-6 rounded-full bg-sage-600 text-white flex items-center justify-center text-[10px] font-serif font-bold shrink-0 mt-0.5">S</div>
+                    <div class="p-3.5 rounded-2xl rounded-tl-sm bg-sage-100/70 dark:bg-sage-900/60 text-slate-800 dark:text-slate-200 border border-sage-200/40 dark:border-sage-800/40">
+                        Conversation cleared. How can I assist you with the studio?
+                    </div>
+                </div>
+            `;
+        });
+
+        async function sendSageMessage(text) {
+            if (!text.trim()) return;
+            const messagesContainer = $('#sage-messages');
+
+            // Append User Message
+            const userMsgEl = document.createElement('div');
+            userMsgEl.className = "flex justify-end";
+            userMsgEl.innerHTML = `
+                <div class="p-3 rounded-2xl rounded-tr-sm bg-sage-700 text-white max-w-[85%] leading-relaxed text-xs">
+                    ${text}
+                </div>
+            `;
+            messagesContainer.appendChild(userMsgEl);
+            $('#sage-input').value = '';
+
+            // Typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = "flex items-center gap-2 text-slate-400 text-[11px] italic";
+            typingIndicator.innerHTML = `<span>Sage is writing...</span>`;
+            messagesContainer.appendChild(typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             try {
-                const response = await fetch('/ask-ai', {
+                const res = await fetch('/api/sage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        question: text,
-                        provider: 'Cognify AI',
-                        pdf_text: currentPdfText
+                        message: text,
+                        history: sageHistory
                     })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
                 typingIndicator.remove();
 
-                if (data.error) {
-                    appendMessage({
-                        role: 'ai',
-                        content: `⚠️ **Error**: ${data.error}\n\n*Details*: ${data.details || ''}`,
-                        isError: true
-                    });
-                } else {
-                    appendMessage({
-                        role: 'ai',
-                        content: data.response
-                    });
+                if (data.success) {
+                    sageHistory.push({ role: "user", text: text });
+                    sageHistory.push({ role: "assistant", text: data.reply });
 
-                    // Optional Text-To-Speech
-                    if (ttsEnabled && 'speechSynthesis' in window) {
-                        speakText(data.response);
-                    }
+                    const sageMsgEl = document.createElement('div');
+                    sageMsgEl.className = "flex items-start gap-2.5 max-w-[90%]";
+                    sageMsgEl.innerHTML = `
+                        <div class="w-6 h-6 rounded-full bg-sage-600 text-white flex items-center justify-center text-[10px] font-serif font-bold shrink-0 mt-0.5">S</div>
+                        <div class="p-3.5 rounded-2xl rounded-tl-sm bg-sage-100/70 dark:bg-sage-900/60 text-slate-800 dark:text-slate-200 border border-sage-200/40 dark:border-sage-800/40 prose dark:prose-invert prose-xs">
+                            ${marked.parse(data.reply)}
+                        </div>
+                    `;
+                    messagesContainer.appendChild(sageMsgEl);
+                } else {
+                    const errEl = document.createElement('div');
+                    errEl.className = "text-red-500 text-xs italic";
+                    errEl.innerText = data.error || "Sage is momentarily quiet. Please try again.";
+                    messagesContainer.appendChild(errEl);
                 }
             } catch (err) {
                 typingIndicator.remove();
-                appendMessage({
-                    role: 'ai',
-                    content: '❌ **Network Error**: Unable to connect to the Cognify backend server. Please verify the server is running.',
-                    isError: true
-                });
-            } finally {
-                isProcessing = false;
-                sendButton.disabled = false;
-                userPromptInput.focus();
+                const errEl = document.createElement('div');
+                errEl.className = "text-red-500 text-xs italic";
+                errEl.innerText = "Could not reach the studio. Please verify connection.";
+                messagesContainer.appendChild(errEl);
             }
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        $('#sage-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendSageMessage($('#sage-input').value.trim());
         });
 
-        // Helper: Smooth Scroll to Bottom
-        function scrollToBottom() {
-            requestAnimationFrame(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                setTimeout(() => {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 60);
-            });
-        }
+        // ==================== AUTHENTICATION (USER'S CODE SPECIFICATION) ====================
 
-        // Append Message Component
-        function appendMessage({ role, content, isError = false }) {
-            const messageWrapper = document.createElement('div');
-            messageWrapper.className = `flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full animate-fade-in ${role === 'user' ? 'justify-end' : 'justify-start'}`;
-
-            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            if (role === 'user') {
-                messageWrapper.innerHTML = `
-                    <div class="flex flex-col items-end max-w-[85%] sm:max-w-[75%]">
-                        <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-sm sm:text-base shadow-md shadow-blue-600/20 leading-relaxed break-words">
-                            ${escapeHtml(content)}
-                        </div>
-                        <span class="text-[10px] text-slate-400 mt-1 px-1">${timeString}</span>
-                    </div>
-                `;
-            } else if (role === 'system') {
-                messageWrapper.innerHTML = `
-                    <div class="w-full my-2 flex justify-center">
-                        <div class="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-medium max-w-lg text-center">
-                            ${marked.parse(content)}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // AI Response with Markdown & Code Highlighting
-                const parsedHtml = marked.parse(content);
-                const uniqueId = 'msg-' + Date.now();
-
-                messageWrapper.innerHTML = `
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md ring-2 ring-blue-500/20 mt-1">
-                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                            <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
-                            <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
-                            <circle cx="12" cy="12.5" r="2" fill="white"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1 max-w-[90%] sm:max-w-[82%]">
-                        <div class="p-5 rounded-2xl rounded-tl-sm glass-card ${isError ? 'border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-950/20' : ''}">
-                            <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 pb-2 mb-3">
-                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                                    Cognify AI
-                                </span>
-                                <span class="text-[10px] text-slate-400">${timeString}</span>
-                            </div>
-                            <div id="${uniqueId}" class="prose-content">
-                                ${parsedHtml}
-                            </div>
-                            <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/60">
-                                <button class="copy-btn text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" data-target="${uniqueId}">
-                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                    <span>Copy</span>
-                                </button>
-                                <button class="speak-btn text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" data-text="${escapeHtml(content)}">
-                                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
-                                    <span>Read</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            chatMessages.appendChild(messageWrapper);
-
-            // Highlight Code Blocks
-            messageWrapper.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
-
-            // Re-render Lucide Icons for dynamic content
-            lucide.createIcons();
-
-            // Smoothly scroll to bottom
-            scrollToBottom();
-
-            // Wire Copy Buttons
-            messageWrapper.querySelectorAll('.copy-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const targetId = btn.getAttribute('data-target');
-                    const text = document.getElementById(targetId).innerText;
-                    navigator.clipboard.writeText(text);
-                    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i><span class="text-emerald-500">Copied!</span>`;
-                    lucide.createIcons();
-                    setTimeout(() => {
-                        btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Copy</span>`;
-                        lucide.createIcons();
-                    }, 2000);
-                });
-            });
-
-            // Wire Speak Buttons
-            messageWrapper.querySelectorAll('.speak-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const text = btn.getAttribute('data-text');
-                    speakText(text);
-                });
-            });
-
-            // Record to store for export
-            chatHistoryStore.push({ role, content, time: timeString });
-        }
-
-        // Typing Indicator Component
-        function showTypingIndicator() {
-            const div = document.createElement('div');
-            div.id = 'typing-bubble';
-            div.className = 'flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full animate-fade-in';
-            div.innerHTML = `
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md">
-                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
-                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
-                        <circle cx="12" cy="12.5" r="2" fill="white"/>
-                    </svg>
-                </div>
-                <div class="p-4 rounded-2xl rounded-tl-sm glass-card flex items-center gap-3">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.15s"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.3s"></span>
-                    </div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cognify is thinking...</span>
-                </div>
-            `;
-            chatMessages.appendChild(div);
-            scrollToBottom();
-            lucide.createIcons();
-            return div;
-        }
-
-        // Clear Session Handler
-        async function resetSession() {
-            if (confirm("Reset current study session and clear memory?")) {
-                try {
-                    await fetch('/clear-chat', { method: 'POST' });
-                } catch (e) {}
-                
-                detachPdf();
-                chatMessages.innerHTML = '';
-                if (heroWelcome) {
-                    heroWelcome.classList.remove('hidden');
-                    chatMessages.appendChild(heroWelcome);
-                }
-                chatHistoryStore.length = 0;
+        function users() {
+            try {
+                return JSON.parse(localStorage.getItem('alba-users')) || {};
+            } catch (e) {
+                return {};
             }
         }
-        newSessionBtn.addEventListener('click', resetSession);
-        clearAllBtn.addEventListener('click', resetSession);
 
-        // Export Session to Markdown
-        exportChatBtn.addEventListener('click', () => {
-            if (chatHistoryStore.length === 0) {
-                alert("No study notes to export yet!");
-                return;
-            }
-            let mdContent = `# Cognify AI — Study Session Notes\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
-            if (currentPdfFileName) {
-                mdContent += `**Associated Document**: ${currentPdfFileName}\n\n---\n\n`;
-            }
-            chatHistoryStore.forEach(msg => {
-                if (msg.role === 'user') {
-                    mdContent += `### 🙋 Question (${msg.time}):\n${msg.content}\n\n`;
-                } else if (msg.role === 'ai') {
-                    mdContent += `### 🤖 Cognify Answer:\n${msg.content}\n\n---\n\n`;
-                }
-            });
-
-            const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Cognify_Notes_${new Date().toISOString().slice(0,10)}.md`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-        // Text-to-Speech
-        function speakText(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const cleanText = text.replace(/[#*`_\[\]()]/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 1.05;
-            utterance.pitch = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        ttsToggleBtn.addEventListener('click', () => {
-            ttsEnabled = !ttsEnabled;
-            if (ttsEnabled) {
-                ttsToggleBtn.classList.add('bg-blue-600', 'text-white');
-                ttsToggleBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800/60');
-            } else {
-                ttsToggleBtn.classList.remove('bg-blue-600', 'text-white');
-                ttsToggleBtn.classList.add('bg-slate-100', 'dark:bg-slate-800/60');
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            }
-        });
-
-        // Speech Recognition (Dictation)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.lang = 'en-US';
-
-            recognition.onstart = () => {
-                voiceInputBtn.classList.add('text-red-500', 'animate-pulse');
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                userPromptInput.value += (userPromptInput.value ? ' ' : '') + transcript;
-                userPromptInput.dispatchEvent(new Event('input'));
-            };
-
-            recognition.onend = () => {
-                voiceInputBtn.classList.remove('text-red-500', 'animate-pulse');
-            };
-
-            voiceInputBtn.addEventListener('click', () => {
-                recognition.start();
-            });
-        } else {
-            voiceInputBtn.style.display = 'none';
-        }
-
-        // Helper: Escape HTML
-        function escapeHtml(string) {
-            const div = document.createElement('div');
-            div.innerText = string;
-            return div.innerHTML;
-        }
-
-        // ==================== AUTHENTICATION LOGIC ====================
-        const authModal = document.getElementById('auth-modal');
-        const authLoginBtn = document.getElementById('auth-login-btn');
-        const closeAuthModal = document.getElementById('close-auth-modal');
-        const userProfileMenu = document.getElementById('user-profile-menu');
-        const userDisplayName = document.getElementById('user-display-name');
-        const userDisplayEmail = document.getElementById('user-display-email');
-        const logoutBtn = document.getElementById('logout-btn');
-        const tabLogin = document.getElementById('tab-login');
-        const tabRegister = document.getElementById('tab-register');
-        const formLogin = document.getElementById('form-login');
-        const formRegister = document.getElementById('form-register');
-        const authAlert = document.getElementById('auth-alert');
-        const authModalTitle = document.getElementById('auth-modal-title');
-        const authModalDesc = document.getElementById('auth-modal-desc');
-
-        let currentUser = null;
-
-        function openAuthModal(tab = 'login') {
-            authModal.classList.remove('hidden');
-            authModal.classList.add('flex');
-            switchAuthTab(tab);
-            hideAuthAlert();
-        }
-
-        function closeAuthModalHandler() {
-            authModal.classList.add('hidden');
-            authModal.classList.remove('flex');
-            hideAuthAlert();
-        }
-
-        function showAuthAlert(msg, type = 'error') {
-            authAlert.innerHTML = `
-                <i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle-2'}" class="w-4 h-4 shrink-0"></i>
-                <span>${msg}</span>
-            `;
-            authAlert.className = `mb-4 p-3 rounded-xl text-xs font-medium border flex items-center gap-2 ${
-                type === 'error'
-                    ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40'
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40'
-            }`;
-            lucide.createIcons();
+        function showAuthAlert(msg) {
+            const el = $('#auth-alert');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.remove('hidden');
         }
 
         function hideAuthAlert() {
-            authAlert.classList.add('hidden');
-            authAlert.innerHTML = '';
+            const el = $('#auth-alert');
+            if (el) el.classList.add('hidden');
+        }
+
+        function signIn(name, email, method = 'email', token = null) {
+            const user = { name, email, method };
+            localStorage.setItem('alba-current-user', JSON.stringify(user));
+            if (token) {
+                localStorage.setItem('alba-token', token);
+            }
+            updateUserDisplay(user);
+            closeAuthModal();
+        }
+
+        function updateUserDisplay(user) {
+            if (user) {
+                $('#user-btn-text').textContent = user.name.split(' ')[0];
+                $('#user-menu-name').textContent = user.name;
+                $('#user-menu-email').textContent = user.email;
+            } else {
+                $('#user-btn-text').textContent = "Member Sign In";
+            }
+        }
+
+        function openAuthModal(tab = 'login') {
+            $('#auth-modal').classList.remove('hidden');
+            $('#auth-modal').classList.add('flex');
+            hideAuthAlert();
+            switchAuthTab(tab);
+        }
+
+        function closeAuthModal() {
+            $('#auth-modal').classList.add('hidden');
+            $('#auth-modal').classList.remove('flex');
+            hideAuthAlert();
         }
 
         function switchAuthTab(tab) {
             hideAuthAlert();
             if (tab === 'login') {
-                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm";
-                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
-                formLogin.classList.remove('hidden');
-                formRegister.classList.add('hidden');
-                authModalTitle.innerText = "Welcome Back to Cognify";
-                authModalDesc.innerText = "Sign in to access your study history and materials";
+                $('#tab-login-btn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-sage-800 text-sage-800 dark:text-sage-200 shadow-sm";
+                $('#tab-register-btn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                $('#login-form').classList.remove('hidden');
+                $('#register-form').classList.add('hidden');
             } else {
-                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm";
-                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
-                formRegister.classList.remove('hidden');
-                formLogin.classList.add('hidden');
-                authModalTitle.innerText = "Create Your Cognify Account";
-                authModalDesc.innerText = "Start saving study sessions and personalized AI notes";
+                $('#tab-register-btn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-sage-800 text-sage-800 dark:text-sage-200 shadow-sm";
+                $('#tab-login-btn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white";
+                $('#register-form').classList.remove('hidden');
+                $('#login-form').classList.add('hidden');
             }
         }
 
-        function updateAuthUI(user) {
-            currentUser = user;
-            if (user) {
-                // Logged In: Show user avatar pill
-                const firstName = user.name.split(' ')[0];
-                authLoginBtn.innerHTML = `
-                    <div class="w-5 h-5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-[10px] uppercase">
-                        ${user.name.charAt(0)}
-                    </div>
-                    <span>${escapeHtml(firstName)}</span>
-                    <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
-                `;
-                userDisplayName.innerText = user.name;
-                userDisplayEmail.innerText = user.email;
-            } else {
-                // Logged Out
-                authLoginBtn.innerHTML = `
-                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                    <span>Sign In</span>
-                `;
-                userProfileMenu.classList.add('hidden');
-            }
-            lucide.createIcons();
-        }
-
-        async function checkAuthSession() {
-            const token = localStorage.getItem('cognify_token');
-            if (!token) {
-                updateAuthUI(null);
-                return;
-            }
-            try {
-                const res = await fetch(`/auth/me?token=${encodeURIComponent(token)}`);
-                const data = await res.json();
-                if (data.authenticated && data.user) {
-                    updateAuthUI(data.user);
-                } else {
-                    localStorage.removeItem('cognify_token');
-                    updateAuthUI(null);
-                }
-            } catch (err) {
-                console.error("Auth check failed:", err);
-            }
-        }
-
-        // Event Listeners for Auth
-        authLoginBtn.addEventListener('click', (e) => {
+        $('#open-auth-btn').addEventListener('click', (e) => {
             e.stopPropagation();
+            const currentUser = JSON.parse(localStorage.getItem('alba-current-user') || 'null');
             if (currentUser) {
-                userProfileMenu.classList.toggle('hidden');
+                $('#user-menu').classList.toggle('hidden');
             } else {
                 openAuthModal('login');
             }
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
-            if (userProfileMenu && !userProfileMenu.contains(e.target) && !authLoginBtn.contains(e.target)) {
-                userProfileMenu.classList.add('hidden');
+            if (!$('#user-menu').contains(e.target) && !$('#open-auth-btn').contains(e.target)) {
+                $('#user-menu').classList.add('hidden');
             }
         });
 
-        closeAuthModal.addEventListener('click', closeAuthModalHandler);
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) closeAuthModalHandler();
-        });
+        $('#close-modal-btn').addEventListener('click', closeAuthModal);
+        $('#tab-login-btn').addEventListener('click', () => switchAuthTab('login'));
+        $('#tab-register-btn').addEventListener('click', () => switchAuthTab('register'));
 
-        tabLogin.addEventListener('click', () => switchAuthTab('login'));
-        tabRegister.addEventListener('click', () => switchAuthTab('register'));
-
-        // Handle Sign In Submit
-        formLogin.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            const btn = document.getElementById('btn-submit-login');
-
-            btn.disabled = true;
-            btn.innerHTML = `<span>Signing In...</span>`;
-
-            try {
-                const res = await fetch('/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-
-                if (data.success && data.token) {
-                    localStorage.setItem('cognify_token', data.token);
-                    updateAuthUI(data.user);
-                    closeAuthModalHandler();
-                    formLogin.reset();
-                } else {
-                    showAuthAlert(data.error || "Invalid email or password.");
-                }
-            } catch (err) {
-                showAuthAlert("Network error. Please ensure the backend server is running.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<span>Sign In to Cognify</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
-                lucide.createIcons();
-            }
-        });
-
-        // Handle Sign Up Submit
-        formRegister.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('register-name').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const btn = document.getElementById('btn-submit-register');
-
-            btn.disabled = true;
-            btn.innerHTML = `<span>Creating Account...</span>`;
-
-            try {
-                const res = await fetch('/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
-                const data = await res.json();
-
-                if (data.success && data.token) {
-                    localStorage.setItem('cognify_token', data.token);
-                    updateAuthUI(data.user);
-                    closeAuthModalHandler();
-                    formRegister.reset();
-                } else {
-                    showAuthAlert(data.error || "Could not create account.");
-                }
-            } catch (err) {
-                showAuthAlert("Network error. Please ensure the backend server is running.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<span>Create Account</span><i data-lucide="user-plus" class="w-3.5 h-3.5"></i>`;
-                lucide.createIcons();
-            }
-        });
-
-        // Handle Sign Out
-        logoutBtn.addEventListener('click', async () => {
-            const token = localStorage.getItem('cognify_token');
+        $('#logout-btn').addEventListener('click', async () => {
+            const token = localStorage.getItem('alba-token');
             if (token) {
                 try {
                     await fetch('/auth/logout', {
@@ -1385,15 +970,79 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token })
                     });
-                } catch (err) {}
+                } catch(e) {}
             }
-            localStorage.removeItem('cognify_token');
-            updateAuthUI(null);
-            userProfileMenu.classList.add('hidden');
+            localStorage.removeItem('alba-current-user');
+            localStorage.removeItem('alba-token');
+            updateUserDisplay(null);
+            $('#user-menu').classList.add('hidden');
         });
 
-        // Check authentication state on page load
-        checkAuthSession();
+        // Exact User-Supplied Login Form Submit Handler
+        $('#login-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const email = $('#login-email').value.trim().toLowerCase();
+            const password = $('#login-password').value;
+            try {
+                const r = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await r.json();
+                if (!data.success) return showAuthAlert(data.error || 'Login failed — check your details.');
+                signIn(data.user?.name || email.split('@')[0], email, 'email', data.token);
+            } catch(err) {
+                const u = users()[email];   // server unreachable → local fallback
+                if (!u || u.pass !== btoa(password)) return showAuthAlert('Could not reach the studio server, and no local account matches.');
+                signIn(u.name, email, 'email');
+            }
+        });
+
+        // Exact User-Supplied Register Form Submit Handler
+        $('#register-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const name = $('#reg-name').value.trim();
+            const email = $('#reg-email').value.trim().toLowerCase();
+            const pass = $('#reg-password').value;
+            try {
+                const r = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: pass })
+                });
+                const data = await r.json();
+                if (!data.success) return showAuthAlert(data.error || 'Could not create the account.');
+                signIn(name, email, 'email', data.token);
+            } catch(err) {
+                const all = users();
+                if (all[email]) return showAuthAlert('An account already lives at that email — sign in instead.');
+                all[email] = { name, pass: btoa(pass) };
+                localStorage.setItem('alba-users', JSON.stringify(all));
+                signIn(name, email, 'email');
+            }
+        });
+
+        // Check active session on load
+        (function initSession() {
+            const u = JSON.parse(localStorage.getItem('alba-current-user') || 'null');
+            if (u) updateUserDisplay(u);
+
+            const token = localStorage.getItem('alba-token');
+            if (token) {
+                fetch(`/auth/me?token=${encodeURIComponent(token)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.authenticated && data.user) {
+                            signIn(data.user.name, data.user.email, 'email', token);
+                        }
+                    })
+                    .catch(() => {});
+            }
+        })();
+
+        // Re-render Lucide icons
+        lucide.createIcons();
     </script>
 </body>
 </html>
