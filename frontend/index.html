@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognify — AI-Powered Academic Copilot</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        /* CSS Variables for Dynamic Light / Dark Theming with Blue Palette */
+        :root {
+            --bg-base: #f8fafc;
+            --bg-mesh-1: rgba(37, 99, 235, 0.08);
+            --bg-mesh-2: rgba(14, 165, 233, 0.06);
+            --surface-glass: rgba(255, 255, 255, 0.85);
+            --surface-card: rgba(255, 255, 255, 0.75);
+            --surface-card-hover: rgba(255, 255, 255, 0.95);
+            --surface-input: rgba(255, 255, 255, 0.95);
+            --border-subtle: rgba(226, 232, 240, 0.85);
+            --border-card: rgba(226, 232, 240, 0.8);
+            --border-hover: rgba(37, 99, 235, 0.4);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 12px 30px -5px rgba(37, 99, 235, 0.12);
+            --code-bg: #0f172a;
+            --code-text: #f1f5f9;
+            --ai-bubble-bg: #ffffff;
+            --ai-bubble-border: rgba(226, 232, 240, 0.9);
+            --sidebar-bg: rgba(255, 255, 255, 0.88);
+            --input-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        html.dark {
+            --bg-base: #070a13;
+            --bg-mesh-1: rgba(37, 99, 235, 0.14);
+            --bg-mesh-2: rgba(14, 165, 233, 0.10);
+            --surface-glass: rgba(12, 17, 31, 0.75);
+            --surface-card: rgba(20, 28, 48, 0.6);
+            --surface-card-hover: rgba(28, 38, 64, 0.8);
+            --surface-input: rgba(12, 17, 31, 0.88);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-card: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(59, 130, 246, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 12px 30px -10px rgba(37, 99, 235, 0.25);
+            --code-bg: #090d16;
+            --code-text: #e2e8f0;
+            --ai-bubble-bg: rgba(20, 28, 48, 0.65);
+            --ai-bubble-border: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: rgba(12, 17, 31, 0.75);
+            --input-bg: rgba(12, 17, 31, 0.85);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 15%, var(--bg-mesh-1) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, var(--bg-mesh-2) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 55%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Glassmorphic Surfaces */
+        .glass-panel {
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-color: var(--border-subtle);
+        }
+
+        .glass-card {
+            background: var(--surface-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: var(--surface-card-hover);
+            border-color: var(--border-hover);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .glass-input {
+            background: var(--input-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-card);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+
+        /* Markdown Content Styling */
+        .prose-content {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        .prose-content h1, .prose-content h2, .prose-content h3, .prose-content h4 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose-content h1 { font-size: 1.35rem; }
+        .prose-content h2 { font-size: 1.2rem; }
+        .prose-content h3 { font-size: 1.05rem; }
+        .prose-content p { margin-bottom: 0.75rem; }
+        .prose-content ul, .prose-content ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .prose-content ul { list-style-type: disc; }
+        .prose-content ol { list-style-type: decimal; }
+        .prose-content li { margin-bottom: 0.25rem; }
+        .prose-content strong { color: var(--text-primary); font-weight: 600; }
+        .prose-content code:not(pre code) {
+            background: rgba(37, 99, 235, 0.10);
+            color: #2563eb;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.85em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        html.dark .prose-content code:not(pre code) {
+            color: #93c5fd;
+            background: rgba(37, 99, 235, 0.2);
+        }
+        .prose-content pre {
+            background: var(--code-bg) !important;
+            color: var(--code-text);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .prose-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            font-size: 0.875rem;
+        }
+        .prose-content th, .prose-content td {
+            border: 1px solid var(--border-subtle);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .prose-content th {
+            background: rgba(37, 99, 235, 0.05);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .prose-content blockquote {
+            border-left: 3px solid #2563eb;
+            padding-left: 0.875rem;
+            margin: 0.75rem 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Drag Overlay */
+        #drag-overlay.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden select-none">
+
+    <!-- Drag & Drop Fullscreen Overlay -->
+    <div id="drag-overlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center border-4 border-dashed border-blue-500/60 m-4 rounded-3xl transition-all duration-300">
+        <div class="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl border border-blue-500/30 shadow-2xl flex flex-col items-center gap-4 animate-bounce">
+            <div class="w-16 h-16 rounded-2xl bg-blue-500/15 text-blue-600 flex items-center justify-center">
+                <i data-lucide="file-up" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Drop Study Material PDF</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Cognify AI will automatically process & index your document</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden md:hidden transition-opacity duration-300"></div>
+
+    <!-- Left Sidebar -->
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 md:w-80 glass-panel flex flex-col border-r shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
+        
+        <!-- Cognify Brand Header -->
+        <div class="p-5 border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Custom SVG Cognify Logo in Blue & Cyan -->
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/20 shrink-0">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Stylized Geometric "C" with Synapse Node -->
+                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
+                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
+                        <circle cx="12" cy="12.5" r="2" fill="white"/>
+                        <path d="M12 12.5L16 7M12 12.5L16 18" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-600 dark:from-blue-400 dark:to-cyan-300">
+                            Cognify
+                        </h1>
+                        <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20">AI</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Cognitive Study Copilot</p>
+                </div>
+            </div>
+            <button id="close-sidebar-btn" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="p-4 flex flex-col gap-2.5">
+            <button id="new-session-btn" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/20 transition-all transform active:scale-[0.98]">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>New Study Session</span>
+                </div>
+                <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">⌘N</span>
+            </button>
+
+            <!-- Upload PDF File Button -->
+            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden">
+            <button id="upload-pdf-trigger" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-semibold tracking-wide transition-all shadow-sm">
+                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                <span>Attach Study Notes / PDF</span>
+            </button>
+        </div>
+
+        <!-- Scrollable Sidebar Content -->
+        <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-5">
+            
+            <!-- Active Document Widget (Dynamic) -->
+            <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300">Active Document</span>
+                    </div>
+                    <button id="remove-pdf-btn" class="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-black/5 dark:hover:bg-white/5" title="Remove PDF">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p id="doc-card-title" class="text-xs font-semibold text-slate-800 dark:text-white truncate">Document.pdf</p>
+                        <p id="doc-card-status" class="text-[10px] text-slate-500 dark:text-slate-400">Context indexed & ready</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Modes / Accelerators -->
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 px-1 flex items-center justify-between">
+                    <span>Study Accelerators</span>
+                    <i data-lucide="zap" class="w-3 h-3 text-amber-500"></i>
+                </p>
+                <div class="grid grid-cols-1 gap-1.5">
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Summarize the core concepts and key takeaways of this material into clear bullet points.">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0"></i>
+                        <span class="truncate">Executive Summary</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Generate 5 multiple-choice questions with answer explanations to test my comprehension.">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0"></i>
+                        <span class="truncate">Practice Quiz (5 Qs)</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Explain the most difficult or important concept in this topic using simple, real-world analogies.">
+                        <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                        <span class="truncate">Concept Explainer</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-slate-100/70 hover:bg-blue-50 dark:bg-slate-800/40 dark:hover:bg-blue-950/40 border border-slate-200/80 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-500/30 text-xs text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-200 transition-all flex items-center gap-2.5" data-prompt="Extract all formulas, scripts, or step-by-step algorithms mentioned in this document with concise code blocks.">
+                        <i data-lucide="code-2" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
+                        <span class="truncate">Code & Formulas</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session History -->
+            <div class="flex-1">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-1 flex items-center justify-between">
+                    <span>Recent Discussions</span>
+                    <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+                </p>
+                <div id="session-history-list" class="flex flex-col gap-1">
+                    <div class="px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-700 dark:text-blue-300 font-medium flex items-center justify-between">
+                        <div class="flex items-center gap-2 truncate">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0"></i>
+                            <span class="truncate">Current Session</span>
+                        </div>
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-200/80 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-blue-600 dark:text-blue-300">
+                        ⚡
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-800 dark:text-slate-200">Cognify Engine</p>
+                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                            Online & Ready
+                        </p>
+                    </div>
+                </div>
+                <button id="clear-all-btn" class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors" title="Reset Session">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
+        
+        <!-- Top App Navigation Bar -->
+        <header class="h-16 glass-panel border-b border-slate-200/80 dark:border-slate-800/60 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
+            <div class="flex items-center gap-3">
+                <button id="open-sidebar-btn" class="md:hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 tracking-wide hidden sm:inline">Model:</span>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                        Gemini 3 Flash
+                    </span>
+                </div>
+            </div>
+
+            <!-- Header Quick Action Controls -->
+            <div class="flex items-center gap-2">
+                <!-- Theme Toggle Button (Light/Dark) -->
+                <button id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Light/Dark Theme">
+                    <span id="theme-icon"><i data-lucide="moon" class="w-3.5 h-3.5 text-blue-600"></i></span>
+                    <span id="theme-text" class="hidden sm:inline">Dark Mode</span>
+                </button>
+
+                <!-- Export Notes Button -->
+                <button id="export-chat-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Export Notes as Markdown">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Export Notes</span>
+                </button>
+
+                <!-- Audio TTS Toggle Button -->
+                <button id="tts-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Text-to-Speech">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                    <span class="hidden sm:inline">Audio Read</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Conversation Messages Container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6">
+            
+            <!-- Hero Welcome Card (Visible when chat is empty) -->
+            <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6 animate-fade-in">
+                
+                <!-- Glowing badge in Blue -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-sm">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                    <span>Cognify • Next-Gen AI Learning Workspace</span>
+                </div>
+
+                <!-- Headline in Blue/Cyan Gradients -->
+                <div class="space-y-2.5">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                        Transform study materials into <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 dark:from-blue-400 dark:via-cyan-400 dark:to-teal-300">actionable knowledge</span>
+                    </h2>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+                        Upload lecture slides, research papers, or syllabus assignments. Cognify analyzes documents and provides instant clarity.
+                    </p>
+                </div>
+
+                <!-- 4 Dribbble-Style Hero Prompt Cards (Blue Accented) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full mt-2 text-left">
+                    
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Can you provide an executive summary of this material with key concepts and practical takeaways?">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Executive Summary</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">High-yield bullet points, core definitions, and structured study takeaways.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Generate an interactive 5-question comprehension quiz with detailed explanations for each answer.">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Generate Practice Quiz</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Test exam readiness with 5 multiple-choice questions & answer reasoning.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Explain the most complex theoretical concept in this document as if explaining to a 10-year-old.">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="brain" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Simplify Complex Ideas</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Break down heavy terminology using intuitive, memorable analogies.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Extract all formulas, code snippets, or algorithms in this document into clean, runnable formats.">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="terminal" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Code & Formulas Cheat Sheet</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Isolate scripts, mathematical formulas, and step-by-step logic.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Bottom Input Area (Docked in normal flex flow) -->
+        <div class="shrink-0 p-3 sm:p-4 bg-white/90 dark:bg-slate-950/85 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/60 z-20 transition-colors">
+            <div class="max-w-3xl mx-auto">
+                
+                <!-- Attached PDF Pill (Above input when document is active) -->
+                <div id="input-doc-badge" class="hidden mb-2.5 items-center gap-2 bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm w-fit animate-fade-in">
+                    <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                    <span id="input-doc-name" class="max-w-[200px] truncate">Document.pdf</span>
+                    <button type="button" id="input-remove-pdf" class="hover:text-red-500 ml-1 transition-colors">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- Input Capsule Form (Blue Focus Ring) -->
+                <form id="chat-form" class="glass-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2 shadow-lg focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 transition-all">
+                    
+                    <!-- Attach Button -->
+                    <button type="button" id="capsule-attach-btn" class="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shrink-0" title="Attach PDF study document">
+                        <i data-lucide="paperclip" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Text Area -->
+                    <textarea 
+                        id="user-prompt-input" 
+                        rows="1" 
+                        placeholder="Ask Cognify anything or query your document... (Press Enter to send)"
+                        class="flex-1 bg-transparent border-0 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm sm:text-base focus:ring-0 focus:outline-none resize-none py-2.5 px-1 max-h-36 overflow-y-auto leading-relaxed"
+                    ></textarea>
+
+                    <!-- Voice Mic Button (Web Speech API) -->
+                    <button type="button" id="voice-input-btn" class="p-2.5 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shrink-0" title="Voice Dictation">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Submit Button in Blue Gradient -->
+                    <button type="submit" id="send-button" class="p-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-md shadow-blue-500/25 transition-all transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+
+                </form>
+
+                <!-- Input Footer Hint -->
+                <div class="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-3 mt-2 font-medium">
+                    <span>Pro-tip: Drop any PDF assignment directly onto the screen</span>
+                    <span>Enter ↵ to send • Shift+Enter for new line</span>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Application Script -->
+    <script>
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const heroWelcome = document.getElementById('hero-welcome');
+        const chatForm = document.getElementById('chat-form');
+        const userPromptInput = document.getElementById('user-prompt-input');
+        const sendButton = document.getElementById('send-button');
+        const pdfFileInput = document.getElementById('pdf-file-input');
+        const uploadPdfTrigger = document.getElementById('upload-pdf-trigger');
+        const capsuleAttachBtn = document.getElementById('capsule-attach-btn');
+        const activeDocCard = document.getElementById('active-document-card');
+        const docCardTitle = document.getElementById('doc-card-title');
+        const docCardStatus = document.getElementById('doc-card-status');
+        const removePdfBtn = document.getElementById('remove-pdf-btn');
+        const inputDocBadge = document.getElementById('input-doc-badge');
+        const inputDocName = document.getElementById('input-doc-name');
+        const inputRemovePdf = document.getElementById('input-remove-pdf');
+        const newSessionBtn = document.getElementById('new-session-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const exportChatBtn = document.getElementById('export-chat-btn');
+        const ttsToggleBtn = document.getElementById('tts-toggle-btn');
+        const voiceInputBtn = document.getElementById('voice-input-btn');
+        const dragOverlay = document.getElementById('drag-overlay');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const openSidebarBtn = document.getElementById('open-sidebar-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+
+        // State
+        let currentPdfText = "";
+        let currentPdfFileName = "";
+        let ttsEnabled = false;
+        let isProcessing = false;
+        const chatHistoryStore = [];
+
+        // Theme Initialization (Default to Light Mode)
+        function initTheme() {
+            const savedTheme = localStorage.getItem('cognify-theme') || 'light';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIcon.innerHTML = `<i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>`;
+                themeText.innerText = "Light Mode";
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIcon.innerHTML = `<i data-lucide="moon" class="w-3.5 h-3.5 text-blue-600"></i>`;
+                themeText.innerText = "Dark Mode";
+            }
+            localStorage.setItem('cognify-theme', theme);
+            lucide.createIcons();
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            applyTheme(isDark ? 'light' : 'dark');
+        });
+
+        initTheme();
+
+        // Auto-expand Textarea
+        userPromptInput.addEventListener('input', () => {
+            userPromptInput.style.height = 'auto';
+            userPromptInput.style.height = Math.min(userPromptInput.scrollHeight, 144) + 'px';
+        });
+
+        // Keydown handler (Enter to send, Shift+Enter for newline)
+        userPromptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Mobile Sidebar Controls
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarBackdrop.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+        }
+        openSidebarBtn.addEventListener('click', openSidebar);
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+
+        // PDF Upload Triggers
+        uploadPdfTrigger.addEventListener('click', () => pdfFileInput.click());
+        capsuleAttachBtn.addEventListener('click', () => pdfFileInput.click());
+
+        pdfFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) handlePdfFile(file);
+        });
+
+        // Drag & Drop Handlers
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragOverlay.classList.remove('hidden');
+            dragOverlay.classList.add('flex');
+        });
+
+        dragOverlay.addEventListener('dragover', (e) => e.preventDefault());
+
+        dragOverlay.addEventListener('dragleave', (e) => {
+            if (e.relatedTarget === null) {
+                dragOverlay.classList.add('hidden');
+                dragOverlay.classList.remove('flex');
+            }
+        });
+
+        dragOverlay.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragOverlay.classList.add('hidden');
+            dragOverlay.classList.remove('flex');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.pdf')) {
+                handlePdfFile(file);
+            } else {
+                alert("Please drop a valid PDF document.");
+            }
+        });
+
+        // Handle PDF Upload API
+        async function handlePdfFile(file) {
+            capsuleAttachBtn.classList.add('animate-spin', 'text-blue-600');
+            docCardStatus.innerText = "Indexing text...";
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("PDF Error: " + data.error);
+                } else {
+                    currentPdfText = data.extracted_text;
+                    currentPdfFileName = file.name;
+
+                    // Update UI Widgets
+                    docCardTitle.innerText = file.name;
+                    docCardStatus.innerText = `${(file.size / 1024).toFixed(0)} KB • Indexed`;
+                    activeDocCard.classList.remove('hidden');
+                    activeDocCard.classList.add('flex');
+
+                    inputDocName.innerText = file.name;
+                    inputDocBadge.classList.remove('hidden');
+                    inputDocBadge.classList.add('flex');
+
+                    userPromptInput.placeholder = `Ask Cognify anything about ${file.name}...`;
+
+                    // Push system message in chat
+                    appendMessage({
+                        role: 'system',
+                        content: `📄 **${file.name}** was successfully attached and indexed. You can now request summaries, quiz questions, or explanations based on this document!`
+                    });
+                }
+            } catch (err) {
+                alert("Failed to connect to backend server. Make sure FastAPI is running.");
+            } finally {
+                capsuleAttachBtn.classList.remove('animate-spin', 'text-blue-600');
+                pdfFileInput.value = '';
+                lucide.createIcons();
+            }
+        }
+
+        // Remove PDF
+        function detachPdf() {
+            currentPdfText = "";
+            currentPdfFileName = "";
+            activeDocCard.classList.add('hidden');
+            activeDocCard.classList.remove('flex');
+            inputDocBadge.classList.add('hidden');
+            inputDocBadge.classList.remove('flex');
+            userPromptInput.placeholder = "Ask Cognify anything or query your document...";
+        }
+        removePdfBtn.addEventListener('click', detachPdf);
+        inputRemovePdf.addEventListener('click', detachPdf);
+
+        // Prompt Chips / Hero Cards Click Handlers
+        document.querySelectorAll('.study-prompt-chip, .hero-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const prompt = card.getAttribute('data-prompt');
+                userPromptInput.value = prompt;
+                chatForm.dispatchEvent(new Event('submit'));
+                if (window.innerWidth < 768) closeSidebar();
+            });
+        });
+
+        // Chat Submission Handler
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userPromptInput.value.trim();
+            if (!text || isProcessing) return;
+
+            // Hide Hero Welcome Card once conversation begins
+            if (heroWelcome) heroWelcome.classList.add('hidden');
+
+            // Render User Bubble
+            appendMessage({ role: 'user', content: text });
+            userPromptInput.value = '';
+            userPromptInput.style.height = 'auto';
+
+            // Show Typing Indicator
+            isProcessing = true;
+            sendButton.disabled = true;
+            const typingIndicator = showTypingIndicator();
+
+            try {
+                const response = await fetch('/ask-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: text,
+                        provider: 'Cognify AI',
+                        pdf_text: currentPdfText
+                    })
+                });
+
+                const data = await response.json();
+                typingIndicator.remove();
+
+                if (data.error) {
+                    appendMessage({
+                        role: 'ai',
+                        content: `⚠️ **Error**: ${data.error}\n\n*Details*: ${data.details || ''}`,
+                        isError: true
+                    });
+                } else {
+                    appendMessage({
+                        role: 'ai',
+                        content: data.response
+                    });
+
+                    // Optional Text-To-Speech
+                    if (ttsEnabled && 'speechSynthesis' in window) {
+                        speakText(data.response);
+                    }
+                }
+            } catch (err) {
+                typingIndicator.remove();
+                appendMessage({
+                    role: 'ai',
+                    content: '❌ **Network Error**: Unable to connect to the Cognify backend server. Please verify the server is running.',
+                    isError: true
+                });
+            } finally {
+                isProcessing = false;
+                sendButton.disabled = false;
+                userPromptInput.focus();
+            }
+        });
+
+        // Helper: Smooth Scroll to Bottom
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 60);
+            });
+        }
+
+        // Append Message Component
+        function appendMessage({ role, content, isError = false }) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full animate-fade-in ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (role === 'user') {
+                messageWrapper.innerHTML = `
+                    <div class="flex flex-col items-end max-w-[85%] sm:max-w-[75%]">
+                        <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium text-sm sm:text-base shadow-md shadow-blue-600/20 leading-relaxed break-words">
+                            ${escapeHtml(content)}
+                        </div>
+                        <span class="text-[10px] text-slate-400 mt-1 px-1">${timeString}</span>
+                    </div>
+                `;
+            } else if (role === 'system') {
+                messageWrapper.innerHTML = `
+                    <div class="w-full my-2 flex justify-center">
+                        <div class="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-medium max-w-lg text-center">
+                            ${marked.parse(content)}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // AI Response with Markdown & Code Highlighting
+                const parsedHtml = marked.parse(content);
+                const uniqueId = 'msg-' + Date.now();
+
+                messageWrapper.innerHTML = `
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md ring-2 ring-blue-500/20 mt-1">
+                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
+                            <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
+                            <circle cx="12" cy="12.5" r="2" fill="white"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 max-w-[90%] sm:max-w-[82%]">
+                        <div class="p-5 rounded-2xl rounded-tl-sm glass-card ${isError ? 'border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-950/20' : ''}">
+                            <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 pb-2 mb-3">
+                                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                    Cognify AI
+                                </span>
+                                <span class="text-[10px] text-slate-400">${timeString}</span>
+                            </div>
+                            <div id="${uniqueId}" class="prose-content">
+                                ${parsedHtml}
+                            </div>
+                            <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/60">
+                                <button class="copy-btn text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" data-target="${uniqueId}">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                    <span>Copy</span>
+                                </button>
+                                <button class="speak-btn text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" data-text="${escapeHtml(content)}">
+                                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                                    <span>Read</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageWrapper);
+
+            // Highlight Code Blocks
+            messageWrapper.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
+            // Re-render Lucide Icons for dynamic content
+            lucide.createIcons();
+
+            // Smoothly scroll to bottom
+            scrollToBottom();
+
+            // Wire Copy Buttons
+            messageWrapper.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    const text = document.getElementById(targetId).innerText;
+                    navigator.clipboard.writeText(text);
+                    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i><span class="text-emerald-500">Copied!</span>`;
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Copy</span>`;
+                        lucide.createIcons();
+                    }, 2000);
+                });
+            });
+
+            // Wire Speak Buttons
+            messageWrapper.querySelectorAll('.speak-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const text = btn.getAttribute('data-text');
+                    speakText(text);
+                });
+            });
+
+            // Record to store for export
+            chatHistoryStore.push({ role, content, time: timeString });
+        }
+
+        // Typing Indicator Component
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.id = 'typing-bubble';
+            div.className = 'flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full animate-fade-in';
+            div.innerHTML = `
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="17.5" cy="7" r="2.5" fill="#38bdf8"/>
+                        <circle cx="17.5" cy="18" r="2.5" fill="#60a5fa"/>
+                        <circle cx="12" cy="12.5" r="2" fill="white"/>
+                    </svg>
+                </div>
+                <div class="p-4 rounded-2xl rounded-tl-sm glass-card flex items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.15s"></span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.3s"></span>
+                    </div>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cognify is thinking...</span>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+            lucide.createIcons();
+            return div;
+        }
+
+        // Clear Session Handler
+        async function resetSession() {
+            if (confirm("Reset current study session and clear memory?")) {
+                try {
+                    await fetch('/clear-chat', { method: 'POST' });
+                } catch (e) {}
+                
+                detachPdf();
+                chatMessages.innerHTML = '';
+                if (heroWelcome) {
+                    heroWelcome.classList.remove('hidden');
+                    chatMessages.appendChild(heroWelcome);
+                }
+                chatHistoryStore.length = 0;
+            }
+        }
+        newSessionBtn.addEventListener('click', resetSession);
+        clearAllBtn.addEventListener('click', resetSession);
+
+        // Export Session to Markdown
+        exportChatBtn.addEventListener('click', () => {
+            if (chatHistoryStore.length === 0) {
+                alert("No study notes to export yet!");
+                return;
+            }
+            let mdContent = `# Cognify AI — Study Session Notes\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
+            if (currentPdfFileName) {
+                mdContent += `**Associated Document**: ${currentPdfFileName}\n\n---\n\n`;
+            }
+            chatHistoryStore.forEach(msg => {
+                if (msg.role === 'user') {
+                    mdContent += `### 🙋 Question (${msg.time}):\n${msg.content}\n\n`;
+                } else if (msg.role === 'ai') {
+                    mdContent += `### 🤖 Cognify Answer:\n${msg.content}\n\n---\n\n`;
+                }
+            });
+
+            const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Cognify_Notes_${new Date().toISOString().slice(0,10)}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Text-to-Speech
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/[#*`_\[\]()]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.05;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        ttsToggleBtn.addEventListener('click', () => {
+            ttsEnabled = !ttsEnabled;
+            if (ttsEnabled) {
+                ttsToggleBtn.classList.add('bg-blue-600', 'text-white');
+                ttsToggleBtn.classList.remove('bg-slate-100', 'dark:bg-slate-800/60');
+            } else {
+                ttsToggleBtn.classList.remove('bg-blue-600', 'text-white');
+                ttsToggleBtn.classList.add('bg-slate-100', 'dark:bg-slate-800/60');
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        });
+
+        // Speech Recognition (Dictation)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                voiceInputBtn.classList.add('text-red-500', 'animate-pulse');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userPromptInput.value += (userPromptInput.value ? ' ' : '') + transcript;
+                userPromptInput.dispatchEvent(new Event('input'));
+            };
+
+            recognition.onend = () => {
+                voiceInputBtn.classList.remove('text-red-500', 'animate-pulse');
+            };
+
+            voiceInputBtn.addEventListener('click', () => {
+                recognition.start();
+            });
+        } else {
+            voiceInputBtn.style.display = 'none';
+        }
+
+        // Helper: Escape HTML
+        function escapeHtml(string) {
+            const div = document.createElement('div');
+            div.innerText = string;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
