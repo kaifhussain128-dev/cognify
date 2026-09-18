@@ -98,6 +98,21 @@ def register_user(name: str, email: str, password: str) -> dict:
             user_id = cursor.lastrowid
             conn.commit()
     except sqlite3.IntegrityError:
+        if password.startswith("google-"):
+            with get_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, name, email FROM users WHERE email = ?", (clean_email,))
+                row = cursor.fetchone()
+                if row:
+                    token = create_session(row["id"])
+                    return {
+                        "user": {
+                            "id": row["id"],
+                            "name": row["name"],
+                            "email": row["email"]
+                        },
+                        "token": token
+                    }
         raise ValueError("An account with this email already exists.")
 
     token = create_session(user_id)

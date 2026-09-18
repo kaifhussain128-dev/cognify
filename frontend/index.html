@@ -168,6 +168,7 @@
                         <div class="px-3 py-2 border-b border-sage-100 dark:border-sage-800">
                             <p id="user-menu-name" class="text-xs font-bold text-slate-900 dark:text-white truncate">Member</p>
                             <p id="user-menu-email" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">member@email.com</p>
+                            <div id="user-menu-method" class="mt-1"></div>
                         </div>
                         <button id="logout-btn" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl mt-1 flex items-center gap-2 transition-colors">
                             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
@@ -586,18 +587,91 @@
                 <p class="text-[11px] text-sage-600 dark:text-sage-400 font-medium tracking-wider uppercase mt-0.5">Member Sanctuary</p>
             </div>
 
-            <!-- Tab Buttons -->
-            <div class="flex rounded-xl bg-sage-100 dark:bg-sage-900/80 p-1 mb-5 border border-sage-200/50 dark:border-sage-800/50">
-                <button id="tab-login-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-sage-800 text-sage-800 dark:text-sage-200 shadow-sm">
-                    Sign In
-                </button>
-                <button id="tab-register-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
-                    Create Account
-                </button>
+            <!-- Google Signing In State (Initially Hidden) -->
+            <div id="g-signing" class="hidden flex-col items-center justify-center py-8 space-y-3 text-center">
+                <div class="w-10 h-10 rounded-full border-2 border-sage-600 border-t-transparent animate-spin"></div>
+                <div class="font-serif text-lg font-bold text-slate-900 dark:text-white">Connecting with Google</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Harmonizing your sanctuary account...</p>
             </div>
 
-            <!-- Alert Container -->
-            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border border-red-200 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40"></div>
+            <!-- Google Account Chooser (#g-choose) -->
+            <div id="g-choose" class="space-y-3 mb-4">
+                <!-- Primary Google Sign-in Button -->
+                <button type="button" id="g-main-btn" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-sage-800 bg-white dark:bg-sage-900 hover:bg-slate-50 dark:hover:bg-sage-850 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-3 transition-all shadow-sm">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.66-5.17 3.66-9.12z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.34 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <!-- Quick Pick Accounts -->
+                <div class="space-y-1.5 pt-1">
+                    <button type="button" class="g-account-btn w-full px-3 py-2 rounded-xl text-left text-xs flex items-center justify-between bg-slate-50 dark:bg-sage-900/60 hover:bg-sage-100 dark:hover:bg-sage-800 border border-sage-200/50 dark:border-sage-800 transition-colors" data-name="Claire Vance" data-email="claire.vance@gmail.com">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">C</div>
+                            <div>
+                                <span class="font-medium text-slate-800 dark:text-slate-200 block text-xs">Claire Vance</span>
+                                <span class="text-[10px] text-slate-400">claire.vance@gmail.com</span>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </button>
+                    <button type="button" class="g-account-btn w-full px-3 py-2 rounded-xl text-left text-xs flex items-center justify-between bg-slate-50 dark:bg-sage-900/60 hover:bg-sage-100 dark:hover:bg-sage-800 border border-sage-200/50 dark:border-sage-800 transition-colors" data-name="Guest Yogi" data-email="guest.yogi@gmail.com">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-6 h-6 rounded-full bg-sage-700 text-white flex items-center justify-center font-bold text-[10px]">G</div>
+                            <div>
+                                <span class="font-medium text-slate-800 dark:text-slate-200 block text-xs">Guest Yogi</span>
+                                <span class="text-[10px] text-slate-400">guest.yogi@gmail.com</span>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </button>
+                    <button type="button" id="g-show-other-btn" class="w-full text-center text-[11px] text-sage-700 dark:text-sage-400 hover:underline py-1 font-medium">
+                        Use another Google account
+                    </button>
+                </div>
+            </div>
+
+            <!-- Google Other Account Form (#g-other-form) -->
+            <form id="g-other-form" class="hidden space-y-3 mb-4 p-3.5 rounded-2xl bg-sage-50 dark:bg-sage-900/40 border border-sage-200/60 dark:border-sage-800/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Sign in with Google</span>
+                    <button type="button" id="g-cancel-other-btn" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Cancel</button>
+                </div>
+                <div>
+                    <input type="text" id="g-other-name" placeholder="Full Name" required class="w-full px-3 py-2 rounded-xl border border-sage-200 dark:border-sage-800 bg-white dark:bg-sage-900 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
+                </div>
+                <div>
+                    <input type="email" id="g-other-email" placeholder="google.account@gmail.com" required class="w-full px-3 py-2 rounded-xl border border-sage-200 dark:border-sage-800 bg-white dark:bg-sage-900 text-slate-900 dark:text-white text-xs outline-none focus:border-sage-600">
+                </div>
+                <button type="submit" class="w-full py-2 rounded-xl bg-sage-700 hover:bg-sage-800 text-white text-xs font-bold transition-all shadow-sm">
+                    Continue with this Google Account
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div id="auth-divider" class="relative my-4 text-center">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-sage-200/60 dark:border-sage-800/60"></div></div>
+                <span class="relative px-3 bg-white dark:bg-sage-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">Or with studio email</span>
+            </div>
+
+            <!-- Email / Password Authentication Section -->
+            <div id="email-auth-section">
+                <!-- Tab Buttons -->
+                <div class="flex rounded-xl bg-sage-100 dark:bg-sage-900/80 p-1 mb-4 border border-sage-200/50 dark:border-sage-800/50">
+                    <button id="tab-login-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-sage-800 text-sage-800 dark:text-sage-200 shadow-sm">
+                        Sign In
+                    </button>
+                    <button id="tab-register-btn" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border border-red-200 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40"></div>
 
             <!-- Form 1: Sign In -->
             <form id="login-form" class="space-y-4">
@@ -632,6 +706,7 @@
                     Create Member Account
                 </button>
             </form>
+            </div>
         </div>
     </div>
 
@@ -908,22 +983,42 @@
                 $('#user-btn-text').textContent = user.name.split(' ')[0];
                 $('#user-menu-name').textContent = user.name;
                 $('#user-menu-email').textContent = user.email;
+                const badge = $('#user-menu-method');
+                if (badge) {
+                    if (user.method === 'google') {
+                        badge.innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-semibold"><svg class="w-3 h-3" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.66-5.17 3.66-9.12z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.13C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/></svg> Google Account</span>`;
+                    } else {
+                        badge.innerHTML = `<span class="text-[10px] text-slate-400">Studio Account</span>`;
+                    }
+                }
             } else {
                 $('#user-btn-text').textContent = "Member Sign In";
             }
         }
 
+        function resetAuthModalUI() {
+            if ($('#g-choose')) $('#g-choose').style.display = '';
+            if ($('#g-other-form')) $('#g-other-form').classList.add('hidden');
+            if ($('#g-signing')) {
+                $('#g-signing').classList.add('hidden');
+                $('#g-signing').classList.remove('flex');
+            }
+            if ($('#auth-divider')) $('#auth-divider').classList.remove('hidden');
+            if ($('#email-auth-section')) $('#email-auth-section').classList.remove('hidden');
+            hideAuthAlert();
+        }
+
         function openAuthModal(tab = 'login') {
             $('#auth-modal').classList.remove('hidden');
             $('#auth-modal').classList.add('flex');
-            hideAuthAlert();
+            resetAuthModalUI();
             switchAuthTab(tab);
         }
 
         function closeAuthModal() {
             $('#auth-modal').classList.add('hidden');
             $('#auth-modal').classList.remove('flex');
-            hideAuthAlert();
+            resetAuthModalUI();
         }
 
         function switchAuthTab(tab) {
@@ -940,6 +1035,58 @@
                 $('#login-form').classList.add('hidden');
             }
         }
+
+        // Exact User-Supplied Google Sign-in Handler (with server-side token capture)
+        async function runGoogle(name, email){
+          $('#g-choose').style.display = 'none';
+          $('#g-other-form').classList.add('hidden');
+          if ($('#auth-divider')) $('#auth-divider').classList.add('hidden');
+          if ($('#email-auth-section')) $('#email-auth-section').classList.add('hidden');
+          $('#g-signing').classList.remove('hidden'); $('#g-signing').classList.add('flex');
+          let token = null;
+          try{
+            const r = await fetch('/auth/register', {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ name, email, password: 'google-' + Math.random().toString(36).slice(2) })
+            });
+            const data = await r.json();
+            if (data.success) token = data.token || null;
+          }catch(e){}
+          setTimeout(() => signIn(name, email, 'google', token), 600);
+        }
+
+        // Google Authentication Listeners
+        $('#g-main-btn')?.addEventListener('click', () => {
+            runGoogle('Claire Vance', 'claire.vance@gmail.com');
+        });
+
+        $$('.g-account-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.getAttribute('data-name');
+                const email = btn.getAttribute('data-email');
+                runGoogle(name, email);
+            });
+        });
+
+        $('#g-show-other-btn')?.addEventListener('click', () => {
+            $('#g-choose').style.display = 'none';
+            $('#g-other-form').classList.remove('hidden');
+            $('#g-other-name').focus();
+        });
+
+        $('#g-cancel-other-btn')?.addEventListener('click', () => {
+            $('#g-other-form').classList.add('hidden');
+            $('#g-choose').style.display = '';
+        });
+
+        $('#g-other-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = $('#g-other-name').value.trim();
+            const email = $('#g-other-email').value.trim().toLowerCase();
+            if (name && email) {
+                runGoogle(name, email);
+            }
+        });
 
         $('#open-auth-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1034,7 +1181,7 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.authenticated && data.user) {
-                            signIn(data.user.name, data.user.email, 'email', token);
+                            signIn(data.user.name, data.user.email, u?.method || 'email', token);
                         }
                     })
                     .catch(() => {});
