@@ -1,1415 +1,1516 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cognify — StudyMate AI | Think clearly. Learn deeply.</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 26V16a10 10 0 0 1 20 0v10' fill='none' stroke='%23C1683F' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='17' r='3.5' fill='%237D8F63'/%3E%3C/svg%3E">
-
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  darkMode: 'class',
-  theme: { extend: {
-    fontFamily: {
-      serif: ['Fraunces','Georgia','serif'],
-      sans: ['Karla','ui-sans-serif','sans-serif'],
-    },
-    colors: {
-      sand:  {50:'#FAF6EE',100:'#F5EEDF',200:'#EADFC8',300:'#DECBA4',400:'#D2B987',500:'#C4A468',600:'#A98A50',700:'#85693C'},
-      sage:  {50:'#F4F6F0',100:'#E7EBE0',200:'#D2DAC5',300:'#B4C2A0',400:'#98A97F',500:'#7D8F63',600:'#63724D',700:'#4C5739'},
-      terra: {50:'#FBF1EC',100:'#F6E0D5',200:'#EDC3AE',300:'#E0A181',400:'#D07F5B',500:'#C1683F',600:'#A95433',700:'#87422A'},
-      dusk:  {50:'#FBF3F2',100:'#F6E4E2',200:'#EFCAC6',300:'#E3A9A3',400:'#D48A83',500:'#C06D67',600:'#A2544F',700:'#844240'},
-    }
-  }}
-}
-</script>
-
-<!-- Typography: Fraunces (humanist editorial serif) + Karla (airy, clean body font) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Icons + Markdown Parser -->
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<style>
-/* ---------- Warm morning / Evening deep focus themes ---------- */
-:root{
-  --bg:#FAF6EE; --bg-soft:#F3EBDC;
-  --surface:rgba(255,253,247,.88); --surface-solid:#FFFDF8;
-  --border:rgba(122,101,70,.16); --border-strong:rgba(122,101,70,.32);
-  --text:#2E2B24; --text-2:#5C564A; --text-3:#8F8878;
-  --accent:#C1683F; --accent-deep:#A95433;
-  --sage:#7D8F63;
-  --shadow:0 14px 40px -18px rgba(96,74,42,.22);
-  --glass:rgba(250,246,238,.86);
-}
-html.dark{
-  --bg:#1B1813; --bg-soft:#211D16;
-  --surface:rgba(40,35,26,.85); --surface-solid:#282218;
-  --border:rgba(240,226,200,.10); --border-strong:rgba(240,226,200,.22);
-  --text:#F0E8D8; --text-2:#C9BFA9; --text-3:#9A9180;
-  --accent:#D07F5B; --accent-deep:#C1683F;
-  --sage:#98A97F;
-  --shadow:0 16px 44px -16px rgba(0,0,0,.55);
-  --glass:rgba(27,24,19,.86);
-}
-body{
-  font-family:'Karla',sans-serif; background:var(--bg); color:var(--text);
-  overflow-x:hidden;
-}
-
-/* Organic linen / parchment micro-texture */
-body::before{
-  content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.55;
-  background-image:
-    repeating-linear-gradient(0deg,  rgba(122,101,70,.030) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(122,101,70,.030) 0 1px, transparent 1px 3px),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.30'/%3E%3C/svg%3E");
-}
-html.dark body::before{ opacity:.28; filter:invert(.6); }
-h1,h2,h3,.serif{ font-family:'Fraunces',serif; letter-spacing:-.015em; }
-
-.view{ display:none; }
-.view.active{ display:block; animation:viewIn .55s ease both; }
-@keyframes viewIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
-
-/* ---------- Shared UI Elements ---------- */
-.card{ background:var(--surface); border:1px solid var(--border); border-radius:1.25rem; box-shadow:var(--shadow); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
-.hairline{ border-color:var(--border); }
-.btn-primary{ display:inline-flex; align-items:center; gap:.5rem; background:var(--accent); color:#FFF8F0; font-weight:600; font-size:.875rem; padding:.8rem 1.5rem; border-radius:9999px; transition:all .25s ease; box-shadow:0 8px 22px -10px rgba(193,104,63,.55); }
-.btn-primary:hover{ background:var(--accent-deep); transform:translateY(-1px); }
-.btn-primary:active{ transform:scale(.98); }
-.btn-ghost{ display:inline-flex; align-items:center; gap:.5rem; border:1px solid var(--border-strong); color:var(--text); font-weight:600; font-size:.875rem; padding:.8rem 1.5rem; border-radius:9999px; transition:all .25s ease; }
-.btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
-.t-2{ color:var(--text-2); } .t-3{ color:var(--text-3); }
-
-/* ---------- Reveal on scroll (600ms) ---------- */
-[data-reveal]{ opacity:0; transform:translateY(26px); transition:opacity .6s ease, transform .6s cubic-bezier(.22,.61,.36,1); transition-delay:var(--d,0ms); }
-[data-reveal].revealed{ opacity:1; transform:none; }
-
-/* ---------- Focus Breathing Rhythm (4s cycle) ---------- */
-@keyframes breathe{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
-.breath{ animation:breathe 4s ease-in-out infinite; transform-origin:50% 62%; }
-@keyframes dotBreathe{ 0%,100%{transform:scale(.75); opacity:.6} 50%{transform:scale(1.25); opacity:1} }
-.breath-dot{ animation:dotBreathe 4s ease-in-out infinite; }
-@keyframes lblA{ 0%,40%{opacity:1} 50%,90%{opacity:0} 100%{opacity:1} }
-@keyframes lblB{ 0%,40%{opacity:0} 50%,90%{opacity:1} 100%{opacity:0} }
-.lbl-a{ animation:lblA 4s linear infinite; } .lbl-b{ animation:lblB 4s linear infinite; }
-
-/* ---------- Atmospheric study beams ---------- */
-.beam{ position:absolute; top:-25%; height:150%; pointer-events:none; transform-origin:top center;
-  background:linear-gradient(to bottom, rgba(250,222,170,.55), rgba(250,222,170,0) 72%);
-  filter:blur(10px); animation:beamDrift 13s ease-in-out infinite alternate; }
-@keyframes beamDrift{ from{transform:rotate(24deg) translateX(-16px)} to{transform:rotate(24deg) translateX(22px)} }
-html.dark .beam{ opacity:.30; }
-
-/* Ken Burns Media */
-.kb{ overflow:hidden; }
-.kb .kb-media{ transform:scale(1.03); transition:transform 6.5s cubic-bezier(.16,1,.3,1), filter .6s ease; will-change:transform; }
-.kb:hover .kb-media{ transform:scale(1.12) translate(1.5%,-1%); }
-.photo img{ filter:sepia(.24) saturate(.88) contrast(.98) brightness(1.02); }
-html.dark .photo img{ filter:sepia(.20) saturate(.85) brightness(.82); }
-.p-img{ opacity:0; transition:opacity .9s ease, transform 6.5s cubic-bezier(.16,1,.3,1); }
-.p-img.on{ opacity:1; }
-.kb:hover .p-img.on{ transform:scale(1.12) translate(1.5%,-1%); }
-
-/* Study Copilot Message Bubbles */
-.msg-user{ background:var(--accent); color:#FFF8F0; border-radius:1.25rem 1.25rem .35rem 1.25rem; padding:.85rem 1.2rem; font-size:.92rem; line-height:1.65; max-width:85%; }
-.msg-ai{ background:var(--surface); border:1px solid var(--border); border-radius:1.25rem 1.25rem 1.25rem .35rem; padding:.95rem 1.25rem; font-size:.92rem; line-height:1.75; max-width:90%; }
-.msg-ai p{ margin-bottom:.55rem; } .msg-ai p:last-child{ margin-bottom:0; }
-.msg-ai ul, .msg-ai ol{ margin:.4rem 0 .6rem 1.25rem; }
-.msg-ai ul{ list-style:disc; } .msg-ai ol{ list-style:decimal; }
-.msg-ai li{ margin-bottom:.35rem; }
-.msg-ai strong{ font-weight:700; color:var(--text); }
-.msg-ai code{ background:rgba(122,101,70,.12); padding:.15rem .35rem; border-radius:.3rem; font-size:.84em; font-family:monospace; }
-.msg-ai pre{ background:rgba(0,0,0,.08); padding:.8rem; border-radius:.6rem; overflow-x:auto; margin:.6rem 0; font-family:monospace; font-size:.82em; }
-html.dark .msg-ai pre{ background:rgba(0,0,0,.35); }
-
-.chip-action{ display:inline-flex; align-items:center; gap:.35rem; font-size:.72rem; font-weight:700; color:var(--accent); border:1px solid var(--accent); padding:.2rem .65rem; border-radius:9999px; transition:all .2s ease; cursor:pointer; }
-.chip-action:hover{ background:var(--accent); color:#FFF8F0; }
-.think-dot{ width:6px; height:6px; border-radius:9999px; background:var(--text-3); animation:tb 1.2s ease-in-out infinite; }
-.think-dot:nth-child(2){ animation-delay:.15s } .think-dot:nth-child(3){ animation-delay:.3s }
-@keyframes tb{ 0%,100%{transform:translateY(0); opacity:.5} 50%{transform:translateY(-4px); opacity:1} }
-
-/* Glass Header */
-.glass{ background:var(--glass); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
-
-/* Toasts */
-#toasts{ position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:95; display:flex; flex-direction:column; align-items:center; gap:.5rem; pointer-events:none; }
-.toast{ background:var(--surface-solid); border:1px solid var(--border-strong); color:var(--text); box-shadow:var(--shadow); border-radius:9999px; padding:.65rem 1.25rem; font-size:.83rem; font-weight:600; display:flex; align-items:center; gap:.55rem; animation:toastIn .45s cubic-bezier(.22,1,.3,1) both; }
-@keyframes toastIn{ from{opacity:0; transform:translateY(14px) scale(.96)} to{opacity:1; transform:none} }
-.toast.bye{ transition:opacity .4s, transform .4s; opacity:0; transform:translateY(10px); }
-
-/* Focus Chime Notification Pill */
-#chime-pill{ transition:opacity .6s ease, transform .6s ease; }
-#chime-pill.hide{ opacity:0; transform:translateY(20px); pointer-events:none; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar{ width:7px; height:7px; }
-::-webkit-scrollbar-track{ background:transparent; }
-::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:9999px; }
-
-@media (prefers-reduced-motion: reduce){
-  .breath,.breath-dot,.lbl-a,.lbl-b,.beam{ animation:none !important; }
-  .kb .kb-media{ transition:none !important; }
-  [data-reveal]{ opacity:1; transform:none; transition:none; }
-}
-</style>
-</head>
-<body>
-
-<!-- ============================================================
-     VIEW 1 · COGNIFY LANDING PAGE
-============================================================ -->
-<div id="view-home" class="view relative z-10">
-
-  <!-- Header -->
-  <header id="site-header" class="fixed top-0 inset-x-0 z-40 transition-all duration-300">
-    <div class="max-w-6xl mx-auto px-6 lg:px-10 h-[72px] flex items-center justify-between">
-      <a href="#/home" class="flex items-center gap-2.5 group">
-        <svg viewBox="0 0 32 32" class="w-8 h-8">
-          <path d="M6 26V16a10 10 0 0 1 20 0v10" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="16" cy="17" r="3.2" fill="var(--sage)"/>
-        </svg>
-        <span class="text-xl font-medium tracking-tight">Cognify</span>
-        <span class="hidden sm:inline text-[10px] uppercase tracking-[.22em] t-3 -ml-1">StudyMate AI</span>
-      </a>
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold t-2">
-        <button data-scroll="#features" class="hover:text-[var(--accent)] transition-colors">Modality</button>
-        <button data-scroll="#methodologies" class="hover:text-[var(--accent)] transition-colors">Science</button>
-        <button data-scroll="#free" class="hover:text-[var(--accent)] transition-colors">Free Access</button>
-        <a href="#/study" class="hover:text-[var(--accent)] transition-colors flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sage-500"></i> Workspace
-        </a>
-      </nav>
-      <div class="flex items-center gap-2">
-        <button data-theme-toggle class="p-2.5 rounded-full border hairline t-2 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors" title="Toggle study mode">
-          <i data-lucide="moon" class="w-4 h-4"></i>
-        </button>
-        <div id="home-auth" class="flex items-center gap-2"></div>
-        <button id="menu-btn" class="md:hidden p-2.5 rounded-full border hairline t-2"><i data-lucide="menu" class="w-4 h-4"></i></button>
-      </div>
-    </div>
-    <div id="mobile-menu" class="hidden md:hidden mx-4 mt-1 card p-3 flex flex-col gap-1 text-sm font-semibold">
-      <button data-scroll="#features" class="text-left px-4 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5">Modality</button>
-      <button data-scroll="#methodologies" class="text-left px-4 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5">Science</button>
-      <button data-scroll="#free" class="text-left px-4 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5">Free Access</button>
-      <a href="#/study" class="px-4 py-2.5 rounded-xl text-[var(--accent)]">Study Workspace</a>
-      <a href="#/signin" class="px-4 py-2.5 rounded-xl border-t hairline mt-1">Sign in</a>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="relative min-h-screen flex items-center overflow-hidden">
-    <div class="absolute inset-0 pointer-events-none">
-      <div class="beam w-[130px] left-[6%]"></div>
-      <div class="beam w-[60px] left-[16%] opacity-70" style="animation-delay:-4s"></div>
-      <div class="beam w-[90px] left-[26%] opacity-50" style="animation-delay:-8s"></div>
-    </div>
-    <div class="relative max-w-6xl mx-auto px-6 lg:px-10 pt-28 pb-20 grid lg:grid-cols-[1.05fr_.95fr] gap-14 lg:gap-8 items-center w-full">
-      <div>
-        <div data-reveal class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.22em] text-sage-700 dark:text-sage-300 border hairline rounded-full px-4 py-1.5 mb-7">
-          <span class="w-1.5 h-1.5 rounded-full bg-sage-500"></span> An intelligent sanctuary for deep study
-        </div>
-        <h1 data-reveal style="--d:80ms" class="text-[clamp(2.7rem,6.2vw,4.7rem)] leading-[1.04] font-light mb-6">
-          Think clearly.<br>Learn <em class="not-italic text-[var(--accent)]">deeply.</em>
-        </h1>
-        <p data-reveal style="--d:160ms" class="t-2 text-lg leading-[1.85] max-w-md mb-9">
-          Cognify is a quiet, intelligent AI Study Copilot designed for rigorous learning. Upload dense lecture notes, textbooks, and research papers — synthesize ideas, ask socratic questions, and test active recall with zero algorithmic distraction.
-        </p>
-        <div data-reveal style="--d:240ms" class="flex flex-wrap items-center gap-3">
-          <a href="#/study" class="btn-primary">Open Study Workspace <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
-          <button data-scroll="#features" class="btn-ghost">Explore modalities</button>
-        </div>
-        <p data-reveal style="--d:320ms" class="t-3 text-xs mt-7 tracking-wide">Free student tier · PDF analysis · No credit card required</p>
-      </div>
-
-      <!-- Breathing Focus Scene -->
-      <div data-reveal style="--d:200ms" class="relative mx-auto w-full max-w-[380px]">
-        <div class="breath scene-wrap kb relative rounded-t-[999px] rounded-b-[2rem] overflow-hidden border hairline shadow-2xl">
-          <svg viewBox="0 0 420 540" class="kb-media w-full h-auto block" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of a calm study library desk with morning sunlight, notebooks, and an open text">
-            <defs>
-              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#F4E4D2"/><stop offset=".55" stop-color="#EADFC8"/><stop offset="1" stop-color="#E0CFAF"/>
-              </linearGradient>
-              <radialGradient id="sunG" cx=".5" cy=".5" r=".5">
-                <stop offset="0" stop-color="#F6D9A0" stop-opacity=".95"/><stop offset="1" stop-color="#F6D9A0" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-            <rect width="420" height="540" fill="url(#sky)"/>
-            <g stroke="#8A7A5C" stroke-opacity=".38" stroke-width="3" fill="none">
-              <path d="M60,540 L60,250 A150,150 0 0 1 360,250 L360,540"/>
-              <path d="M105,250 A105,105 0 0 1 315,250" stroke-opacity=".22"/>
-              <line x1="210" y1="14" x2="210" y2="398" stroke-opacity=".3"/>
-              <line x1="60" y1="250" x2="360" y2="250" stroke-opacity=".3"/>
-            </g>
-            <circle cx="298" cy="122" r="92" fill="url(#sunG)"/>
-            <circle cx="298" cy="122" r="33" fill="#F2C987" opacity=".9"/>
-            <polygon points="272,118 320,122 214,540 118,540" fill="#F6D9A0" opacity=".34"/>
-            <!-- Wooden study desk -->
-            <rect y="400" width="420" height="140" fill="#D8C29B"/>
-            <rect y="398" width="420" height="5" fill="#C9B187" opacity=".6"/>
-            <!-- Ceramic study lamp & plant -->
-            <path d="M50,462 h46 l-7,54 h-32 Z" fill="#B0876A"/>
-            <path d="M73,462 C40,428 33,378 57,342 C66,382 71,422 76,452 Z" fill="#7D8F63"/>
-            <path d="M75,462 C84,410 104,378 132,366 C118,402 95,438 79,456 Z" fill="#98A97F"/>
-            <!-- Open manuscript notebook -->
-            <rect x="135" y="425" width="150" height="24" rx="4" fill="#FFF8EE" stroke="#A98A50" stroke-width="1.5"/>
-            <line x1="210" y1="425" x2="210" y2="449" stroke="#C4A468" stroke-width="1.5"/>
-            <line x1="145" y1="432" x2="200" y2="432" stroke="#B4C2A0" stroke-width="2"/>
-            <line x1="145" y1="439" x2="195" y2="439" stroke="#B4C2A0" stroke-width="2"/>
-            <line x1="220" y1="432" x2="275" y2="432" stroke="#C1683F" stroke-width="2"/>
-            <line x1="220" y1="439" x2="265" y2="439" stroke="#C1683F" stroke-width="2"/>
-          </svg>
-        </div>
-        <div class="flex items-center justify-center gap-2.5 mt-5 text-xs t-3 tracking-[.18em] uppercase">
-          <span class="breath-dot w-2 h-2 rounded-full bg-[var(--accent)] inline-block"></span>
-          <span class="relative inline-block w-20 text-center font-semibold">
-            <span class="lbl-a absolute inset-0">inhale</span>
-            <span class="lbl-b absolute inset-0">focus</span>
-            <span class="invisible">focus</span>
-          </span>
-        </div>
-        <p class="text-center text-[11px] t-3 mt-1.5 italic serif">focus breathes in steady cycles — so can you</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Modalities & Capabilities Section -->
-  <section id="features" class="min-h-[92vh] flex items-center py-28">
-    <div class="max-w-6xl mx-auto px-6 lg:px-10 w-full">
-      <div class="max-w-xl mb-14">
-        <p data-reveal class="text-[11px] font-bold uppercase tracking-[.24em] t-3 mb-3">Core Modalities</p>
-        <h2 data-reveal style="--d:80ms" class="text-4xl md:text-5xl font-light leading-tight mb-4">Four ways Cognify<br>deepens understanding</h2>
-        <p data-reveal style="--d:150ms" class="t-2 leading-[1.85]">Grounded in cognitive science and retrieval practice. Upload your study texts and let our AI companion guide your mastery.</p>
-      </div>
-      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <div class="flex flex-col divide-y" style="border-color:var(--border)">
-          <button class="feature-tab text-left py-6 flex items-baseline gap-5 group" data-fi="0">
-            <span class="serif italic t-3 text-sm w-6">01</span>
-            <span class="flex-1">
-              <span class="block text-2xl md:text-3xl font-light group-hover:text-[var(--accent)] transition-colors">Document Synthesis</span>
-              <span class="block t-3 text-sm mt-1">Direct PDF upload · Extracted text · Key takeaways</span>
-            </span>
-            <i data-lucide="arrow-right" class="w-4 h-4 t-3 opacity-0 group-hover:opacity-100 group-hover:text-[var(--accent)] transition-all"></i>
-          </button>
-          <button class="feature-tab text-left py-6 flex items-baseline gap-5 group" data-fi="1">
-            <span class="serif italic t-3 text-sm w-6">02</span>
-            <span class="flex-1">
-              <span class="block text-2xl md:text-3xl font-light group-hover:text-[var(--accent)] transition-colors">Socratic AI Tutor</span>
-              <span class="block t-3 text-sm mt-1">Step-by-step guidance · Nuanced conceptual breakdowns</span>
-            </span>
-            <i data-lucide="arrow-right" class="w-4 h-4 t-3 opacity-0 group-hover:opacity-100 group-hover:text-[var(--accent)] transition-all"></i>
-          </button>
-          <button class="feature-tab text-left py-6 flex items-baseline gap-5 group" data-fi="2">
-            <span class="serif italic t-3 text-sm w-6">03</span>
-            <span class="flex-1">
-              <span class="block text-2xl md:text-3xl font-light group-hover:text-[var(--accent)] transition-colors">Active Recall & Quizzing</span>
-              <span class="block t-3 text-sm mt-1">Auto-generated test questions · Self-assessment drills</span>
-            </span>
-            <i data-lucide="arrow-right" class="w-4 h-4 t-3 opacity-0 group-hover:opacity-100 group-hover:text-[var(--accent)] transition-all"></i>
-          </button>
-          <button class="feature-tab text-left py-6 flex items-baseline gap-5 group" data-fi="3">
-            <span class="serif italic t-3 text-sm w-6">04</span>
-            <span class="flex-1">
-              <span class="block text-2xl md:text-3xl font-light group-hover:text-[var(--accent)] transition-colors">Focused Deep Work</span>
-              <span class="block t-3 text-sm mt-1">Calm interface · Ambient singing bowl focus chimes</span>
-            </span>
-            <i data-lucide="arrow-right" class="w-4 h-4 t-3 opacity-0 group-hover:opacity-100 group-hover:text-[var(--accent)] transition-all"></i>
-          </button>
-        </div>
-
-        <div class="kb photo card relative rounded-[2rem] overflow-hidden aspect-[4/3.2]" id="feature-photo">
-          <img class="p-img kb-media absolute inset-0 w-full h-full object-cover" src="https://picsum.photos/seed/cognify-doc/900/720.jpg" alt="Organized academic study desk">
-          <img class="p-img kb-media absolute inset-0 w-full h-full object-cover" src="https://picsum.photos/seed/cognify-tutor/900/720.jpg" alt="Insightful learning notes and diagrams">
-          <img class="p-img kb-media absolute inset-0 w-full h-full object-cover" src="https://picsum.photos/seed/cognify-quiz/900/720.jpg" alt="Active recall flashcards">
-          <img class="p-img kb-media absolute inset-0 w-full h-full object-cover" src="https://picsum.photos/seed/cognify-focus/900/720.jpg" alt="Warm morning study room">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
-          <div class="absolute bottom-0 inset-x-0 p-6 md:p-7 text-[#FFF8F0]">
-            <h3 id="feature-name" class="text-2xl font-light">Document Synthesis</h3>
-            <p id="feature-desc" class="text-sm leading-relaxed opacity-90 mt-1.5 max-w-md">Drop any PDF textbook, paper, or syllabus. Cognify extracts the structural flow and synthesizes core ideas instantly.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Quote Band -->
-  <section class="py-24 border-y hairline" style="background:var(--bg-soft)">
-    <div class="max-w-3xl mx-auto px-6 text-center" data-reveal>
-      <p class="serif italic font-light text-3xl md:text-[2.6rem] leading-snug">“The quieter the mind becomes,<br>the deeper you can learn.”</p>
-      <p class="t-3 text-xs uppercase tracking-[.22em] mt-6">— painted above the door of the Cognify Study Lab</p>
-    </div>
-  </section>
-
-  <!-- Learning Methodologies Section -->
-  <section id="methodologies" class="min-h-[92vh] flex items-center py-28">
-    <div class="max-w-6xl mx-auto px-6 lg:px-10 w-full">
-      <div class="max-w-xl mb-16">
-        <p data-reveal class="text-[11px] font-bold uppercase tracking-[.24em] t-3 mb-3">Cognitive Science</p>
-        <h2 data-reveal style="--d:80ms" class="text-4xl md:text-5xl font-light leading-tight mb-4">Evidence-based<br>study frameworks</h2>
-        <p data-reveal style="--d:150ms" class="t-2 leading-[1.85]">Cognify is engineered to support the highest-retention learning techniques discovered over the last century.</p>
-      </div>
-      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
-        
-        <!-- Card 1 -->
-        <div class="card p-7 text-center group outline-none" data-reveal>
-          <div class="w-14 h-14 mx-auto rounded-full bg-sand-200 dark:bg-sand-700/30 flex items-center justify-center mb-6" style="color:var(--accent)">
-            <i data-lucide="book-open-check" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-medium">The Feynman Technique</h3>
-          <p class="t-3 text-xs uppercase tracking-[.18em] mt-1.5 mb-4">Simplicity · Intuition</p>
-          <p class="serif italic t-2 leading-relaxed text-sm">“If you cannot explain a concept to a curious child without jargon, you do not truly understand it yet.”</p>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="card p-7 text-center group outline-none" data-reveal style="--d:120ms">
-          <div class="w-14 h-14 mx-auto rounded-full bg-sage-200 dark:bg-sage-700/30 flex items-center justify-center mb-6" style="color:var(--sage)">
-            <i data-lucide="brain-circuit" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-medium">Active Retrieval</h3>
-          <p class="t-3 text-xs uppercase tracking-[.18em] mt-1.5 mb-4">Quizzing · Synapses</p>
-          <p class="serif italic t-2 leading-relaxed text-sm">“Testing your own recall before re-reading builds lasting neural connections that passive scanning will never produce.”</p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="card p-7 text-center group outline-none" data-reveal style="--d:240ms">
-          <div class="w-14 h-14 mx-auto rounded-full bg-terra-200 dark:bg-terra-700/30 flex items-center justify-center mb-6" style="color:var(--accent-deep)">
-            <i data-lucide="timer" class="w-6 h-6"></i>
-          </div>
-          <h3 class="text-xl font-medium">Focused Deep Work</h3>
-          <p class="t-3 text-xs uppercase tracking-[.18em] mt-1.5 mb-4">Flow · Consolidation</p>
-          <p class="serif italic t-2 leading-relaxed text-sm">“Memory consolidates during unhurried reflection. Study with uninterrupted focus, breathe, and let insight take root.”</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Free Access Section -->
-  <section id="free" class="min-h-[85vh] flex items-center py-28" style="background:var(--bg-soft)">
-    <div class="max-w-4xl mx-auto px-6 lg:px-10 w-full">
-      <div class="card rounded-[2rem] p-8 md:p-14 grid md:grid-cols-[1.1fr_1fr] gap-10 items-center" style="background:linear-gradient(135deg, rgba(251,241,236,.9), rgba(246,224,213,.55)); border-color:rgba(193,104,63,.25)" data-reveal>
-        <div>
-          <p class="text-[11px] font-bold uppercase tracking-[.24em] text-terra-600 dark:text-terra-300 mb-3">Free Student Workspace</p>
-          <h2 class="text-4xl md:text-[2.9rem] font-light leading-[1.1] mb-5">Start studying<br>with clarity.</h2>
-          <p class="t-2 leading-[1.85] text-[.95rem]">No credit card, no complex contracts, and no ads. Enter your name and subject, and your personalized study workspace is ready immediately.</p>
-          <div class="flex items-center gap-2 t-3 text-xs mt-6">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-sage-500"></i> Offline mode · PDF extraction · Instant session export
-          </div>
-        </div>
-        <div>
-          <form id="free-form" class="flex flex-col gap-3">
-            <input id="free-name" type="text" required placeholder="Your full name" class="w-full rounded-xl border hairline bg-[var(--surface-solid)] px-4 py-3 text-sm outline-none focus:border-[var(--accent)] transition-colors">
-            <input id="free-email" type="email" required placeholder="Email address" class="w-full rounded-xl border hairline bg-[var(--surface-solid)] px-4 py-3 text-sm outline-none focus:border-[var(--accent)] transition-colors">
-            <select id="free-subject" class="w-full rounded-xl border hairline bg-[var(--surface-solid)] px-4 py-3 text-sm outline-none focus:border-[var(--accent)] transition-colors t-2">
-              <option value="">What are you studying?</option>
-              <option value="Computer Science">Computer Science & Algorithms</option>
-              <option value="Medicine & Health">Medicine, Biology & Health</option>
-              <option value="Mathematics & Physics">Mathematics & Physics</option>
-              <option value="Law & Humanities">Law, History & Humanities</option>
-              <option value="General Learning">Lifelong Learning & Research</option>
-            </select>
-            <button type="submit" class="btn-primary justify-center mt-1">Enter Free Study Workspace</button>
-            <p class="t-3 text-[11px] text-center">We respect your focus. Never spam.</p>
-          </form>
-          <div id="free-success" class="hidden text-center py-6 flex-col items-center">
-            <div class="w-14 h-14 mx-auto rounded-full bg-sage-100 dark:bg-sage-700/30 flex items-center justify-center mb-4">
-              <i data-lucide="check" class="w-6 h-6 text-sage-600 dark:text-sage-300"></i>
-            </div>
-            <p class="serif text-xl mb-2">Welcome to Cognify.</p>
-            <p class="t-2 text-sm leading-relaxed mb-4" id="free-success-text"></p>
-            <a href="#/study" class="btn-primary !py-2.5 !px-6 text-xs">Launch Workspace Now</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="border-t hairline py-12">
-    <div class="max-w-6xl mx-auto px-6 lg:px-10 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-2.5">
-        <svg viewBox="0 0 32 32" class="w-6 h-6">
-          <path d="M6 26V16a10 10 0 0 1 20 0v10" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="16" cy="17" r="3.2" fill="var(--sage)"/>
-        </svg>
-        <span class="serif text-lg">Cognify</span>
-      </div>
-      <p class="t-3 text-xs text-center leading-relaxed">Cognify StudyMate AI · Engineered for Deep Work and Lifelong Learning.<br>Breathe first. Scroll less.</p>
-      <a href="#/study" class="btn-ghost text-xs !py-2.5 !px-5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Open Workspace</a>
-    </div>
-  </footer>
-</div>
-
-<!-- ============================================================
-     VIEW 2 · MEMBER SIGN-IN & REGISTRATION
-============================================================ -->
-<div id="view-signin" class="view relative z-10 min-h-screen">
-  <div class="grid lg:grid-cols-2 min-h-screen">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognify — AI-Powered StudyMate</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23C1683F'/%3E%3Cpath d='M9 16a7 7 0 1 1 14 0 7 7 0 0 1-14 0z' fill='none' stroke='%23FAF6EE' stroke-width='2.5'/%3E%3Ccircle cx='20' cy='12' r='2' fill='%237D8F63'/%3E%3C/svg%3E">
     
-    <!-- Calm Side -->
-    <div class="hidden lg:flex flex-col justify-between p-14 relative overflow-hidden" style="background:linear-gradient(160deg, var(--bg-soft), rgba(212,185,135,.25))">
-      <a href="#/home" class="flex items-center gap-2.5 relative z-10">
-        <svg viewBox="0 0 32 32" class="w-8 h-8">
-          <path d="M6 26V16a10 10 0 0 1 20 0v10" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="16" cy="17" r="3.2" fill="var(--sage)"/>
-        </svg>
-        <span class="text-xl font-medium tracking-tight">Cognify</span>
-      </a>
-      <div class="relative z-10 max-w-md">
-        <div class="breath relative w-40 h-56 mx-auto mb-10 rounded-t-[999px] rounded-b-[1.5rem] overflow-hidden border hairline scene-wrap">
-          <svg viewBox="0 0 160 220" class="w-full h-full">
-            <rect width="160" height="220" fill="#EADFC8"/>
-            <path d="M30,220 L30,110 A50,50 0 0 1 130,110 L130,220" fill="none" stroke="#8A7A5C" stroke-opacity=".4" stroke-width="3"/>
-            <circle cx="105" cy="70" r="34" fill="#F6D9A0" opacity=".8"/>
-            <rect y="160" width="160" height="60" fill="#D8C29B"/>
-            <rect x="44" y="172" width="72" height="12" rx="3" fill="#FFFDF8" stroke="#8A7A5C"/>
-          </svg>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Karla', 'ui-sans-serif', 'sans-serif'],
+                    },
+                    colors: {
+                        sand:  {50:'#FAF6EE',100:'#F5EEDF',200:'#EADFC8',300:'#DECBA4',400:'#D2B987',500:'#C4A468',600:'#A98A50',700:'#85693C'},
+                        sage:  {50:'#F4F6F0',100:'#E7EBE0',200:'#D2DAC5',300:'#B4C2A0',400:'#98A97F',500:'#7D8F63',600:'#63724D',700:'#4C573B'},
+                        terra: {50:'#FDF6F2',100:'#F9ECE4',200:'#F2D5C4',300:'#E4B299',400:'#DA8B65',500:'#C1683F',600:'#A7532D',700:'#8B4122'},
+                        dusk:  {50:'#F6F5F4',100:'#E8E6E3',200:'#D1CEC8',300:'#B3AEA5',400:'#8E877D',500:'#6B645B',600:'#4F4A42',700:'#38332C',800:'#26231E',900:'#1C1A17',950:'#12100E'}
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts: Fraunces (refined editorial serif) & Karla (clean sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #FAF6EE;
+            --surface-panel: rgba(250, 246, 238, 0.92);
+            --surface-card: rgba(255, 255, 255, 0.75);
+            --surface-card-hover: rgba(255, 255, 255, 0.95);
+            --surface-input: rgba(255, 255, 255, 0.95);
+            --border-subtle: #EADFC8;
+            --border-card: rgba(234, 223, 200, 0.85);
+            --border-hover: #C1683F;
+            --text-primary: #1C1A17;
+            --text-secondary: #4F4A42;
+            --text-muted: #8E877D;
+            --terra: #C1683F;
+            --terra-light: #FDF6F2;
+            --sage: #7D8F63;
+            --sage-light: #F4F6F0;
+            --card-shadow: 0 4px 20px -2px rgba(28, 26, 23, 0.05);
+            --card-shadow-hover: 0 12px 30px -5px rgba(193, 104, 63, 0.12);
+            --code-bg: #1C1A17;
+            --code-text: #FAF6EE;
+        }
+
+        html.dark {
+            --bg-base: #12100E;
+            --surface-panel: rgba(28, 26, 23, 0.92);
+            --surface-card: rgba(38, 35, 30, 0.7);
+            --surface-card-hover: rgba(48, 44, 38, 0.9);
+            --surface-input: rgba(28, 26, 23, 0.95);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-card: rgba(255, 255, 255, 0.08);
+            --border-hover: #DA8B65;
+            --text-primary: #FAF6EE;
+            --text-secondary: #D1CEC8;
+            --text-muted: #8E877D;
+            --terra: #DA8B65;
+            --terra-light: rgba(193, 104, 63, 0.15);
+            --sage: #98A97F;
+            --sage-light: rgba(125, 143, 99, 0.15);
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 12px 30px -10px rgba(193, 104, 63, 0.25);
+            --code-bg: #0A0908;
+            --code-text: #E8E6E3;
+        }
+
+        body {
+            font-family: 'Karla', sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(193, 104, 63, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(125, 143, 99, 0.04) 0%, transparent 45%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            background-attachment: fixed;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .font-serif {
+            font-family: 'Fraunces', Georgia, serif;
+        }
+
+        /* Editorial Glassmorphic Surfaces */
+        .glass-panel {
+            background: var(--surface-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-color: var(--border-subtle);
+        }
+
+        .glass-card {
+            background: var(--surface-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: var(--surface-card-hover);
+            border-color: var(--border-hover);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .glass-input {
+            background: var(--surface-input);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-card);
+        }
+
+        /* Custom Editorial Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(142, 135, 125, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(193, 104, 63, 0.5);
+        }
+
+        /* Markdown Content Styling */
+        .prose-content {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        .prose-content h1, .prose-content h2, .prose-content h3, .prose-content h4 {
+            font-family: 'Fraunces', Georgia, serif;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+        .prose-content h1 { font-size: 1.35rem; }
+        .prose-content h2 { font-size: 1.2rem; }
+        .prose-content h3 { font-size: 1.05rem; }
+        .prose-content p { margin-bottom: 0.75rem; }
+        .prose-content ul, .prose-content ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .prose-content ul { list-style-type: disc; }
+        .prose-content ol { list-style-type: decimal; }
+        .prose-content li { margin-bottom: 0.25rem; }
+        .prose-content strong { color: var(--text-primary); font-weight: 600; }
+        .prose-content code:not(pre code) {
+            background: var(--terra-light);
+            color: var(--terra);
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.85em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .prose-content pre {
+            background: var(--code-bg) !important;
+            color: var(--code-text);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .prose-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            font-size: 0.875rem;
+        }
+        .prose-content th, .prose-content td {
+            border: 1px solid var(--border-subtle);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .prose-content th {
+            background: rgba(193, 104, 63, 0.05);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .prose-content blockquote {
+            border-left: 3px solid var(--terra);
+            padding-left: 0.875rem;
+            margin: 0.75rem 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        .animate-pulse-soft {
+            animation: pulseSoft 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden select-none">
+
+    <!-- Drag & Drop Fullscreen Overlay -->
+    <div id="drag-overlay" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center border-4 border-dashed border-terra-500/60 m-4 rounded-3xl transition-all duration-300">
+        <div class="text-center p-8 bg-sand-50 dark:bg-dusk-900 rounded-2xl border border-terra-500/30 shadow-2xl flex flex-col items-center gap-4 animate-bounce">
+            <div class="w-16 h-16 rounded-2xl bg-terra-500/15 text-terra-600 dark:text-terra-400 flex items-center justify-center">
+                <i data-lucide="file-up" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold font-serif text-dusk-900 dark:text-sand-100">Drop Study Document (PDF)</h3>
+                <p class="text-sm text-dusk-500 dark:text-dusk-400 mt-1">Cognify AI will index and synthesize this material for your session</p>
+            </div>
         </div>
-        <h2 class="serif text-4xl font-light leading-tight mb-4">Master complex ideas.<br>One insight at a time.</h2>
-        <p class="t-2 leading-[1.85] text-sm">Sign in to save active study documents, maintain your session notes, and access intelligent synthesis on any device.</p>
-      </div>
-      <div class="flex items-center gap-2 text-[11px] t-3 tracking-[.18em] uppercase relative z-10">
-        <span class="breath-dot w-1.5 h-1.5 rounded-full bg-[var(--accent)] inline-block"></span> inhale — exhale — learn
-      </div>
     </div>
-
-    <!-- Form Side -->
-    <div class="flex items-center justify-center p-6 sm:p-12">
-      <div class="w-full max-w-md">
-        <a href="#/home" class="inline-flex items-center gap-2 text-xs font-semibold t-3 hover:text-[var(--accent)] transition-colors mb-8 lg:hidden">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Return home
-        </a>
-        <div class="card p-8 sm:p-10">
-          <h1 class="serif text-3xl font-light mb-2" id="auth-title">Welcome back</h1>
-          <p class="t-3 text-sm mb-7" id="auth-sub">Sign in to your Cognify study workspace.</p>
-
-          <div id="auth-alert" class="hidden mb-5 px-4 py-3 rounded-xl text-xs font-semibold border"></div>
-
-          <!-- Switcher tabs -->
-          <div class="flex rounded-full p-1 mb-7 border hairline" style="background:var(--bg-soft)">
-            <button id="tab-login" class="flex-1 py-2 text-xs font-bold rounded-full transition-all">Sign in</button>
-            <button id="tab-register" class="flex-1 py-2 text-xs font-bold rounded-full transition-all t-3">Create account</button>
-          </div>
-
-          <!-- Login Form -->
-          <form id="login-form" class="flex flex-col gap-4">
-            <div>
-              <label class="block text-xs font-bold mb-1.5 t-2">Email address</label>
-              <input id="login-email" type="email" required placeholder="student@example.com" class="w-full rounded-xl border hairline px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" style="background:var(--surface-solid)">
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5 t-2">Password</label>
-              <input id="login-password" type="password" required placeholder="••••••••" class="w-full rounded-xl border hairline px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" style="background:var(--surface-solid)">
-            </div>
-            <button type="submit" class="btn-primary justify-center mt-1">Sign in to Cognify <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
-          </form>
-
-          <!-- Register Form -->
-          <form id="register-form" class="hidden flex-col gap-4">
-            <div>
-              <label class="block text-xs font-bold mb-1.5 t-2">Full name</label>
-              <input id="reg-name" type="text" required placeholder="Alex Rivera" class="w-full rounded-xl border hairline px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" style="background:var(--surface-solid)">
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5 t-2">Email address</label>
-              <input id="reg-email" type="email" required placeholder="student@example.com" class="w-full rounded-xl border hairline px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" style="background:var(--surface-solid)">
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5 t-2">Password</label>
-              <input id="reg-password" type="password" required minlength="6" placeholder="At least 6 characters" class="w-full rounded-xl border hairline px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" style="background:var(--surface-solid)">
-            </div>
-            <button type="submit" class="btn-primary justify-center mt-1">Create Student Account <i data-lucide="user-plus" class="w-4 h-4"></i></button>
-          </form>
-
-          <div class="flex items-center gap-4 my-7">
-            <span class="flex-1 border-t hairline"></span><span class="t-3 text-[11px] uppercase tracking-[.2em]">or</span><span class="flex-1 border-t hairline"></span>
-          </div>
-
-          <!-- Google Sign-in -->
-          <button id="google-btn" class="w-full flex items-center justify-center gap-3 rounded-xl border py-3 text-sm font-semibold transition-all hover:shadow-md active:scale-[.99]" style="background:#fff; border-color:#dadce0; color:#3c4043">
-            <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Continue with Google
-          </button>
-
-          <button id="guest-link" class="w-full text-center t-3 text-xs font-semibold mt-6 hover:text-[var(--accent)] transition-colors">
-            Just exploring? Enter workspace as a guest
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     VIEW 3 · COGNIFY AI STUDY WORKSPACE
-============================================================ -->
-<div id="view-study" class="view h-screen">
-  <div class="flex h-full relative z-10">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div id="sb-backdrop" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden lg:hidden"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm hidden md:hidden transition-opacity duration-300"></div>
 
-    <!-- Workspace Sidebar -->
-    <aside id="study-sidebar" class="fixed lg:relative inset-y-0 left-0 z-40 w-72 lg:w-80 glass border-r hairline flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-      
-      <!-- Brand & Dismiss -->
-      <div class="p-5 border-b hairline flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-full flex items-center justify-center text-white shadow-sm" style="background:var(--accent)">
-            <i data-lucide="sparkles" class="w-4.5 h-4.5"></i>
-          </div>
-          <div>
-            <p class="serif text-lg leading-none font-medium">Cognify</p>
-            <p class="text-[10px] t-3 uppercase tracking-[.18em] mt-1">Study Copilot</p>
-          </div>
-        </div>
-        <button id="sb-close" class="lg:hidden p-1.5 rounded-lg t-3"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <!-- Actions -->
-      <div class="p-4 flex flex-col gap-2">
-        <button id="new-chat-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold shadow-md transition-all active:scale-[.98]" style="background:var(--accent)">
-          <i data-lucide="plus" class="w-4 h-4"></i> New Study Session
-        </button>
-      </div>
-
-      <!-- Active Document Widget -->
-      <div class="px-4 pb-3">
-        <p class="text-[10px] font-bold uppercase tracking-[.2em] t-3 mb-2 flex items-center justify-between">
-          <span>Active Material</span>
-          <span id="doc-status-tag" class="text-sage-600 dark:text-sage-400 font-semibold">None loaded</span>
-        </p>
+    <!-- Left Sidebar: Navigation, Document Upload & Study Accelerators -->
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 md:w-80 glass-panel flex flex-col border-r shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
         
-        <!-- Document Card (hidden initially until uploaded) -->
-        <div id="active-doc-card" class="hidden card p-3 mb-2 bg-sage-50/70 dark:bg-sage-950/40 border-sage-300/50">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2 min-w-0">
-              <i data-lucide="file-text" class="w-4 h-4 text-sage-600 shrink-0"></i>
-              <div class="min-w-0">
-                <p id="doc-card-title" class="text-xs font-bold truncate">document.pdf</p>
-                <p id="doc-card-sub" class="text-[10px] t-3">0 chars loaded</p>
-              </div>
+        <!-- Brand Header -->
+        <div class="p-5 border-b border-sand-200/80 dark:border-dusk-800/60 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Seal Emblem -->
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center shadow-md shadow-terra-500/25 ring-2 ring-terra-400/20 shrink-0">
+                    <svg class="w-6 h-6 text-sand-50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+                        <circle cx="17.5" cy="7" r="2.2" fill="#7D8F63"/>
+                        <circle cx="17.5" cy="18" r="2.2" fill="#DA8B65"/>
+                        <circle cx="12" cy="12.5" r="1.8" fill="white"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-xl font-bold font-serif tracking-tight text-dusk-900 dark:text-sand-100">
+                            Cognify
+                        </h1>
+                        <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded bg-sage-500/15 text-sage-700 dark:text-sage-300 border border-sage-500/25">StudyMate</span>
+                    </div>
+                    <p class="text-[11px] text-dusk-500 dark:text-dusk-400 font-medium">Academic AI Copilot</p>
+                </div>
             </div>
-            <button id="clear-doc-btn" class="p-1 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30" title="Remove document">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <button id="close-sidebar-btn" class="md:hidden p-1.5 rounded-lg text-dusk-400 hover:text-dusk-700 dark:hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-          </div>
         </div>
 
-        <!-- Hidden PDF input -->
-        <input type="file" id="pdf-file-input" accept=".pdf" class="hidden">
-        
-        <!-- Upload Trigger Button -->
-        <button id="upload-pdf-trigger" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border hairline text-xs font-medium t-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-          <i data-lucide="upload" class="w-3.5 h-3.5 text-sage-500"></i>
-          <span>Upload PDF Notes</span>
-        </button>
-      </div>
+        <!-- Action Controls -->
+        <div class="p-4 flex flex-col gap-2.5">
+            <button id="new-session-btn" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white font-medium text-sm shadow-md shadow-terra-500/20 transition-all transform active:scale-[0.98]">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>New Study Session</span>
+                </div>
+                <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">⌘N</span>
+            </button>
 
-      <!-- Quick Study Prompts -->
-      <div class="px-4 pb-2">
-        <p class="text-[10px] font-bold uppercase tracking-[.2em] t-3 mb-2">Prompt Library</p>
-        <div class="flex flex-col gap-1.5" id="quick-chips">
-          <button class="quick text-left px-3.5 py-2.5 rounded-xl border hairline text-xs font-medium t-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex items-center gap-2.5" data-q="Summarize this material into core takeaways and definitions"><i data-lucide="list-checks" class="w-3.5 h-3.5 text-sage-500"></i> Summarize material</button>
-          <button class="quick text-left px-3.5 py-2.5 rounded-xl border hairline text-xs font-medium t-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex items-center gap-2.5" data-q="Generate a 5-question active recall quiz with answer explanations"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-sage-500"></i> Generate active recall quiz</button>
-          <button class="quick text-left px-3.5 py-2.5 rounded-xl border hairline text-xs font-medium t-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex items-center gap-2.5" data-q="Explain the central concept simply using the Feynman technique"><i data-lucide="lightbulb" class="w-3.5 h-3.5 text-sage-500"></i> Explain like I'm five (Feynman)</button>
-          <button class="quick text-left px-3.5 py-2.5 rounded-xl border hairline text-xs font-medium t-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex items-center gap-2.5" data-q="Create a structured study guide and schedule for this topic"><i data-lucide="calendar" class="w-3.5 h-3.5 text-sage-500"></i> Create study outline</button>
+            <!-- Upload PDF File Button -->
+            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden">
+            <button id="upload-pdf-trigger" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sand-100 hover:bg-sand-200 dark:bg-dusk-800/80 dark:hover:bg-dusk-700/80 border border-sand-200 dark:border-dusk-700/60 text-dusk-700 dark:text-sand-200 text-xs font-semibold tracking-wide transition-all shadow-sm">
+                <i data-lucide="paperclip" class="w-3.5 h-3.5 text-terra-600 dark:text-terra-400"></i>
+                <span>Attach Lecture Notes / PDF</span>
+            </button>
         </div>
-      </div>
 
-      <!-- Active Session Tab -->
-      <div class="flex-1 overflow-y-auto px-4 py-2">
-        <p class="text-[10px] font-bold uppercase tracking-[.2em] t-3 mb-2">Study Sessions</p>
-        <div class="px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between" style="background:rgba(125,143,99,.14); color:var(--sage)">
-          <span class="flex items-center gap-2"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Current Workspace</span>
-          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--sage)"></span>
+        <!-- Scrollable Sidebar Content -->
+        <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-5">
+            
+            <!-- Active Document Widget (Dynamic) -->
+            <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-sage-50/80 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-500/30 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-sage-500 animate-ping"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-sage-700 dark:text-sage-300">Active Document</span>
+                    </div>
+                    <button id="remove-pdf-btn" class="text-dusk-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-black/5 dark:hover:bg-white/5" title="Remove PDF">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-sage-500/15 text-sage-700 dark:text-sage-300 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p id="doc-card-title" class="text-xs font-semibold text-dusk-800 dark:text-sand-100 truncate">Document.pdf</p>
+                        <p id="doc-card-status" class="text-[10px] text-dusk-500 dark:text-dusk-400">Indexed & ready for study</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Accelerators / Modes -->
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 mb-2.5 px-1 flex items-center justify-between">
+                    <span>Study Accelerators</span>
+                    <i data-lucide="zap" class="w-3 h-3 text-terra-500"></i>
+                </p>
+                <div class="grid grid-cols-1 gap-1.5">
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-sand-100/70 hover:bg-terra-50 dark:bg-dusk-800/40 dark:hover:bg-terra-950/40 border border-sand-200/80 hover:border-terra-300 dark:border-dusk-800 dark:hover:border-terra-500/30 text-xs text-dusk-700 dark:text-dusk-300 hover:text-terra-600 dark:hover:text-terra-300 transition-all flex items-center gap-2.5" data-prompt="Summarize the core concepts, definitions, and key takeaways into clear high-yield bullet points.">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-terra-500 shrink-0"></i>
+                        <span class="truncate">Executive Summary</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-sand-100/70 hover:bg-terra-50 dark:bg-dusk-800/40 dark:hover:bg-terra-950/40 border border-sand-200/80 hover:border-terra-300 dark:border-dusk-800 dark:hover:border-terra-500/30 text-xs text-dusk-700 dark:text-dusk-300 hover:text-terra-600 dark:hover:text-terra-300 transition-all flex items-center gap-2.5" data-prompt="Generate 5 multiple-choice practice questions with detailed explanations for each answer to test comprehension.">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-sage-600 dark:text-sage-400 shrink-0"></i>
+                        <span class="truncate">Practice Quiz (5 Qs)</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-sand-100/70 hover:bg-terra-50 dark:bg-dusk-800/40 dark:hover:bg-terra-950/40 border border-sand-200/80 hover:border-terra-300 dark:border-dusk-800 dark:hover:border-terra-500/30 text-xs text-dusk-700 dark:text-dusk-300 hover:text-terra-600 dark:hover:text-terra-300 transition-all flex items-center gap-2.5" data-prompt="Explain the most difficult concept in this topic using simple, intuitive real-world analogies (Feynman Technique).">
+                        <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                        <span class="truncate">Feynman Explainer</span>
+                    </button>
+                    <button class="study-prompt-chip text-left px-3 py-2 rounded-xl bg-sand-100/70 hover:bg-terra-50 dark:bg-dusk-800/40 dark:hover:bg-terra-950/40 border border-sand-200/80 hover:border-terra-300 dark:border-dusk-800 dark:hover:border-terra-500/30 text-xs text-dusk-700 dark:text-dusk-300 hover:text-terra-600 dark:hover:text-terra-300 transition-all flex items-center gap-2.5" data-prompt="Extract all formulas, algorithms, or code blocks mentioned in this material with concise formatting.">
+                        <i data-lucide="code-2" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+                        <span class="truncate">Formulas & Code</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session History -->
+            <div class="flex-1">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 mb-2 px-1 flex items-center justify-between">
+                    <span>Active Session</span>
+                    <i data-lucide="clock" class="w-3 h-3 text-dusk-400"></i>
+                </p>
+                <div id="session-history-list" class="flex flex-col gap-1">
+                    <div class="px-3 py-2 rounded-lg bg-terra-500/10 border border-terra-500/20 text-xs text-terra-700 dark:text-terra-300 font-medium flex items-center justify-between">
+                        <div class="flex items-center gap-2 truncate">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-terra-500 shrink-0"></i>
+                            <span class="truncate">Current Study Session</span>
+                        </div>
+                        <span class="w-1.5 h-1.5 rounded-full bg-terra-500"></span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- User Profile Box -->
-      <div class="p-4 border-t hairline" id="studio-user-box"></div>
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-sand-200/80 dark:border-dusk-800/60 bg-sand-100/50 dark:bg-dusk-950/40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <button id="focus-chime-btn" class="w-8 h-8 rounded-full bg-terra-50 dark:bg-dusk-800 border border-terra-200 dark:border-dusk-700 flex items-center justify-center text-xs text-terra-600 dark:text-terra-400 hover:scale-105 transition-transform" title="Play Singing Bowl Focus Chime">
+                        🔔
+                    </button>
+                    <div>
+                        <p class="text-xs font-semibold text-dusk-800 dark:text-sand-200">Study Engine</p>
+                        <p class="text-[10px] text-sage-600 dark:text-sage-400 font-medium flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sage-500 inline-block"></span>
+                            Online & Ready
+                        </p>
+                    </div>
+                </div>
+                <button id="clear-all-btn" class="p-2 rounded-lg text-dusk-400 hover:text-red-500 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="Reset Session Memory">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
     </aside>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 flex flex-col h-full min-w-0">
-      
-      <!-- Top Navigation -->
-      <header class="h-16 glass border-b hairline px-4 sm:px-6 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-3">
-          <button id="sb-open" class="lg:hidden p-2 rounded-xl t-2"><i data-lucide="menu" class="w-5 h-5"></i></button>
-          <a href="#/home" class="hidden sm:flex items-center gap-2 text-xs font-semibold t-3 hover:text-[var(--accent)] transition-colors">
-            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Home
-          </a>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border hairline">
-            <span class="w-1.5 h-1.5 rounded-full bg-sage-500 animate-pulse"></span>
-            <span class="text-xs font-bold">Cognify Copilot</span>
-            <span class="text-[10px] t-3" id="header-doc-badge">· Ready to study</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="focus-chime-btn" class="p-2.5 rounded-full border hairline t-2 hover:text-[var(--accent)] transition-colors" title="Singing bowl chime">
-            <i data-lucide="bell" class="w-4 h-4"></i>
-          </button>
-          <button data-theme-toggle class="p-2.5 rounded-full border hairline t-2 hover:text-[var(--accent)] transition-colors" title="Toggle study theme">
-            <i data-lucide="moon" class="w-4 h-4"></i>
-          </button>
-          <button id="save-chat" class="p-2.5 rounded-full border hairline t-2 hover:text-[var(--accent)] transition-colors" title="Export study notes">
-            <i data-lucide="download" class="w-4 h-4"></i>
-          </button>
-          <div id="studio-auth"></div>
-        </div>
-      </header>
-
-      <!-- Messages Area -->
-      <div id="chat-scroll" class="flex-1 overflow-y-auto px-4 sm:px-6 py-8">
-        <div id="chat-messages" class="max-w-3xl mx-auto flex flex-col gap-5"></div>
+    <!-- Main Workspace Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
         
-        <!-- Welcome Screen (When empty) -->
-        <div id="study-welcome" class="max-w-3xl mx-auto pt-4 text-center flex flex-col items-center gap-7">
-          <div class="breath w-16 h-16 rounded-full flex items-center justify-center text-white shadow-md" style="background:var(--accent)">
-            <i data-lucide="sparkles" class="w-7 h-7"></i>
-          </div>
-          <div>
-            <h2 class="serif text-3xl md:text-4xl font-light mb-3">What would you like to master today?</h2>
-            <p class="t-2 text-sm leading-[1.85] max-w-md mx-auto">Upload a lecture PDF or ask a direct conceptual question. Cognify synthesizes material, breaks down dense proofs, and tests your understanding with calm rigor.</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
-            <button class="quick card p-4 group" data-q="Please explain the core thesis and key definitions of this subject">
-              <i data-lucide="book-open" class="w-5 h-5 text-sage-500 mb-2.5"></i>
-              <p class="text-sm font-bold group-hover:text-[var(--accent)] transition-colors">Break down a complex topic</p>
-              <p class="t-3 text-xs mt-1 leading-relaxed">Plain language intuition & clear frameworks.</p>
-            </button>
-            <button class="quick card p-4 group" data-q="Generate a 5-question active recall test to check my comprehension">
-              <i data-lucide="check-circle-2" class="w-5 h-5 text-sage-500 mb-2.5"></i>
-              <p class="text-sm font-bold group-hover:text-[var(--accent)] transition-colors">Active recall quiz</p>
-              <p class="t-3 text-xs mt-1 leading-relaxed">Targeted questions with detailed rationale.</p>
-            </button>
-            <button class="quick card p-4 group" data-q="Walk me through a step-by-step problem-solving strategy for this topic">
-              <i data-lucide="code" class="w-5 h-5 text-sage-500 mb-2.5"></i>
-              <p class="text-sm font-bold group-hover:text-[var(--accent)] transition-colors">Step-by-step walkthrough</p>
-              <p class="t-3 text-xs mt-1 leading-relaxed">Methodical derivations & analytical logic.</p>
-            </button>
-            <button class="quick card p-4 group" data-q="Summarize key formulas, rules, and takeaways into flashcards">
-              <i data-lucide="layers" class="w-5 h-5 text-sage-500 mb-2.5"></i>
-              <p class="text-sm font-bold group-hover:text-[var(--accent)] transition-colors">Create study flashcards</p>
-              <p class="t-3 text-xs mt-1 leading-relaxed">Front/back concept pairs ready for review.</p>
-            </button>
-          </div>
-        </div>
-      </div>
+        <!-- Top Navigation Bar -->
+        <header class="h-16 glass-panel border-b border-sand-200/80 dark:border-dusk-800/60 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20">
+            <div class="flex items-center gap-3">
+                <button id="open-sidebar-btn" class="md:hidden p-2 rounded-xl text-dusk-500 dark:text-dusk-400 hover:text-dusk-800 dark:hover:text-white hover:bg-sand-100 dark:hover:bg-dusk-800 transition-colors">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-sage-500 animate-ping"></div>
+                    <span class="text-xs font-semibold text-dusk-600 dark:text-dusk-300 tracking-wide hidden sm:inline">Model:</span>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-terra-500/10 text-terra-700 dark:text-terra-300 border border-terra-500/20">
+                        Gemini 3 Flash • Active
+                    </span>
+                </div>
+            </div>
 
-      <!-- Chat Input Area -->
-      <div class="shrink-0 p-3 sm:p-4 glass border-t hairline">
-        <div class="max-w-3xl mx-auto">
-          <form id="chat-form" class="card flex items-end gap-2 p-2 !rounded-2xl focus-within:border-[var(--accent)] transition-colors">
-            
-            <!-- Quick attachment trigger -->
-            <button type="button" id="quick-attach-btn" class="p-2 rounded-xl t-3 hover:text-[var(--accent)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors" title="Attach PDF notes">
-              <i data-lucide="paperclip" class="w-4 h-4"></i>
-            </button>
+            <!-- Header Quick Action Controls -->
+            <div class="flex items-center gap-2">
+                <!-- Theme Toggle Button (Light/Dark) -->
+                <button id="theme-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Light/Dark Mode">
+                    <span id="theme-icon"><i data-lucide="moon" class="w-3.5 h-3.5 text-terra-600"></i></span>
+                    <span id="theme-text" class="hidden sm:inline">Dark Mode</span>
+                </button>
 
-            <textarea id="chat-input" rows="1" placeholder="Ask Cognify about your study material, concepts, or formulas…" class="flex-1 bg-transparent border-0 outline-none resize-none text-sm px-2 py-2.5 leading-relaxed max-h-36 t-2 placeholder:t-3" style="color:var(--text)"></textarea>
+                <!-- Export Notes Button -->
+                <button id="export-chat-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Export Study Session Notes">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Export Notes</span>
+                </button>
+
+                <!-- Audio TTS Toggle Button -->
+                <button id="tts-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Text-to-Speech Readout">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5 text-terra-600 dark:text-terra-400"></i>
+                    <span class="hidden sm:inline">Audio Read</span>
+                </button>
+
+                <div class="h-5 w-[1px] bg-sand-200 dark:bg-dusk-700/60 mx-1"></div>
+
+                <!-- Sign In / User Profile Pill & Dropdown -->
+                <div id="auth-container" class="relative">
+                    <button id="auth-login-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-semibold shadow-sm shadow-terra-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span>Sign In</span>
+                    </button>
+
+                    <!-- User Profile Dropdown -->
+                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-60 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95">
+                        <div class="px-4 py-2.5 border-b border-sand-100 dark:border-dusk-800/80">
+                            <div class="flex items-center justify-between">
+                                <p id="user-display-name" class="text-xs font-bold font-serif text-dusk-900 dark:text-sand-100 truncate">Alex Chen</p>
+                                <span id="user-auth-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300">Google</span>
+                            </div>
+                            <p id="user-display-email" class="text-[11px] text-dusk-500 dark:text-dusk-400 truncate mt-0.5">alex@university.edu</p>
+                        </div>
+                        <div class="px-2 py-1">
+                            <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Conversation Messages Container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6">
             
-            <button type="submit" id="send-btn" class="p-2.5 rounded-xl text-white shadow-md transition-all active:scale-95 disabled:opacity-40" style="background:var(--accent)">
-              <i data-lucide="send" class="w-5 h-5"></i>
-            </button>
-          </form>
-          <div class="flex justify-between text-[11px] t-3 px-3 mt-2 font-medium">
-            <span id="input-subtext">Cognify AI Study Copilot · Markdown & LaTeX supported</span>
-            <span>Enter ↵ to send</span>
-          </div>
+            <!-- Hero Welcome Card (Visible when chat is empty) -->
+            <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6">
+                
+                <!-- Glowing badge in Terra & Sage -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sand-100 dark:bg-dusk-800 border border-sand-200 dark:border-dusk-700 text-terra-700 dark:text-terra-300 text-xs font-semibold shadow-sm">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-terra-500"></i>
+                    <span>Cognify • StudyMate AI Workspace</span>
+                </div>
+
+                <!-- Headline with Fraunces Typography -->
+                <div class="space-y-2.5">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-dusk-900 dark:text-sand-100 leading-tight">
+                        Transform study materials into <span class="italic text-terra-600 dark:text-terra-400">deep, lasting knowledge</span>
+                    </h2>
+                    <p class="text-sm sm:text-base text-dusk-600 dark:text-dusk-300 max-w-xl mx-auto leading-relaxed">
+                        Upload lecture slides, research papers, or syllabus chapters. Cognify synthesizes core concepts, formulates active recall quizzes, and clarifies complex topics.
+                    </p>
+                </div>
+
+                <!-- 4 Editorial Hero Prompt Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full mt-2 text-left">
+                    
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Can you provide an executive summary of this material with key concepts, definitions, and practical takeaways?">
+                        <div class="w-10 h-10 rounded-xl bg-terra-500/15 text-terra-600 dark:text-terra-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold font-serif text-dusk-900 dark:text-sand-100 group-hover:text-terra-600 dark:group-hover:text-terra-300 transition-colors">Executive Summary</h4>
+                        <p class="text-xs text-dusk-500 dark:text-dusk-400 mt-1 leading-normal">High-yield bullet points, core definitions, and structured study takeaways.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Generate an interactive 5-question comprehension quiz with detailed answer reasoning to test my recall.">
+                        <div class="w-10 h-10 rounded-xl bg-sage-500/15 text-sage-600 dark:text-sage-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold font-serif text-dusk-900 dark:text-sand-100 group-hover:text-sage-600 dark:group-hover:text-sage-300 transition-colors">Generate Practice Quiz</h4>
+                        <p class="text-xs text-dusk-500 dark:text-dusk-400 mt-1 leading-normal">Test exam readiness with 5 multiple-choice questions & answer explanations.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Explain the most complex theoretical concept in this material as if explaining to a 10-year-old using memorable analogies.">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold font-serif text-dusk-900 dark:text-sand-100 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Simplify Complex Ideas</h4>
+                        <p class="text-xs text-dusk-500 dark:text-dusk-400 mt-1 leading-normal">Break down heavy academic terminology with intuitive, memorable analogies.</p>
+                    </div>
+
+                    <div class="hero-card glass-card p-4 rounded-2xl cursor-pointer group" data-prompt="Extract all formulas, code snippets, or mathematical theorems in this document into clean, readable formats.">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="terminal" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="text-sm font-bold font-serif text-dusk-900 dark:text-sand-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Code & Formulas Sheet</h4>
+                        <p class="text-xs text-dusk-500 dark:text-dusk-400 mt-1 leading-normal">Isolate equations, algorithms, and step-by-step logic into clean blocks.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
-      </div>
+
+        <!-- Bottom Input Area -->
+        <div class="shrink-0 p-3 sm:p-4 bg-sand-50/90 dark:bg-dusk-950/85 backdrop-blur-2xl border-t border-sand-200 dark:border-dusk-800/60 z-20 transition-colors">
+            <div class="max-w-3xl mx-auto">
+                
+                <!-- Attached PDF Pill (Above input when document is active) -->
+                <div id="input-doc-badge" class="hidden mb-2.5 items-center gap-2 bg-sage-50 dark:bg-sage-950/70 border border-sage-200 dark:border-sage-500/30 text-sage-800 dark:text-sage-200 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm w-fit">
+                    <i data-lucide="file-check" class="w-3.5 h-3.5 text-sage-600 dark:text-sage-400"></i>
+                    <span id="input-doc-name" class="max-w-[220px] truncate">Document.pdf</span>
+                    <button type="button" id="input-remove-pdf" class="hover:text-red-500 ml-1 transition-colors" title="Remove PDF context">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- Input Capsule Form -->
+                <form id="chat-form" class="glass-input rounded-2xl p-2 sm:p-2.5 flex items-end gap-2 shadow-lg focus-within:ring-2 focus-within:ring-terra-500/40 focus-within:border-terra-500/50 transition-all">
+                    
+                    <!-- Attach Button -->
+                    <button type="button" id="capsule-attach-btn" class="p-2.5 rounded-xl text-dusk-400 hover:text-terra-600 dark:hover:text-terra-400 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-all shrink-0" title="Attach PDF study document">
+                        <i data-lucide="paperclip" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Text Area -->
+                    <textarea 
+                        id="user-prompt-input" 
+                        rows="1" 
+                        placeholder="Ask Cognify anything or query your study material... (Press Enter to send)"
+                        class="flex-1 bg-transparent border-0 text-dusk-900 dark:text-sand-100 placeholder-dusk-400 dark:placeholder-dusk-500 text-sm sm:text-base focus:ring-0 focus:outline-none resize-none py-2.5 px-1 max-h-36 overflow-y-auto leading-relaxed"
+                    ></textarea>
+
+                    <!-- Voice Mic Button (Speech Recognition) -->
+                    <button type="button" id="voice-input-btn" class="p-2.5 rounded-xl text-dusk-400 hover:text-terra-600 dark:hover:text-terra-400 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-all shrink-0" title="Voice Dictation">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="send-button" class="p-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white shadow-md shadow-terra-500/25 transition-all transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0" title="Send message">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+
+                </form>
+
+                <!-- Input Footer Hint -->
+                <div class="flex items-center justify-between text-[11px] text-dusk-400 dark:text-dusk-500 px-3 mt-2 font-medium">
+                    <span>Pro-tip: Drop any PDF document directly onto the screen</span>
+                    <span>Enter ↵ to send • Shift+Enter for newline</span>
+                </div>
+
+            </div>
+        </div>
+
     </main>
-  </div>
-</div>
 
-<!-- ============================================================
-     OVERLAYS · Google Chooser · Toasts · Chime Opt-in
-============================================================ -->
-<div id="google-modal" class="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-  <div class="relative w-full max-w-[400px] rounded-2xl bg-white text-[#202124] shadow-2xl p-6" style="font-family:Roboto,Arial,sans-serif">
-    <button id="g-close" class="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:bg-gray-100 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
-    <svg class="w-8 h-8 mb-4" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-    <div id="g-choose">
-      <h3 class="text-[22px] font-normal mb-1">Choose a Google Account</h3>
-      <p class="text-[13px] text-gray-500 mb-5">to continue to <span class="font-medium text-[#1a73e8]">Cognify StudyMate</span></p>
-      <div class="flex flex-col -mx-6">
-        <button class="g-acct flex items-center gap-3.5 px-6 py-3 hover:bg-gray-50 transition-colors text-left" data-name="Claire Vance" data-email="claire.vance@gmail.com">
-          <span class="w-9 h-9 rounded-full bg-[#1a73e8] text-white flex items-center justify-center text-sm font-medium">C</span>
-          <span><span class="block text-[14px] font-medium">Claire Vance</span><span class="block text-[12px] text-gray-500">claire.vance@gmail.com</span></span>
-        </button>
-        <button class="g-acct flex items-center gap-3.5 px-6 py-3 hover:bg-gray-50 transition-colors text-left" data-name="Guest Scholar" data-email="scholar@gmail.com">
-          <span class="w-9 h-9 rounded-full bg-[#188038] text-white flex items-center justify-center text-sm font-medium">S</span>
-          <span><span class="block text-[14px] font-medium">Guest Scholar</span><span class="block text-[12px] text-gray-500">scholar@gmail.com</span></span>
-        </button>
-        <button id="g-other" class="flex items-center gap-3.5 px-6 py-3 hover:bg-gray-50 transition-colors text-left border-t border-gray-100">
-          <span class="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-gray-500"><i data-lucide="user-plus" class="w-4 h-4"></i></span>
-          <span class="text-[14px] font-medium">Use another account</span>
-        </button>
-      </div>
-      <p class="text-[11px] text-gray-500 mt-5 leading-relaxed">Your account will be authenticated directly with Cognify's secure server session.</p>
-    </div>
-    <div id="g-other-form" class="hidden flex-col gap-3">
-      <h3 class="text-[20px] font-normal mb-1">Sign in with Google</h3>
-      <p class="text-[13px] text-gray-500 mb-2">to continue to <span class="font-medium text-[#1a73e8]">Cognify StudyMate</span></p>
-      <input id="g-name" type="text" placeholder="Full name" class="w-full rounded border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-[#1a73e8]">
-      <input id="g-email" type="email" placeholder="Email address" class="w-full rounded border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-[#1a73e8]">
-      <div class="flex justify-end gap-2 mt-2">
-        <button id="g-cancel" class="text-[#1a73e8] text-sm font-medium px-4 py-2 rounded hover:bg-blue-50">Cancel</button>
-        <button id="g-continue" class="bg-[#1a73e8] text-white text-sm font-medium px-5 py-2 rounded hover:bg-[#1765cc]">Next</button>
-      </div>
-    </div>
-    <div id="g-signing" class="hidden flex-col items-center py-10">
-      <div class="w-9 h-9 border-[3px] border-gray-200 border-t-[#1a73e8] rounded-full animate-spin mb-4"></div>
-      <p class="text-[13px] text-gray-500 font-medium">Connecting to Cognify…</p>
-    </div>
-  </div>
-</div>
+    <!-- Auth Modal with Sign In, Create Account & Sign in with Google -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden">
+            
+            <!-- Close Button -->
+            <button id="close-auth-modal" class="absolute top-5 right-5 p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
 
-<div id="toasts"></div>
+            <!-- Brand Header -->
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center shadow-lg shadow-terra-500/25 mb-3 ring-4 ring-terra-500/10">
+                    <svg class="w-7 h-7 text-sand-50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 6.5C14.8 5.6 13.2 5 11.5 5C7.4 5 4 8.4 4 12.5C4 16.6 7.4 20 11.5 20C13.2 20 14.8 19.4 16 18.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+                        <circle cx="17.5" cy="7" r="2.2" fill="#7D8F63"/>
+                        <circle cx="17.5" cy="18" r="2.2" fill="#DA8B65"/>
+                        <circle cx="12" cy="12.5" r="1.8" fill="white"/>
+                    </svg>
+                </div>
+                <h3 id="auth-modal-title" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">Welcome to Cognify</h3>
+                <p id="auth-modal-desc" class="text-xs text-dusk-500 dark:text-dusk-400 mt-1">Sign in to save and sync your study workspace</p>
+            </div>
 
-<!-- Focus Chime Notification Pill -->
-<div id="chime-pill" class="fixed bottom-5 left-5 z-[70] card p-4 max-w-[300px] hide">
-  <div class="flex items-start gap-3">
-    <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:rgba(125,143,99,.18); color:var(--sage)"><i data-lucide="bell" class="w-4 h-4"></i></div>
-    <div>
-      <p class="text-xs font-bold mb-1">Gentle Focus Bell</p>
-      <p class="t-3 text-[11px] leading-relaxed mb-3">Like the singing bowl in quiet libraries — one soft note on your first scroll to mark the start of deep work.</p>
-      <div class="flex gap-2">
-        <button id="chime-yes" class="text-[11px] font-bold px-3.5 py-1.5 rounded-full text-white" style="background:var(--sage)">Gently, yes</button>
-        <button id="chime-no" class="text-[11px] font-bold px-3.5 py-1.5 rounded-full border hairline t-3">No thanks</button>
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Sign In with Google Section -->
+            <div id="google-auth-section" class="mb-5">
+                <div id="g-choose">
+                    <button type="button" id="btn-google-main" class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-sand-300 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-800 dark:text-sand-100 hover:bg-sand-50 dark:hover:bg-dusk-700 font-medium text-xs shadow-sm transition-all hover:border-terra-300">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.36 7.33 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.25 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                    
+                    <!-- Quick-Select Google Demo Accounts Drawer (Toggled or shown on click) -->
+                    <div id="g-accounts-list" class="hidden mt-2 flex-col gap-1.5 p-2 bg-sand-100/60 dark:bg-dusk-800/60 rounded-xl border border-sand-200 dark:border-dusk-700">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-400 px-1">Choose Google Account</p>
+                        <button type="button" class="g-account-btn w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white dark:hover:bg-dusk-700 text-left transition-colors" data-name="Alex Chen" data-email="alex.chen@university.edu">
+                            <div class="w-6 h-6 rounded-full bg-terra-500 text-white flex items-center justify-center font-bold text-[10px]">A</div>
+                            <div class="truncate">
+                                <p class="text-xs font-semibold text-dusk-900 dark:text-sand-100">Alex Chen</p>
+                                <p class="text-[10px] text-dusk-500 dark:text-dusk-400">alex.chen@university.edu</p>
+                            </div>
+                        </button>
+                        <button type="button" class="g-account-btn w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white dark:hover:bg-dusk-700 text-left transition-colors" data-name="Taylor Reed" data-email="taylor.reed@college.edu">
+                            <div class="w-6 h-6 rounded-full bg-sage-500 text-white flex items-center justify-center font-bold text-[10px]">T</div>
+                            <div class="truncate">
+                                <p class="text-xs font-semibold text-dusk-900 dark:text-sand-100">Taylor Reed</p>
+                                <p class="text-[10px] text-dusk-500 dark:text-dusk-400">taylor.reed@college.edu</p>
+                            </div>
+                        </button>
+                        <button type="button" id="g-other-toggle" class="text-[11px] text-terra-600 dark:text-terra-400 hover:underline px-1 text-left mt-0.5">Use another Google account...</button>
+                        
+                        <!-- Custom Google Account input -->
+                        <div id="g-custom-account-form" class="hidden flex-col gap-2 pt-1 border-t border-sand-200 dark:border-dusk-700 mt-1">
+                            <input type="text" id="g-custom-name" placeholder="Your Full Name" class="w-full px-2.5 py-1.5 rounded-lg border border-sand-300 dark:border-dusk-600 bg-white dark:bg-dusk-800 text-xs">
+                            <input type="email" id="g-custom-email" placeholder="name@gmail.com" class="w-full px-2.5 py-1.5 rounded-lg border border-sand-300 dark:border-dusk-600 bg-white dark:bg-dusk-800 text-xs">
+                            <button type="button" id="btn-g-custom-submit" class="w-full py-1.5 bg-terra-500 hover:bg-terra-600 text-white rounded-lg text-xs font-semibold">Sign In with this Google Email</button>
+                        </div>
+                    </div>
+                </div>
 
-<!-- ============================================================
-     JAVASCRIPT LOGIC
-============================================================ -->
-<script>
-const $  = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const esc = s => (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const icons = () => lucide.createIcons();
+                <!-- Google Signing In State -->
+                <div id="g-signing" class="hidden flex-col items-center justify-center py-4 gap-2 bg-sand-100/50 dark:bg-dusk-800/50 rounded-xl border border-sand-200 dark:border-dusk-700">
+                    <div class="w-5 h-5 rounded-full border-2 border-terra-500 border-t-transparent animate-spin"></div>
+                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Connecting with Google...</p>
+                </div>
+            </div>
 
-const state = {
-  session: JSON.parse(localStorage.getItem('cognify-session') || 'null'),
-  token: localStorage.getItem('cognify-token') || null,
-  activePdf: JSON.parse(localStorage.getItem('cognify-active-pdf') || 'null'),
-  chat: JSON.parse(localStorage.getItem('cognify-chat') || '[]'),
-  busy: false,
-};
+            <!-- Divider -->
+            <div class="relative my-4 flex items-center justify-center">
+                <div class="border-t border-sand-200 dark:border-dusk-800 w-full"></div>
+                <span class="bg-sand-50 dark:bg-dusk-900 px-3 text-[11px] font-medium text-dusk-400 dark:text-dusk-500 uppercase tracking-wider shrink-0">or with email</span>
+            </div>
 
-function toast(msg){
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4" style="color:var(--sage)"></i><span>${msg}</span>`;
-  $('#toasts').appendChild(el); icons();
-  setTimeout(() => { el.classList.add('bye'); setTimeout(() => el.remove(), 450); }, 3600);
-}
+            <!-- Tab Switcher -->
+            <div class="flex rounded-xl bg-sand-100 dark:bg-dusk-800/80 p-1 mb-5 border border-sand-200 dark:border-dusk-700/60">
+                <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-dusk-700 text-terra-600 dark:text-terra-400 shadow-sm">
+                    Sign In
+                </button>
+                <button id="tab-register" type="button" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-dusk-500 dark:text-dusk-400 hover:text-dusk-800 dark:hover:text-white">
+                    Create Account
+                </button>
+            </div>
 
-/* ============================================================
-   Theme Mode (Morning / Evening)
-============================================================ */
-function applyTheme(t){
-  document.documentElement.classList.toggle('dark', t === 'dark');
-  localStorage.setItem('cognify-theme', t);
-  $$('[data-theme-toggle]').forEach(b => {
-    b.innerHTML = `<i data-lucide="${t === 'dark' ? 'sun' : 'moon'}" class="w-4 h-4"></i>`;
-    b.title = t === 'dark' ? 'Morning study mode' : 'Evening deep focus mode';
-  });
-  icons();
-}
-$$('[data-theme-toggle]').forEach(b => b.addEventListener('click', () =>
-  applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark')));
-applyTheme(localStorage.getItem('cognify-theme') || 'light');
+            <!-- Alert Message Box -->
+            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border items-center gap-2"></div>
 
-/* ============================================================
-   Router
-============================================================ */
-const VIEWS = ['home', 'signin', 'study'];
-function route(){
-  let name = (location.hash || '#/home').replace('#/', '') || 'home';
-  if (!VIEWS.includes(name)) name = 'home';
-  VIEWS.forEach(v => $('#view-' + v).classList.toggle('active', v === name));
-  window.scrollTo(0, 0);
-  $('#mobile-menu').classList.add('hidden');
-  closeSidebar();
-  if (name === 'study'){
-    renderChatMessages();
-    updateDocUI();
-    $('#chat-scroll').scrollTop = $('#chat-scroll').scrollHeight;
-  }
-}
-window.addEventListener('hashchange', route);
+            <!-- Sign In Form -->
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
+                        <input type="email" id="login-email" required placeholder="you@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit-login" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+                    <span>Sign In to Cognify</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </form>
 
-/* ============================================================
-   Landing Page Interactions
-============================================================ */
-const header = $('#site-header');
-window.addEventListener('scroll', () => {
-  header.classList.toggle('glass', window.scrollY > 30);
-  header.classList.toggle('border-b', window.scrollY > 30);
-  header.style.borderColor = 'var(--border)';
-  firstScroll();
-}, { passive: true });
-
-function scrollToSel(sel){ document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' }); }
-$$('[data-scroll]').forEach(b => b.addEventListener('click', () => {
-  $('#mobile-menu').classList.add('hidden');
-  scrollToSel(b.dataset.scroll);
-}));
-$('#menu-btn').addEventListener('click', () => $('#mobile-menu').classList.toggle('hidden'));
-
-const io = new IntersectionObserver(es => es.forEach(e => {
-  if (e.isIntersecting){ e.target.classList.add('revealed'); io.unobserve(e.target); }
-}), { threshold: .15, rootMargin: '0px 0px -40px 0px' });
-function observeReveals(){ $$('[data-reveal]:not(.revealed)').forEach(el => io.observe(el)); }
-
-/* Features tab navigation */
-const FEATURES = [
-  { name:'Document Synthesis', desc:'Drop any PDF textbook, paper, or syllabus. Cognify extracts structural flow, formulas, and synthesizes core ideas instantly.' },
-  { name:'Socratic AI Tutor', desc:'Engage in guided study dialogue that checks reasoning step-by-step rather than simply handing over final solutions.' },
-  { name:'Active Recall & Quizzing', desc:'Automatically convert reading notes into self-test drills and flashcards to build enduring conceptual retention.' },
-  { name:'Focused Deep Work', desc:'A calm, clutter-free sanctuary equipped with singing bowl focus chimes, structured markdown, and distraction-free learning.' },
-];
-function setFeature(i){
-  $$('.feature-tab').forEach((t, k) => {
-    t.style.color = k === i ? 'var(--accent)' : '';
-  });
-  $$('#feature-photo .p-img').forEach((img, k) => img.classList.toggle('on', k === i));
-  const n = $('#feature-name'), d = $('#feature-desc');
-  n.textContent = FEATURES[i].name; d.textContent = FEATURES[i].desc;
-  [n, d].forEach(el => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'viewIn .5s ease both'; });
-}
-$$('.feature-tab').forEach(t => t.addEventListener('click', () => setFeature(+t.dataset.fi)));
-setFeature(0);
-
-/* Claim Free Account Form */
-$('#free-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const name = $('#free-name').value.trim(), email = $('#free-email').value.trim();
-  const subj = $('#free-subject').value;
-  if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
-  
-  signIn(name, email, 'claimed-free');
-  $('#free-form').classList.add('hidden');
-  $('#free-success').classList.remove('hidden');
-  $('#free-success').classList.add('flex');
-  $('#free-success-text').textContent = `${name}, your study workspace is pre-configured for ${subj || 'deep learning'}.`;
-  icons();
-  toast('Welcome to Cognify — opening workspace.');
-  setTimeout(() => location.hash = '#/study', 1400);
-});
-
-/* ============================================================
-   Focus Singing Bowl Chime (WebAudio)
-============================================================ */
-let audioCtx = null, chimePlayed = false;
-function playChime(){
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const now = audioCtx.currentTime;
-    [[523.25,.10],[785,.045],[1046.5,.028]].forEach(([f, g], i) => {
-      const o = audioCtx.createOscillator(), gn = audioCtx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      gn.gain.setValueAtTime(0, now);
-      gn.gain.linearRampToValueAtTime(g, now + .015 + i * .02);
-      gn.gain.exponentialRampToValueAtTime(.0001, now + 4 - i * .7);
-      o.connect(gn).connect(audioCtx.destination);
-      o.start(now); o.stop(now + 4.2);
-    });
-  }catch(e){}
-}
-let scrolled = false;
-function firstScroll(){
-  if (scrolled) return; scrolled = true;
-  if (localStorage.getItem('cognify-chime') === 'on') playChime();
-}
-(function setupChime(){
-  if (localStorage.getItem('cognify-chime')) return;
-  setTimeout(() => $('#chime-pill').classList.remove('hide'), 1600);
-  $('#chime-yes').addEventListener('click', () => {
-    localStorage.setItem('cognify-chime', 'on');
-    $('#chime-pill').classList.add('hide');
-    playChime();
-    toast('Focus bell active — one gentle note.');
-  });
-  $('#chime-no').addEventListener('click', () => {
-    localStorage.setItem('cognify-chime', 'off');
-    $('#chime-pill').classList.add('hide');
-  });
-})();
-$('#focus-chime-btn')?.addEventListener('click', () => {
-  playChime();
-  toast('Focus bell played.');
-});
-
-/* ============================================================
-   Authentication (Server-Side SQLite + Google + Offline Fallback)
-============================================================ */
-const users = () => JSON.parse(localStorage.getItem('cognify-users') || '{}');
-
-function showAuthAlert(msg, ok){
-  const a = $('#auth-alert');
-  a.className = `mb-5 px-4 py-3 rounded-xl text-xs font-semibold border flex items-center gap-2`;
-  a.style.background = ok ? 'rgba(125,143,99,.14)' : 'rgba(193,104,63,.12)';
-  a.style.borderColor = ok ? 'rgba(125,143,99,.4)' : 'rgba(193,104,63,.4)';
-  a.style.color = ok ? 'var(--sage)' : 'var(--accent)';
-  a.innerHTML = `<i data-lucide="${ok ? 'check-circle-2' : 'alert-circle'}" class="w-3.5 h-3.5"></i>${esc(msg)}`;
-  a.classList.remove('hidden'); icons();
-}
-
-function setTab(login){
-  $('#login-form').classList.toggle('hidden', !login);
-  $('#login-form').classList.toggle('flex', login);
-  $('#register-form').classList.toggle('hidden', login);
-  $('#register-form').classList.toggle('flex', !login);
-  $('#tab-login').style.cssText = login ? 'background:var(--surface-solid);color:var(--accent);box-shadow:var(--shadow)' : 'color:var(--text-3)';
-  $('#tab-register').style.cssText = !login ? 'background:var(--surface-solid);color:var(--accent);box-shadow:var(--shadow)' : 'color:var(--text-3)';
-  $('#auth-title').textContent = login ? 'Welcome back' : 'Create your account';
-  $('#auth-sub').textContent = login ? 'Sign in to your Cognify study workspace.' : 'Thirty seconds, and the workspace is yours.';
-  $('#auth-alert').classList.add('hidden');
-}
-$('#tab-login').addEventListener('click', () => setTab(true));
-$('#tab-register').addEventListener('click', () => setTab(false));
-setTab(true);
-
-function signIn(name, email, provider = 'email', token = null){
-  state.session = { name, email, provider };
-  localStorage.setItem('cognify-session', JSON.stringify(state.session));
-  if (token){
-    state.token = token;
-    localStorage.setItem('cognify-token', token);
-  }
-  updateAuthUI();
-  $('#google-modal').classList.add('hidden');
-  $('#google-modal').classList.remove('flex');
-  location.hash = '#/study';
-  toast(`Welcome, ${name.split(' ')[0]} — your workspace is ready.`);
-}
-
-$('#login-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const email = $('#login-email').value.trim().toLowerCase();
-  const password = $('#login-password').value;
-  try{
-    const r = await fetch('/auth/login', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password })
-    });
-    const data = await r.json();
-    if (!data.success) return showAuthAlert(data.error || 'Login failed — check your credentials.');
-    signIn(data.user?.name || email.split('@')[0], email, 'email', data.token);
-  }catch(err){
-    const u = users()[email];
-    if (!u || u.pass !== btoa(password)) return showAuthAlert('Could not reach server, and no local offline account matches.');
-    signIn(u.name, email, 'email');
-  }
-});
-
-$('#register-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const name = $('#reg-name').value.trim();
-  const email = $('#reg-email').value.trim().toLowerCase();
-  const password = $('#reg-password').value;
-  try{
-    const r = await fetch('/auth/register', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ name, email, password })
-    });
-    const data = await r.json();
-    if (!data.success) return showAuthAlert(data.error || 'Registration failed.');
-    signIn(name, email, 'email', data.token);
-  }catch(err){
-    const all = users();
-    if (all[email]) return showAuthAlert('An account already lives at that email — sign in instead.');
-    all[email] = { name, pass: btoa(password) };
-    localStorage.setItem('cognify-users', JSON.stringify(all));
-    signIn(name, email, 'email');
-  }
-});
-
-/* Google OAuth Simulator with Server-side SQLite persistence */
-$('#google-btn').addEventListener('click', () => {
-  const m = $('#google-modal');
-  m.classList.remove('hidden'); m.classList.add('flex');
-  $('#g-choose').classList.remove('hidden'); $('#g-choose').style.display = '';
-  $('#g-other-form').classList.add('hidden'); $('#g-signing').classList.add('hidden');
-});
-$('#g-close').addEventListener('click', () => { $('#google-modal').classList.add('hidden'); $('#google-modal').classList.remove('flex'); });
-$('#google-modal').addEventListener('click', e => { if (e.target === $('#google-modal')) $('#g-close').click(); });
-$('#g-other').addEventListener('click', () => {
-  $('#g-choose').style.display = 'none';
-  $('#g-other-form').classList.remove('hidden'); $('#g-other-form').classList.add('flex');
-});
-$('#g-cancel').addEventListener('click', () => { $('#g-other-form').classList.add('hidden'); $('#g-choose').style.display = ''; });
-$('#g-continue').addEventListener('click', () => {
-  const n = $('#g-name').value.trim(), e = $('#g-email').value.trim();
-  if (!n || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return;
-  runGoogle(n, e);
-});
-$$('.g-acct').forEach(b => b.addEventListener('click', () => runGoogle(b.dataset.name, b.dataset.email)));
-
-async function runGoogle(name, email){
-  $('#g-choose').style.display = 'none';
-  $('#g-other-form').classList.add('hidden');
-  $('#g-signing').classList.remove('hidden'); $('#g-signing').classList.add('flex');
-  let token = null;
-  try{
-    const r = await fetch('/auth/register', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ name, email, password: 'google-' + Math.random().toString(36).slice(2) })
-    });
-    const data = await r.json();
-    if (data.success) token = data.token || null;
-  }catch(e){}
-  setTimeout(() => signIn(name, email, 'google', token), 750);
-}
-$('#guest-link').addEventListener('click', () => location.hash = '#/study');
-
-function updateAuthUI(){
-  const home = $('#home-auth'), box = $('#studio-user-box'), st = $('#studio-auth');
-  if (state.session){
-    const initial = esc(state.session.name[0].toUpperCase());
-    home.innerHTML = `
-      <a href="#/study" class="btn-primary !py-2 !px-5 text-xs"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Open Workspace</a>
-      <div class="relative">
-        <button id="avatar-btn" class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style="background:var(--accent)" title="${esc(state.session.name)}">${initial}</button>
-        <div id="avatar-menu" class="hidden absolute right-0 mt-2 card p-2 w-44 z-50">
-          <p class="px-3 py-2 text-[11px] font-bold truncate">${esc(state.session.name)}</p>
-          <p class="px-3 pb-2 text-[10px] t-3 truncate">${esc(state.session.email)}</p>
-          <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-terra-500 hover:bg-terra-50 dark:hover:bg-terra-900/30 flex items-center gap-2"><i data-lucide="log-out" class="w-3.5 h-3.5"></i> Sign out</button>
+            <!-- Sign Up Form (Hidden initially) -->
+            <form id="form-register" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Full Name</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
+                        <input type="text" id="register-name" required placeholder="Alex Mercer" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
+                        <input type="email" id="register-email" required placeholder="alex@university.edu" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Create Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
+                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit-register" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+                    <span>Create Account</span>
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                </button>
+            </form>
         </div>
-      </div>`;
-    box.innerHTML = `
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:var(--accent)">${initial}</span>
-          <div class="min-w-0"><p class="text-xs font-bold truncate">${esc(state.session.name)}</p><p class="text-[10px] t-3 truncate">${esc(state.session.email)}</p></div>
-        </div>
-        <button id="logout-btn2" class="p-2 rounded-lg t-3 hover:text-terra-500 transition-colors" title="Sign out"><i data-lucide="log-out" class="w-4 h-4"></i></button>
-      </div>`;
-    st.innerHTML = '';
-    $('#logout-btn')?.addEventListener('click', signOut);
-    $('#logout-btn2')?.addEventListener('click', signOut);
-    $('#avatar-btn')?.addEventListener('click', () => $('#avatar-menu').classList.toggle('hidden'));
-  } else {
-    home.innerHTML = `<a href="#/signin" class="btn-ghost !py-2 !px-5 text-xs">Sign in</a>`;
-    st.innerHTML = `<a href="#/signin" class="btn-primary !py-2 !px-4 text-xs">Sign in</a>`;
-    box.innerHTML = `
-      <p class="text-xs t-3 leading-relaxed mb-3">You’re working as a guest. Sign in to save document history across devices.</p>
-      <a href="#/signin" class="btn-primary w-full justify-center !py-2.5 text-xs">Sign in</a>`;
-  }
-  icons();
-}
-
-function signOut(){
-  const token = state.token;
-  if (token){
-    fetch('/auth/logout', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ token })
-    }).catch(() => {});
-  }
-  state.session = null; state.token = null;
-  localStorage.removeItem('cognify-session');
-  localStorage.removeItem('cognify-token');
-  updateAuthUI();
-  location.hash = '#/home';
-  toast('Signed out cleanly.');
-}
-
-/* ============================================================
-   Document Upload & Management (PDF Processor)
-============================================================ */
-$('#upload-pdf-trigger').addEventListener('click', () => $('#pdf-file-input').click());
-$('#quick-attach-btn').addEventListener('click', () => $('#pdf-file-input').click());
-
-$('#pdf-file-input').addEventListener('change', async function(){
-  const file = this.files[0];
-  if (!file) return;
-  if (!file.name.toLowerCase().endsWith('.pdf')){
-    toast('Please select a PDF document.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  toast(`Analyzing ${file.name}…`);
-  $('#doc-status-tag').textContent = 'Extracting…';
-
-  try{
-    const res = await fetch('/upload-pdf', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (data.error){
-      toast('Failed: ' + data.error);
-      $('#doc-status-tag').textContent = 'Error';
-      return;
-    }
-    
-    state.activePdf = {
-      filename: data.filename,
-      text: data.extracted_text,
-      chars: data.extracted_text.length
-    };
-    localStorage.setItem('cognify-active-pdf', JSON.stringify(state.activePdf));
-    updateDocUI();
-    toast(`Loaded ${data.filename} (${Math.round(data.extracted_text.length/1000)}k chars)`);
-
-    // Auto-prompt Cognify about the new document
-    handleSend(`I have attached the document "${data.filename}". Please give me an executive summary and outline of its 3 most important concepts.`);
-
-  }catch(err){
-    toast('Could not connect to PDF processor.');
-    $('#doc-status-tag').textContent = 'Offline';
-  }
-  this.value = '';
-});
-
-$('#clear-doc-btn').addEventListener('click', () => {
-  state.activePdf = null;
-  localStorage.removeItem('cognify-active-pdf');
-  updateDocUI();
-  toast('Document detached from session.');
-});
-
-function updateDocUI(){
-  const card = $('#active-doc-card');
-  const tag = $('#doc-status-tag');
-  const headerBadge = $('#header-doc-badge');
-
-  if (state.activePdf){
-    card.classList.remove('hidden');
-    $('#doc-card-title').textContent = state.activePdf.filename;
-    $('#doc-card-sub').textContent = `${Math.round(state.activePdf.chars/1000)}k chars loaded`;
-    tag.textContent = 'Active';
-    tag.className = 'text-sage-600 dark:text-sage-400 font-bold';
-    headerBadge.textContent = `· 📄 ${state.activePdf.filename.slice(0, 20)}`;
-  } else {
-    card.classList.add('hidden');
-    tag.textContent = 'None';
-    tag.className = 't-3 font-medium';
-    headerBadge.textContent = '· Ready to study';
-  }
-  icons();
-}
-
-/* ============================================================
-   Cognify AI Study Copilot Chat Logic
-============================================================ */
-try{ marked.setOptions({ breaks:true, mangle:false, headerIds:false }); }catch(e){}
-
-function htmlToText(html){
-  const d = document.createElement('div'); d.innerHTML = html;
-  d.querySelectorAll('.chip-action').forEach(b => b.remove());
-  return (d.textContent || '').replace(/[ 	]+/g, ' ').trim();
-}
-
-// Local Knowledge Base fallback for study concepts
-function respondStudy(q){
-  const s = (q || '').toLowerCase();
-  let reply = "";
-
-  if (s.includes('feynman') || s.includes('five') || s.includes('simple')){
-    reply = "### The Feynman Technique for Concept Mastery\n\n1. **Identify the Core Idea**: Write the topic name at the top of a clean sheet.\n2. **Teach It in Plain Words**: Explain the concept as if speaking to a 10-year-old. Forbid jargon.\n3. **Pinpoint the Friction**: Where did you hesitate or reach for technical buzzwords? That is your knowledge gap.\n4. **Refine with an Analogy**: Replace the gaps with a vivid physical analogy.\n\n*What specific concept would you like to break down together right now?*";
-  } else if (s.includes('quiz') || s.includes('active recall') || s.includes('test') || s.includes('question')){
-    reply = "### Active Recall Self-Assessment Drill\n\n- **Q1**: What is the primary underlying assumption behind this subject or model?\n- **Q2**: Under what conditions does this theorem/framework break down?\n- **Q3**: How would you re-derive the central conclusion from first principles?\n- **Q4**: What is the counter-intuitive implication of this idea?\n\nTake a moment to formulate your thoughts without looking at your notes, then share your answers below!";
-  } else if (s.includes('summar') || s.includes('notes') || s.includes('takeaway')){
-    reply = state.activePdf 
-      ? `### Document Synthesis: ${state.activePdf.filename}\n\nThis material contains **${Math.round(state.activePdf.chars/1000)}k characters** of notes. Key conceptual clusters identified:\n\n- **Core Thesis**: Foundational principles and analytical definitions.\n- **Methodology**: Step-by-step logic, criteria, and operational frameworks.\n- **Synthesis**: Practical implications and open questions.\n\nWhich specific chapter or section should we explore deeper?`
-      : "### Executive Study Synthesis\n\nTo give you a document-grounded summary, upload your PDF notes using the **Upload PDF** button in the sidebar or paperclip icon below!\n\nIn the meantime, feel free to paste any passage or formula directly here in chat.";
-  } else {
-    reply = "I am **Cognify**, your AI Study Copilot. I can assist you with:\n\n- **Document Synthesis**: Uploading lecture notes & extracting key ideas.\n- **Active Retrieval**: Quizzing you to ensure memory consolidation.\n- **Step-by-Step Proofs**: Walking through dense math, logic, or code.\n- **Study Schedules**: Structuring your focus sessions.\n\nWhat are we mastering today?";
-  }
-
-  return { html: marked.parse(reply) };
-}
-
-async function askStudyCopilot(message){
-  const history = state.chat.slice(-10).map(m => ({
-    role: m.role === 'ai' ? 'assistant' : 'user',
-    text: m.html ? htmlToText(m.html) : m.text
-  }));
-
-  const payload = {
-    message,
-    history,
-    pdf_text: state.activePdf?.text || ""
-  };
-
-  try{
-    const r = await fetch('/api/study', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const data = await r.json();
-    if (data.success && data.reply) return { html: marked.parse(data.reply) };
-  }catch(e){}
-
-  // Local knowledge base fallback so learning never breaks
-  return respondStudy(message);
-}
-
-function renderChatMessages(){
-  const container = $('#chat-messages');
-  container.innerHTML = '';
-  
-  if (!state.chat.length){
-    $('#study-welcome').classList.remove('hidden');
-    return;
-  }
-  $('#study-welcome').classList.add('hidden');
-
-  state.chat.forEach(m => {
-    const wrap = document.createElement('div');
-    if (m.role === 'user'){
-      wrap.className = 'flex justify-end';
-      wrap.innerHTML = `<div class="msg-user">${esc(m.text)}</div>`;
-    } else {
-      wrap.className = 'flex gap-3';
-      wrap.innerHTML = `
-        <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 text-white shadow-sm" style="background:var(--accent)">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-        </div>
-        <div class="msg-body msg-ai">${m.html || marked.parse(m.text || '')}</div>`;
-    }
-    container.appendChild(wrap);
-  });
-  icons();
-  $('#chat-scroll').scrollTop = $('#chat-scroll').scrollHeight;
-}
-
-function addMsg(role, content){
-  $('#study-welcome')?.classList.add('hidden');
-  const wrap = document.createElement('div');
-  if (role === 'user'){
-    wrap.className = 'flex justify-end';
-    wrap.innerHTML = `<div class="msg-user">${esc(content)}</div>`;
-    state.chat.push({ role, text: content });
-  } else {
-    wrap.className = 'flex gap-3';
-    wrap.innerHTML = `
-      <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 text-white shadow-sm" style="background:var(--accent)">
-        <i data-lucide="sparkles" class="w-4 h-4"></i>
-      </div>
-      <div class="msg-body msg-ai"></div>`;
-  }
-  $('#chat-messages').appendChild(wrap);
-  icons();
-  $('#chat-scroll').scrollTop = $('#chat-scroll').scrollHeight;
-  return wrap.querySelector('.msg-body');
-}
-
-function addThinking(){
-  const wrap = document.createElement('div');
-  wrap.className = 'flex gap-3';
-  wrap.innerHTML = `
-    <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 text-white shadow-sm" style="background:var(--accent)">
-      <i data-lucide="sparkles" class="w-4 h-4"></i>
     </div>
-    <div class="msg-ai flex items-center gap-1.5 !py-4"><span class="think-dot"></span><span class="think-dot"></span><span class="think-dot"></span></div>`;
-  $('#chat-messages').appendChild(wrap);
-  icons();
-  $('#chat-scroll').scrollTop = $('#chat-scroll').scrollHeight;
-  return wrap;
-}
 
-async function handleSend(text){
-  if (!text.trim() || state.busy) return;
-  addMsg('user', text.trim());
-  persistChat();
-  $('#chat-input').value = ''; $('#chat-input').style.height = 'auto';
-  state.busy = true; $('#send-btn').disabled = true;
-  
-  const thinking = addThinking();
-  const res = await askStudyCopilot(text);
-  thinking.remove();
+    <!-- Application Script -->
+    <script>
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const heroWelcome = document.getElementById('hero-welcome');
+        const chatForm = document.getElementById('chat-form');
+        const userPromptInput = document.getElementById('user-prompt-input');
+        const sendButton = document.getElementById('send-button');
+        const pdfFileInput = document.getElementById('pdf-file-input');
+        const uploadPdfTrigger = document.getElementById('upload-pdf-trigger');
+        const capsuleAttachBtn = document.getElementById('capsule-attach-btn');
+        const activeDocCard = document.getElementById('active-document-card');
+        const docCardTitle = document.getElementById('doc-card-title');
+        const docCardStatus = document.getElementById('doc-card-status');
+        const removePdfBtn = document.getElementById('remove-pdf-btn');
+        const inputDocBadge = document.getElementById('input-doc-badge');
+        const inputDocName = document.getElementById('input-doc-name');
+        const inputRemovePdf = document.getElementById('input-remove-pdf');
+        const newSessionBtn = document.getElementById('new-session-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const exportChatBtn = document.getElementById('export-chat-btn');
+        const ttsToggleBtn = document.getElementById('tts-toggle-btn');
+        const voiceInputBtn = document.getElementById('voice-input-btn');
+        const focusChimeBtn = document.getElementById('focus-chime-btn');
+        const dragOverlay = document.getElementById('drag-overlay');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const openSidebarBtn = document.getElementById('open-sidebar-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
 
-  if (res && res.html){
-    const body = addMsg('ai');
-    body.innerHTML = res.html;
-    state.chat.push({ role:'ai', html: res.html });
-    persistChat();
-  }
-  
-  state.busy = false; $('#send-btn').disabled = false;
-  $('#chat-scroll').scrollTop = $('#chat-scroll').scrollHeight;
-  icons();
-}
+        // Auth Elements
+        const authContainer = document.getElementById('auth-container');
+        const authLoginBtn = document.getElementById('auth-login-btn');
+        const userProfileMenu = document.getElementById('user-profile-menu');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userDisplayEmail = document.getElementById('user-display-email');
+        const userAuthBadge = document.getElementById('user-auth-badge');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authModal = document.getElementById('auth-modal');
+        const closeAuthModal = document.getElementById('close-auth-modal');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const formLogin = document.getElementById('form-login');
+        const formRegister = document.getElementById('form-register');
+        const authAlert = document.getElementById('auth-alert');
+        const authModalTitle = document.getElementById('auth-modal-title');
+        const authModalDesc = document.getElementById('auth-modal-desc');
+        const btnGoogleMain = document.getElementById('btn-google-main');
+        const gAccountsList = document.getElementById('g-accounts-list');
+        const gOtherToggle = document.getElementById('g-other-toggle');
+        const gCustomAccountForm = document.getElementById('g-custom-account-form');
+        const btnGCustomSubmit = document.getElementById('btn-g-custom-submit');
+        const gSigning = document.getElementById('g-signing');
+        const gChoose = document.getElementById('g-choose');
 
-$('#chat-form').addEventListener('submit', e => { e.preventDefault(); handleSend($('#chat-input').value); });
-$('#chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); $('#chat-form').requestSubmit(); }
-});
-$('#chat-input').addEventListener('input', function(){
-  this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 144) + 'px';
-});
+        // Application State
+        let currentPdfText = "";
+        let currentPdfFileName = "";
+        let ttsEnabled = false;
+        let isProcessing = false;
+        let currentUser = null;
+        const conversationHistory = [];
 
-$$('.quick').forEach(b => b.addEventListener('click', () => {
-  if (location.hash !== '#/study') location.hash = '#/study';
-  setTimeout(() => handleSend(b.dataset.q), 120);
-}));
-
-$('#new-chat-btn').addEventListener('click', () => {
-  state.chat = []; persistChat();
-  $('#chat-messages').innerHTML = '';
-  $('#study-welcome').classList.remove('hidden');
-  toast('New study session started.');
-});
-
-$('#save-chat').addEventListener('click', () => {
-  const div = document.createElement('div');
-  div.innerHTML = state.chat.map(m => m.html || m.text).join('\n\n---\n\n');
-  const txt = '# COGNIFY STUDY NOTES & SYNTHESIS\n' + '='.repeat(40) + '\n\n' + div.textContent.replace(/\n{3,}/g, '\n\n').trim();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/markdown' }));
-  a.download = 'cognify-study-notes.md'; a.click();
-  toast('Study notes exported as Markdown.');
-});
-
-function persistChat(){ localStorage.setItem('cognify-chat', JSON.stringify(state.chat.slice(-30))); }
-
-/* Sidebar Controls */
-function closeSidebar(){ $('#study-sidebar').classList.add('-translate-x-full'); $('#sb-backdrop').classList.add('hidden'); }
-$('#sb-open').addEventListener('click', () => { $('#study-sidebar').classList.remove('-translate-x-full'); $('#sb-backdrop').classList.remove('hidden'); });
-$('#sb-close').addEventListener('click', closeSidebar);
-$('#sb-backdrop').addEventListener('click', closeSidebar);
-
-/* ============================================================
-   Boot & Session Validation
-============================================================ */
-(function init(){
-  updateAuthUI();
-  updateDocUI();
-  observeReveals();
-  route();
-  icons();
-
-  // Validate active backend session token if present
-  if (state.token){
-    fetch(`/auth/me?token=${encodeURIComponent(state.token)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.authenticated && data.user){
-          signIn(data.user.name, data.user.email, state.session?.provider || 'email', state.token);
+        // Focus Sound (Web Audio Synthesizer)
+        function playFocusChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+                const freqs = [432, 576, 864];
+                freqs.forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now);
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(0.06 / (i + 1), now + 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.8);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 2.9);
+                });
+            } catch (e) {}
         }
-      }).catch(() => {});
-  }
-})();
-</script>
+        if (focusChimeBtn) focusChimeBtn.addEventListener('click', playFocusChime);
+
+        // Local Study Knowledge Base Fallback
+        function respondStudy(q) {
+            const lower = q.toLowerCase();
+            if (lower.includes('feynman') || lower.includes('simple') || lower.includes('analog')) {
+                return "### 💡 The Feynman Technique for Concept Mastery\n\n1. **Identify the Core Premise**: State the idea in a single plain sentence.\n2. **Teach It to a 10-Year-Old**: Strip away jargon and create relatable everyday analogies.\n3. **Pinpoint Knowledge Gaps**: Notice where your explanation falters or turns abstract.\n4. **Refine & Condense**: Simplify until the logic feels completely intuitive.";
+            }
+            if (lower.includes('quiz') || lower.includes('question') || lower.includes('test')) {
+                return "### 📝 Practice Recall Quiz\n\n**Question 1**: What separates *active recall* from *passive review*?\n- A) Active recall relies on highlighters and repetitive re-reading.\n- B) Active recall forces neural retrieval of memory traces before seeing answers.\n- C) Passive review produces stronger long-term synaptic potentiation.\n\n*(Answer: **B** — Neural retrieval strengthening creates resilient memory pathways.)*\n\n**Question 2**: In spaced repetition, when is the optimal moment to review material?\n- Just as the memory begins to decay according to the Ebbinghaus forgetting curve.";
+            }
+            if (lower.includes('formula') || lower.includes('code') || lower.includes('algorithm')) {
+                return "### ⚡ Essential Equations & Analytical Frameworks\n\n```python\n# Spaced Repetition Review Interval Algorithm (SuperMemo-2 Approximation)\ndef next_interval(repetition: int, easiness_factor: float, quality: int):\n    if quality < 3:\n        return 1  # Reset to 1 day on recall lapse\n    if repetition == 1:\n        return 1\n    elif repetition == 2:\n        return 6\n    else:\n        return int(previous_interval * easiness_factor)\n```";
+            }
+            return "### 📚 Study Summary & Actionable Insights\n\n- **Core Takeaway**: Grounding abstract facts in concrete visual models leads to ~3x higher retention during examination.\n- **Recommended Next Step**: Formulate 3 questions about this concept and attempt to answer them without referencing your notes.\n- *Tip*: Feel free to attach any lecture slide or PDF directly onto the screen for deep document synthesis.";
+        }
+
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('cognify-theme') || 'light';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIcon.innerHTML = `<i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>`;
+                themeText.innerText = "Light Mode";
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIcon.innerHTML = `<i data-lucide="moon" class="w-3.5 h-3.5 text-terra-600"></i>`;
+                themeText.innerText = "Dark Mode";
+            }
+            localStorage.setItem('cognify-theme', theme);
+            lucide.createIcons();
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            applyTheme(isDark ? 'light' : 'dark');
+        });
+
+        initTheme();
+
+        // Auto-expand Textarea
+        userPromptInput.addEventListener('input', () => {
+            userPromptInput.style.height = 'auto';
+            userPromptInput.style.height = Math.min(userPromptInput.scrollHeight, 144) + 'px';
+        });
+
+        // Keydown (Enter to send, Shift+Enter for newline)
+        userPromptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Mobile Sidebar Controls
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarBackdrop.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+        }
+        openSidebarBtn.addEventListener('click', openSidebar);
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+
+        // PDF File Picker Triggers
+        uploadPdfTrigger.addEventListener('click', () => pdfFileInput.click());
+        capsuleAttachBtn.addEventListener('click', () => pdfFileInput.click());
+
+        pdfFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) handlePdfFile(file);
+        });
+
+        // Drag & Drop Handlers
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragOverlay.classList.remove('hidden');
+            dragOverlay.classList.add('flex');
+        });
+        dragOverlay.addEventListener('dragover', (e) => e.preventDefault());
+        dragOverlay.addEventListener('dragleave', (e) => {
+            if (e.relatedTarget === null) {
+                dragOverlay.classList.add('hidden');
+                dragOverlay.classList.remove('flex');
+            }
+        });
+        dragOverlay.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragOverlay.classList.add('hidden');
+            dragOverlay.classList.remove('flex');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.pdf')) {
+                handlePdfFile(file);
+            } else {
+                alert("Please drop a valid PDF study document.");
+            }
+        });
+
+        // Handle PDF Upload API
+        async function handlePdfFile(file) {
+            capsuleAttachBtn.classList.add('animate-spin', 'text-terra-600');
+            docCardStatus.innerText = "Extracting text...";
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("PDF Processing Error: " + data.error);
+                } else {
+                    currentPdfText = data.extracted_text;
+                    currentPdfFileName = file.name;
+
+                    docCardTitle.innerText = file.name;
+                    docCardStatus.innerText = `${(file.size / 1024).toFixed(0)} KB • Indexed`;
+                    activeDocCard.classList.remove('hidden');
+                    activeDocCard.classList.add('flex');
+
+                    inputDocName.innerText = file.name;
+                    inputDocBadge.classList.remove('hidden');
+                    inputDocBadge.classList.add('flex');
+
+                    userPromptInput.placeholder = `Ask Cognify anything about ${file.name}...`;
+
+                    appendMessage({
+                        role: 'system',
+                        content: `📄 **${file.name}** was successfully attached and indexed. You can now request summaries, practice quizzes, or concept breakdowns based on this document.`
+                    });
+                }
+            } catch (err) {
+                alert("Failed to connect to backend server. Make sure FastAPI is running.");
+            } finally {
+                capsuleAttachBtn.classList.remove('animate-spin', 'text-terra-600');
+                pdfFileInput.value = '';
+                lucide.createIcons();
+            }
+        }
+
+        function detachPdf() {
+            currentPdfText = "";
+            currentPdfFileName = "";
+            activeDocCard.classList.add('hidden');
+            activeDocCard.classList.remove('flex');
+            inputDocBadge.classList.add('hidden');
+            inputDocBadge.classList.remove('flex');
+            userPromptInput.placeholder = "Ask Cognify anything or query your study material...";
+        }
+        removePdfBtn.addEventListener('click', detachPdf);
+        inputRemovePdf.addEventListener('click', detachPdf);
+
+        // Prompt Chips Click Handlers
+        document.querySelectorAll('.study-prompt-chip, .hero-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const prompt = card.getAttribute('data-prompt');
+                userPromptInput.value = prompt;
+                chatForm.dispatchEvent(new Event('submit'));
+                if (window.innerWidth < 768) closeSidebar();
+            });
+        });
+
+        // Chat Form Submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userPromptInput.value.trim();
+            if (!text || isProcessing) return;
+
+            if (heroWelcome) heroWelcome.classList.add('hidden');
+
+            appendMessage({ role: 'user', content: text });
+            conversationHistory.push({ role: 'user', text });
+            userPromptInput.value = '';
+            userPromptInput.style.height = 'auto';
+
+            isProcessing = true;
+            sendButton.disabled = true;
+            const typingIndicator = showTypingIndicator();
+
+            try {
+                // First attempt /api/study
+                const response = await fetch('/api/study', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        history: conversationHistory.slice(-10),
+                        pdf_text: currentPdfText
+                    })
+                });
+                const data = await response.json();
+                typingIndicator.remove();
+
+                if (data.success && data.reply) {
+                    appendMessage({ role: 'ai', content: data.reply });
+                    conversationHistory.push({ role: 'assistant', text: data.reply });
+                    if (ttsEnabled && 'speechSynthesis' in window) speakText(data.reply);
+                } else {
+                    // Fallback to local study knowledge base
+                    const fallbackReply = respondStudy(text);
+                    appendMessage({ role: 'ai', content: fallbackReply });
+                    conversationHistory.push({ role: 'assistant', text: fallbackReply });
+                    if (ttsEnabled && 'speechSynthesis' in window) speakText(fallbackReply);
+                }
+            } catch (err) {
+                // Fallback on network failure
+                typingIndicator.remove();
+                const fallbackReply = respondStudy(text);
+                appendMessage({ role: 'ai', content: fallbackReply });
+                conversationHistory.push({ role: 'assistant', text: fallbackReply });
+            } finally {
+                isProcessing = false;
+                sendButton.disabled = false;
+                userPromptInput.focus();
+            }
+        });
+
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 60);
+            });
+        }
+
+        // Message Rendering
+        function appendMessage({ role, content, isError = false }) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (role === 'user') {
+                messageWrapper.innerHTML = `
+                    <div class="flex flex-col items-end max-w-[85%] sm:max-w-[75%]">
+                        <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-terra-500 to-terra-600 dark:from-terra-600 dark:to-terra-700 text-white font-medium text-sm sm:text-base shadow-md shadow-terra-600/15 leading-relaxed break-words">
+                            ${escapeHtml(content)}
+                        </div>
+                        <span class="text-[10px] text-dusk-400 mt-1 px-1">${timeString}</span>
+                    </div>
+                `;
+            } else if (role === 'system') {
+                messageWrapper.innerHTML = `
+                    <div class="w-full my-2 flex justify-center">
+                        <div class="px-4 py-2 rounded-xl bg-sage-50 dark:bg-sage-950/40 border border-sage-200 dark:border-sage-500/20 text-sage-800 dark:text-sage-200 text-xs font-medium max-w-lg text-center">
+                            ${marked.parse(content)}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // AI Bubble
+                const rawHtml = marked.parse(content);
+                messageWrapper.innerHTML = `
+                    <div class="flex gap-3 items-start max-w-[92%] sm:max-w-[85%]">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
+                            <span class="font-serif font-bold text-xs">C</span>
+                        </div>
+                        <div class="flex flex-col items-start flex-1 overflow-hidden">
+                            <div class="glass-card p-4 sm:p-5 rounded-2xl rounded-tl-sm w-full border ${isError ? 'border-red-300 bg-red-50/50 dark:bg-red-950/20' : 'border-sand-200 dark:border-white/10'}">
+                                <div class="prose-content">
+                                    ${rawHtml}
+                                </div>
+                                <div class="mt-3 pt-3 border-t border-sand-200/60 dark:border-dusk-700/60 flex items-center justify-between text-[11px] text-dusk-400">
+                                    <div class="flex items-center gap-3">
+                                        <button class="copy-msg-btn flex items-center gap-1 hover:text-terra-600 transition-colors" title="Copy response">
+                                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                            <span>Copy</span>
+                                        </button>
+                                        <button class="speak-msg-btn flex items-center gap-1 hover:text-terra-600 transition-colors" title="Read out loud">
+                                            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                                            <span>Read</span>
+                                        </button>
+                                    </div>
+                                    <span>${timeString}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add event listeners for copy & speak
+                const copyBtn = messageWrapper.querySelector('.copy-msg-btn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(content);
+                        copyBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-sage-600"></i><span class="text-sage-600">Copied!</span>`;
+                        lucide.createIcons();
+                        setTimeout(() => {
+                            copyBtn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Copy</span>`;
+                            lucide.createIcons();
+                        }, 2000);
+                    });
+                }
+                const speakBtn = messageWrapper.querySelector('.speak-msg-btn');
+                if (speakBtn) {
+                    speakBtn.addEventListener('click', () => speakText(content));
+                }
+            }
+
+            chatMessages.appendChild(messageWrapper);
+            lucide.createIcons();
+            messageWrapper.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            scrollToBottom();
+        }
+
+        // Typing Indicator
+        function showTypingIndicator() {
+            const wrapper = document.createElement('div');
+            wrapper.id = 'typing-indicator';
+            wrapper.className = 'flex gap-3 items-start max-w-[85%] mx-auto w-full';
+            wrapper.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
+                    <span class="font-serif font-bold text-xs">C</span>
+                </div>
+                <div class="glass-card px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2 border border-sand-200 dark:border-white/10">
+                    <div class="flex gap-1">
+                        <span class="w-2 h-2 rounded-full bg-terra-500 animate-bounce" style="animation-delay: 0ms"></span>
+                        <span class="w-2 h-2 rounded-full bg-terra-500 animate-bounce" style="animation-delay: 150ms"></span>
+                        <span class="w-2 h-2 rounded-full bg-terra-500 animate-bounce" style="animation-delay: 300ms"></span>
+                    </div>
+                    <span class="text-xs text-dusk-500 dark:text-dusk-400 font-medium">Cognify is synthesizing...</span>
+                </div>
+            `;
+            chatMessages.appendChild(wrapper);
+            scrollToBottom();
+            return wrapper;
+        }
+
+        // Text-to-Speech
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/[*#_`\[\]]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        ttsToggleBtn.addEventListener('click', () => {
+            ttsEnabled = !ttsEnabled;
+            if (ttsEnabled) {
+                ttsToggleBtn.classList.add('bg-terra-500/15', 'text-terra-600');
+            } else {
+                ttsToggleBtn.classList.remove('bg-terra-500/15', 'text-terra-600');
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        });
+
+        // Speech Recognition (Dictation)
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRec();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => voiceInputBtn.classList.add('text-terra-600', 'animate-pulse');
+            recognition.onend = () => voiceInputBtn.classList.remove('text-terra-600', 'animate-pulse');
+            recognition.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                userPromptInput.value += (userPromptInput.value ? ' ' : '') + transcript;
+                userPromptInput.focus();
+            };
+            voiceInputBtn.addEventListener('click', () => recognition.start());
+        } else {
+            voiceInputBtn.style.display = 'none';
+        }
+
+        // Export Chat Session as Markdown
+        exportChatBtn.addEventListener('click', () => {
+            if (!conversationHistory.length) {
+                alert("No study session notes to export yet.");
+                return;
+            }
+            let md = `# Cognify Study Session Notes\n*Exported on ${new Date().toLocaleString()}*\n\n`;
+            if (currentPdfFileName) md += `**Referenced Document**: ${currentPdfFileName}\n\n---\n\n`;
+            conversationHistory.forEach(m => {
+                md += `### ${m.role === 'user' ? 'Student' : 'Cognify Study Copilot'}\n${m.text}\n\n`;
+            });
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Cognify-Study-Notes-${Date.now()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Clear Session
+        function resetSession() {
+            conversationHistory.length = 0;
+            chatMessages.innerHTML = '';
+            if (heroWelcome) {
+                chatMessages.appendChild(heroWelcome);
+                heroWelcome.classList.remove('hidden');
+            }
+            detachPdf();
+            fetch('/clear-chat', { method: 'POST' }).catch(() => {});
+        }
+        newSessionBtn.addEventListener('click', resetSession);
+        clearAllBtn.addEventListener('click', () => {
+            if (confirm("Reset current study session?")) resetSession();
+        });
+
+        // ==================== AUTHENTICATION & GOOGLE SIGN-IN ====================
+        
+        function openAuthModal(tab = 'login') {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+            switchAuthTab(tab);
+            gAccountsList.classList.add('hidden');
+            gCustomAccountForm.classList.add('hidden');
+            gSigning.classList.add('hidden');
+            gChoose.style.display = 'block';
+        }
+
+        function closeAuthModalHandler() {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+            hideAuthAlert();
+        }
+
+        function showAuthAlert(msg, isSuccess = false) {
+            authAlert.classList.remove('hidden');
+            authAlert.className = `mb-4 p-3 rounded-xl text-xs font-medium border flex items-center gap-2 ${
+                isSuccess 
+                    ? 'bg-sage-50 text-sage-800 border-sage-200 dark:bg-sage-950/40 dark:text-sage-300 dark:border-sage-800' 
+                    : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
+            }`;
+            authAlert.innerHTML = `
+                <i data-lucide="${isSuccess ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 shrink-0"></i>
+                <span>${escapeHtml(msg)}</span>
+            `;
+            lucide.createIcons();
+        }
+
+        function hideAuthAlert() {
+            authAlert.classList.add('hidden');
+            authAlert.innerHTML = '';
+        }
+
+        function switchAuthTab(tab) {
+            hideAuthAlert();
+            if (tab === 'login') {
+                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-dusk-700 text-terra-600 dark:text-terra-400 shadow-sm";
+                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-dusk-500 dark:text-dusk-400 hover:text-dusk-800 dark:hover:text-white";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+                authModalTitle.innerText = "Welcome Back to Cognify";
+                authModalDesc.innerText = "Sign in to access your study history and materials";
+            } else {
+                tabRegister.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white dark:bg-dusk-700 text-terra-600 dark:text-terra-400 shadow-sm";
+                tabLogin.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-dusk-500 dark:text-dusk-400 hover:text-dusk-800 dark:hover:text-white";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+                authModalTitle.innerText = "Create Your Cognify Account";
+                authModalDesc.innerText = "Start saving study sessions and personalized AI notes";
+            }
+        }
+
+        function updateAuthUI(user) {
+            currentUser = user;
+            if (user) {
+                const firstName = user.name.split(' ')[0];
+                const methodBadge = user.method === 'google' ? 'Google' : 'Email';
+                authLoginBtn.innerHTML = `
+                    <div class="w-5 h-5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-[10px] uppercase">
+                        ${user.name.charAt(0)}
+                    </div>
+                    <span>${escapeHtml(firstName)}</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
+                `;
+                userDisplayName.innerText = user.name;
+                userDisplayEmail.innerText = user.email;
+                userAuthBadge.innerText = methodBadge;
+            } else {
+                authLoginBtn.innerHTML = `
+                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                    <span>Sign In</span>
+                `;
+                userProfileMenu.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        // Google Sign-In Flow
+        btnGoogleMain.addEventListener('click', () => {
+            gAccountsList.classList.toggle('hidden');
+        });
+
+        gOtherToggle.addEventListener('click', () => {
+            gCustomAccountForm.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.g-account-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.getAttribute('data-name');
+                const email = btn.getAttribute('data-email');
+                runGoogle(name, email);
+            });
+        });
+
+        btnGCustomSubmit.addEventListener('click', () => {
+            const name = document.getElementById('g-custom-name').value.trim();
+            const email = document.getElementById('g-custom-email').value.trim();
+            if (!name || !email.includes('@')) {
+                alert("Please enter a valid name and Google email.");
+                return;
+            }
+            runGoogle(name, email);
+        });
+
+        async function runGoogle(name, email) {
+            gChoose.style.display = 'none';
+            gSigning.classList.remove('hidden');
+            gSigning.classList.add('flex');
+            let token = null;
+            try {
+                const r = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: 'google-' + Math.random().toString(36).slice(2) })
+                });
+                const data = await r.json();
+                if (data.success) token = data.token || null;
+            } catch (e) {}
+
+            setTimeout(() => {
+                const userObj = { name, email, method: 'google', token };
+                localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                if (token) localStorage.setItem('cognify_token', token);
+                updateAuthUI(userObj);
+                closeAuthModalHandler();
+            }, 600);
+        }
+
+        // Sign In Form Submit
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-submit-login');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Signing In...</span>`;
+
+            try {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    const userObj = { name: data.user?.name || email.split('@')[0], email, method: 'email', token: data.token };
+                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                    localStorage.setItem('cognify_token', data.token);
+                    updateAuthUI(userObj);
+                    closeAuthModalHandler();
+                    formLogin.reset();
+                } else {
+                    showAuthAlert(data.error || "Invalid email or password.");
+                }
+            } catch (err) {
+                // Offline fallback
+                const storedUsers = JSON.parse(localStorage.getItem('cognify_local_users') || '{}');
+                const u = storedUsers[email];
+                if (!u || u.pass !== btoa(password)) {
+                    showAuthAlert("Could not reach the server, and no local offline account matches.");
+                } else {
+                    const userObj = { name: u.name, email, method: 'email', token: 'offline-token' };
+                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                    updateAuthUI(userObj);
+                    closeAuthModalHandler();
+                    formLogin.reset();
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Sign In to Cognify</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+            }
+        });
+
+        // Sign Up Form Submit
+        formRegister.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim().toLowerCase();
+            const password = document.getElementById('register-password').value;
+            const btn = document.getElementById('btn-submit-register');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Creating Account...</span>`;
+
+            try {
+                const res = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if (data.success && data.token) {
+                    const userObj = { name, email, method: 'email', token: data.token };
+                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                    localStorage.setItem('cognify_token', data.token);
+                    updateAuthUI(userObj);
+                    closeAuthModalHandler();
+                    formRegister.reset();
+                } else {
+                    showAuthAlert(data.error || "Could not create account.");
+                }
+            } catch (err) {
+                // Store locally if server is unreachable
+                const storedUsers = JSON.parse(localStorage.getItem('cognify_local_users') || '{}');
+                storedUsers[email] = { name, pass: btoa(password) };
+                localStorage.setItem('cognify_local_users', JSON.stringify(storedUsers));
+                const userObj = { name, email, method: 'email', token: 'offline-token' };
+                localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                updateAuthUI(userObj);
+                closeAuthModalHandler();
+                formRegister.reset();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Create Account</span><i data-lucide="user-plus" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+            }
+        });
+
+        // Sign Out
+        logoutBtn.addEventListener('click', async () => {
+            const token = localStorage.getItem('cognify_token');
+            if (token) {
+                try {
+                    await fetch('/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token })
+                    });
+                } catch (err) {}
+            }
+            localStorage.removeItem('cognify_token');
+            localStorage.removeItem('cognify_user');
+            updateAuthUI(null);
+            userProfileMenu.classList.add('hidden');
+        });
+
+        // Open Auth Modal Event
+        authLoginBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentUser) {
+                userProfileMenu.classList.toggle('hidden');
+            } else {
+                openAuthModal('login');
+            }
+        });
+
+        // Click outside closes dropdown
+        document.addEventListener('click', (e) => {
+            if (userProfileMenu && !userProfileMenu.contains(e.target) && !authLoginBtn.contains(e.target)) {
+                userProfileMenu.classList.add('hidden');
+            }
+        });
+
+        closeAuthModal.addEventListener('click', closeAuthModalHandler);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) closeAuthModalHandler();
+        });
+
+        tabLogin.addEventListener('click', () => switchAuthTab('login'));
+        tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+        // Check Auth on Page Load
+        async function checkAuthSession() {
+            const savedUser = localStorage.getItem('cognify_user');
+            if (savedUser) {
+                try {
+                    updateAuthUI(JSON.parse(savedUser));
+                } catch(e) {}
+            }
+            const token = localStorage.getItem('cognify_token');
+            if (!token) return;
+            try {
+                const res = await fetch(`/auth/me?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    const userObj = { ...data.user, method: currentUser?.method || 'email', token };
+                    updateAuthUI(userObj);
+                    localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                }
+            } catch(e) {}
+        }
+        checkAuthSession();
+
+        // Utility: Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        lucide.createIcons();
+    </script>
 </body>
 </html>
