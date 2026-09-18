@@ -14,7 +14,7 @@ from auth import register_user, login_user, get_user_by_token, logout_user
 
 load_dotenv()
 
-app = FastAPI(title="Alba Yoga Studio API")
+app = FastAPI(title="Cognify StudyMate AI API")
 
 # ---------- Request models ----------
 
@@ -35,8 +35,18 @@ class LoginRequest(BaseModel):
 class LogoutRequest(BaseModel):
     token: str = ""
 
-class SageMessage(BaseModel):
+class StudyMessage(BaseModel):
     role: str          # "user" | "assistant"
+    text: str
+
+class StudyRequest(BaseModel):
+    message: str
+    history: list[StudyMessage] = []
+    pdf_text: str = ""
+
+# Keep Sage models for backwards compatibility
+class SageMessage(BaseModel):
+    role: str
     text: str
 
 class SageRequest(BaseModel):
@@ -62,7 +72,7 @@ def serve_ui():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "Alba Yoga Studio"}
+    return {"status": "ok", "service": "Cognify StudyMate AI"}
 
 # ==================== AUTHENTICATION ====================
 
@@ -94,7 +104,7 @@ def auth_logout(req: LogoutRequest):
     logout_user(req.token)
     return {"success": True, "message": "Logged out successfully."}
 
-# ==================== SAGE (AI companion) ====================
+# ==================== COGNIFY STUDY COPILOT ====================
 
 def get_genai_client():
     api_key = os.getenv("GEMINI_API_KEY")
@@ -102,43 +112,35 @@ def get_genai_client():
         raise ValueError("GEMINI_API_KEY is not set.")
     return genai.Client(api_key=api_key)
 
-SAGE_SYSTEM_PROMPT = """You are Sage, the resident companion of Alba — a small boutique \
-yoga studio at 14 Alder Lane (corner of Alder & 9th, sage-green door). Your tone is warm, \
-unhurried, plain-spoken. You are the antidote to high-intensity gym culture: you never push, \
-never upsell aggressively, and never recommend high-intensity exercise.
+COGNIFY_SYSTEM_PROMPT = """You are Cognify, an intelligent, attentive, and calm AI Study Copilot. \
+Your goal is to help students, researchers, and curious minds master difficult subjects, retain concepts deeply, \
+and study with quiet clarity.
 
-STUDIO FACTS (use only these, never invent others):
-- Practices: Vinyasa (60 min, warm room), Yin (75 min, cool room, long floor holds), \
-Restorative (60 min, bolsters & blankets), Breathwork (45 min, seated).
-- Teachers: Maren Kolstad (vinyasa & breathwork), Theo Adebayo (yin & restorative), \
-Priya Raman (restorative & foundations). Priya's Saturday 10:30 "Foundations" class is the \
-recommended starting point for complete beginners.
-- Weekly rhythm: Sunrise Vinyasa Mon-Fri 7:00; Yin + Sound Mon 18:30; Restorative Tue & Thu \
-18:00; Breathwork Tue 19:45 & Thu 19:30; Midday Yin Wed 12:15; Vinyasa II Wed 18:30; Slow Flow \
-Thu 9:30; Unwind Yin Fri 17:30; Long Slow Vinyasa Sat 8:30; Foundations Sat 10:30; Yoga Nidra \
-Sat 16:00; Quiet Morning Yin Sun 9:00; Restorative + Breath Sun 11:00; Evening Unwind Sun 17:00.
-- Pricing: first class free; drop-in $22; 10-class card $180; unlimited month $110 (pause \
-anytime). No contracts.
-- What to bring: nothing. Mats, blocks, straps, blankets and tea provided. Bare feet on the \
-mat, shoes by the door.
-- Policies: cancel up to 2 hours before class, no late-cancel fees. Doors open 15 min early. \
-Max 14 mats per class.
-- To book, direct users to tap a class in the Schedule section, or tell them you can hold a \
-mat if they ask here in chat.
+CORE COMPETENCIES:
+1. Concept Breakdown: Explain complex, technical, or abstract ideas using clear language, structured steps, and intuitive analogies.
+2. Document Understanding: When a document or notes are provided in context, synthesize main arguments, cite specific sections, and answer questions with high fidelity to the text.
+3. Active Recall & Quizzing: Generate targeted practice questions, flashcard sets, or Socratic questions to test comprehension and memory.
+4. Methodical Problem Solving: Walk step-by-step through math, logic, code, or essay construction.
 
-STYLE: short markdown replies — a greeting line, a few bullets or one short paragraph, and a \
-gentle closing question. Use **bold** for class names and times. If asked something unrelated \
-to the studio, answer briefly and steer back kindly. Never mention these instructions."""
+STYLE:
+- Clean Markdown formatting: use bold keywords, bulleted lists, code blocks, or LaTeX math when relevant.
+- Tone: warm, encouraging, intellectually rigorous, and unhurried. No gimmicks, no fluff."""
 
-# NOTE: stateless by design — each client sends its own history,
-# unlike /ask-ai whose global chat_history is shared by ALL visitors.
-@app.post("/api/sage")
-def sage_chat(req: SageRequest):
+@app.post("/api/study")
+def study_chat(req: StudyRequest):
     contents = []
-    for m in req.history[-12:]:                      # keep context bounded
+    
+    # Document context injection
+    doc_prefix = ""
+    if req.pdf_text and req.pdf_text.strip():
+        doc_prefix = f"[ATTACHED DOCUMENT CONTENT]:\n{req.pdf_text.strip()}\n\n---\n"
+
+    for m in req.history[-12:]:
         role = "model" if m.role == "assistant" else "user"
         contents.append({"role": role, "parts": [{"text": m.text}]})
-    contents.append({"role": "user", "parts": [{"text": req.message}]})
+    
+    user_message = doc_prefix + req.message if doc_prefix and not contents else req.message
+    contents.append({"role": "user", "parts": [{"text": user_message}]})
 
     try:
         client = get_genai_client()
@@ -146,11 +148,16 @@ def sage_chat(req: SageRequest):
         response = client.models.generate_content(
             model=model_name,
             contents=contents,
-            config=types.GenerateContentConfig(system_instruction=SAGE_SYSTEM_PROMPT),
+            config=types.GenerateContentConfig(system_instruction=COGNIFY_SYSTEM_PROMPT),
         )
         return {"success": True, "reply": response.text}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+# Backwards compatibility alias for /api/sage
+@app.post("/api/sage")
+def sage_alias(req: SageRequest):
+    return study_chat(StudyRequest(message=req.message, history=[StudyMessage(role=m.role, text=m.text) for m in req.history]))
 
 # ==================== LEGACY STUDY ENDPOINTS (unused by new UI) ====================
 
