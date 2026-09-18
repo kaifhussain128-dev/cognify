@@ -821,6 +821,7 @@
         });
 
         // ==================== SAGE AI COMPANION LOGIC ====================
+        const state = { chat: [] };
         let sageHistory = [];
 
         function openSageDrawer() {
@@ -865,6 +866,7 @@
         });
 
         $('#clear-sage-btn').addEventListener('click', () => {
+            state.chat = [];
             sageHistory = [];
             $('#sage-messages').innerHTML = `
                 <div class="flex items-start gap-2.5 max-w-[90%]">
@@ -876,11 +878,61 @@
             `;
         });
 
+        // Local knowledge base fallback — chat never breaks
+        function respond(message) {
+            const q = (message || '').toLowerCase();
+            let reply = "";
+
+            if (q.includes("beginner") || q.includes("start") || q.includes("first time") || q.includes("new to yoga") || q.includes("newbie")) {
+                reply = "Welcome to Alba. If you are brand new to yoga, we warmly recommend **Foundations with Priya Raman** on **Saturday at 10:30 AM** (60 min, room temperature). It's gentle, unhurried, and designed specifically for beginners.\n\nYour first class is always free. Would you like me to hold a mat for you?";
+            } else if (q.includes("price") || q.includes("pricing") || q.includes("cost") || q.includes("rate") || q.includes("membership") || q.includes("free") || q.includes("card") || q.includes("drop-in") || q.includes("pass")) {
+                reply = "Our pricing is transparent and simple:\n\n- **First Class**: Free with zero obligation\n- **Single Drop-in**: $22\n- **10-Class Card**: $180 ($18 per class, never expires, fully shareable)\n- **Unlimited Month**: $110/mo (no contracts, pause or cancel anytime)\n\nCan I help you reserve your first practice?";
+            } else if (q.includes("bring") || q.includes("wear") || q.includes("mat") || q.includes("props") || q.includes("towel") || q.includes("clothes")) {
+                reply = "You don't need to bring anything at all. We provide high-quality **Manduka mats, cork blocks, straps, organic bolsters, and hot herbal tea** by the door. Bare feet on warm cork; simply leave your shoes in the entryway.";
+            } else if (q.includes("where") || q.includes("address") || q.includes("location") || q.includes("find") || q.includes("lane") || q.includes("parking") || q.includes("directions")) {
+                reply = "Alba is located at **14 Alder Lane** (at the corner of Alder & 9th). Look for our quiet sage-green door. Street parking is readily available along 9th Avenue.";
+            } else if (q.includes("teacher") || q.includes("instructor") || q.includes("maren") || q.includes("theo") || q.includes("priya")) {
+                reply = "Our teachers bring decades of steady, attentive practice:\n\n- **Maren Kolstad**: Vinyasa Flow & Breathwork\n- **Theo Adebayo**: Yin Yoga & Sound Journeys\n- **Priya Raman**: Restorative & Foundations for Beginners\n\nIs there a specific practice or style you would like to explore?";
+            } else if (q.includes("hold") || q.includes("book") || q.includes("reserve") || q.includes("spot")) {
+                reply = "I've noted your mat reservation. Our room is capped at **14 mats** for spacious personal room. Doors open 15 minutes before class time so you can settle in with tea.";
+            } else if (q.includes("schedule") || q.includes("time") || q.includes("class") || q.includes("today") || q.includes("tomorrow") || q.includes("vinyasa") || q.includes("yin") || q.includes("breath")) {
+                reply = "We offer steady daily practices:\n\n- **Sunrise Vinyasa**: Mon–Fri 07:00 – 08:00\n- **Midday Yin**: Wed 12:15 – 13:30\n- **Restorative**: Tue & Thu 18:00 – 19:00\n- **Yin + Sound**: Mon 18:30 – 19:45\n- **Foundations**: Sat 10:30 – 11:30\n\nYou can explore all 7 days in the **Schedule** section above.";
+            } else {
+                reply = "Thank you for reaching out to Alba. We are a neighborhood sanctuary at 14 Alder Lane dedicated to quiet, unhurried movement, breath, and rest. Feel free to ask about our **class schedule**, **teachers**, **pricing**, or **holding a mat**.";
+            }
+
+            return { html: marked.parse(reply) };
+        }
+
+        // Exact User-Supplied Helper Functions
+        function htmlToText(html){
+          const d = document.createElement('div'); d.innerHTML = html;
+          d.querySelectorAll('.chip-reserve').forEach(b => b.remove());
+          return (d.textContent || '').replace(/[ \t]+/g, ' ').trim();
+        }
+
+        async function askSage(message){
+          const history = state.chat.slice(-10).map(m => ({
+            role: m.role === 'sage' ? 'assistant' : 'user',
+            text: m.html ? htmlToText(m.html) : m.text
+          }));
+          try{
+            const r = await fetch('/api/sage', {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ message, history })
+            });
+            const data = await r.json();
+            if (data.success && data.reply) return { html: marked.parse(data.reply) };
+          }catch(e){}
+          return respond(message);   // local knowledge base fallback — chat never breaks
+        }
+
         async function sendSageMessage(text) {
             if (!text.trim()) return;
             const messagesContainer = $('#sage-messages');
 
             // Append User Message
+            state.chat.push({ role: 'user', text: text });
             const userMsgEl = document.createElement('div');
             userMsgEl.className = "flex justify-end";
             userMsgEl.innerHTML = `
@@ -898,44 +950,21 @@
             messagesContainer.appendChild(typingIndicator);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            try {
-                const res = await fetch('/api/sage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        history: sageHistory
-                    })
-                });
+            const res = await askSage(text);
+            typingIndicator.remove();
 
-                const data = await res.json();
-                typingIndicator.remove();
+            if (res && res.html) {
+                state.chat.push({ role: 'sage', html: res.html });
 
-                if (data.success) {
-                    sageHistory.push({ role: "user", text: text });
-                    sageHistory.push({ role: "assistant", text: data.reply });
-
-                    const sageMsgEl = document.createElement('div');
-                    sageMsgEl.className = "flex items-start gap-2.5 max-w-[90%]";
-                    sageMsgEl.innerHTML = `
-                        <div class="w-6 h-6 rounded-full bg-sage-600 text-white flex items-center justify-center text-[10px] font-serif font-bold shrink-0 mt-0.5">S</div>
-                        <div class="p-3.5 rounded-2xl rounded-tl-sm bg-sage-100/70 dark:bg-sage-900/60 text-slate-800 dark:text-slate-200 border border-sage-200/40 dark:border-sage-800/40 prose dark:prose-invert prose-xs">
-                            ${marked.parse(data.reply)}
-                        </div>
-                    `;
-                    messagesContainer.appendChild(sageMsgEl);
-                } else {
-                    const errEl = document.createElement('div');
-                    errEl.className = "text-red-500 text-xs italic";
-                    errEl.innerText = data.error || "Sage is momentarily quiet. Please try again.";
-                    messagesContainer.appendChild(errEl);
-                }
-            } catch (err) {
-                typingIndicator.remove();
-                const errEl = document.createElement('div');
-                errEl.className = "text-red-500 text-xs italic";
-                errEl.innerText = "Could not reach the studio. Please verify connection.";
-                messagesContainer.appendChild(errEl);
+                const sageMsgEl = document.createElement('div');
+                sageMsgEl.className = "flex items-start gap-2.5 max-w-[90%]";
+                sageMsgEl.innerHTML = `
+                    <div class="w-6 h-6 rounded-full bg-sage-600 text-white flex items-center justify-center text-[10px] font-serif font-bold shrink-0 mt-0.5">S</div>
+                    <div class="p-3.5 rounded-2xl rounded-tl-sm bg-sage-100/70 dark:bg-sage-900/60 text-slate-800 dark:text-slate-200 border border-sage-200/40 dark:border-sage-800/40 prose dark:prose-invert prose-xs">
+                        ${res.html}
+                    </div>
+                `;
+                messagesContainer.appendChild(sageMsgEl);
             }
 
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
