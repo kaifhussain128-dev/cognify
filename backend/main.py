@@ -2,21 +2,65 @@ import os
 import sys
 from fastapi import FastAPI, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from fastapi.responses import FileResponse, JSONResponse
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pdf_processor import extract_text_from_pdf
+from pdf_processor import extract_text_from_pdf, extract_pdf_structured
 from auth import register_user, login_user, get_user_by_token, logout_user, google_auth_user
 
 load_dotenv()
 
-app = FastAPI(title="Cognify StudyMate AI API")
+app = FastAPI(
+    title="Cognify StudyMate AI API",
+    description="Intelligent AI study companion featuring Parsli-grade structured PDF document extraction, active recall synthesis, and member authentication."
+)
 
-# ---------- Request models ----------
+# ---------- Request & Response models ----------
+
+class DocumentMetadataSchema(BaseModel):
+    filename: str = Field(description="Original filename of the PDF")
+    page_count: int = Field(description="Total number of rendered pages")
+    total_words: int = Field(description="Total word count across all pages")
+    total_characters: int = Field(description="Total character count")
+    metadata: dict = Field(default_factory=dict, description="Embedded PDF metadata (author, title, producer, etc.)")
+
+class KeyConceptItem(BaseModel):
+    term: str = Field(description="Extracted academic concept or terminology")
+    definition: str = Field(description="High-yield definition or operational significance")
+    importance: str = Field(default="medium", description="'high' or 'medium' priority for study review")
+
+class SectionItem(BaseModel):
+    heading: str = Field(description="Detected section or chapter heading")
+    page: int = Field(default=1, description="Page number where section appears")
+    preview: str = Field(default="", description="Snippet or preview of section content")
+
+class ExtractedDataSchema(BaseModel):
+    title: str = Field(description="Extracted or deduced document title")
+    summary: str = Field(description="Executive summary of the document")
+    key_concepts: list[KeyConceptItem] = Field(default_factory=list, description="Key concepts and definitions")
+    sections: list[SectionItem] = Field(default_factory=list, description="Section-by-section breakdown")
+    suggested_questions: list[str] = Field(default_factory=list, description="Suggested active recall practice questions")
+    raw_text: str = Field(description="Full extracted text content for study analysis")
+
+class PageItem(BaseModel):
+    page_number: int
+    word_count: int
+    char_count: int
+    text: str
+
+class ParsliExtractionResponse(BaseModel):
+    status: str = Field(default="success")
+    engine: str = Field(description="Extraction engine used (e.g. cognify-parsli-ai-v1, cognify-parsli-fast-v1)")
+    mode: str = Field(description="'ai' or 'fast'")
+    processed_at: str = Field(description="ISO timestamp of extraction completion")
+    document: DocumentMetadataSchema
+    extracted_data: ExtractedDataSchema
+    pages: list[PageItem] = Field(default_factory=list)
+    extracted_text: str = Field(default="", description="Backward-compatible text string")
 
 class ChatRequest(BaseModel):
     question: str
@@ -218,15 +262,63 @@ def ask_ai(request: ChatRequest):
             chat_history.pop()
         return {"provider": "Cognify AI", "error": "API error or quota exhausted.", "details": str(e)}
 
-@app.post("/upload-pdf")
-async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pdf"):
-        return {"error": "Only PDF files are supported."}
+@app.post("/api/extract-pdf", response_model=ParsliExtractionResponse, tags=["Document Extraction"])
+async def api_extract_pdf(
+    file: UploadFile = File(..., description="PDF document file to extract"),
+    mode: str = Query("auto", pattern="^(auto|ai|fast)$", description="Extraction engine mode: 'auto' (AI with instant fallback), 'ai' (Gemini structured extraction), or 'fast' (local heuristic parsing)")
+):
+    """
+    Parsli-compatible PDF Structured Extraction API.
+    Converts any PDF into typed, structured JSON containing:
+    - Document metadata (pages, word/char counts, embedded metadata)
+    - Executive summary & detected title
+    - Key academic concepts with high-yield definitions and importance tiers
+    - Section-by-section breakdown with headings and page anchors
+    - Suggested active recall practice questions
+    - Page-by-page text breakdown
+    - Full backward-compatible raw text
+    """
+    if not file.filename.lower().endswith(".pdf"):
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "error": "Invalid file format. Only PDF documents are supported."}
+        )
     try:
         file_bytes = await file.read()
-        pdf_text = extract_text_from_pdf(file_bytes)
-        if not pdf_text:
-            return {"error": "Could not extract any text from this PDF."}
-        return {"message": "PDF processed successfully!", "filename": file.filename, "extracted_text": pdf_text}
+        if len(file_bytes) == 0:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "error": "Uploaded PDF file is empty."}
+            )
+        result = extract_pdf_structured(file_bytes, filename=file.filename, mode=mode)
+        return result
     except Exception as e:
-        return {"error": str(e)}
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "error": f"Failed to extract structured data from PDF: {str(e)}"}
+        )
+
+@app.post("/upload-pdf", tags=["Document Extraction"])
+async def upload_pdf(file: UploadFile = File(...)):
+    """
+    Enhanced PDF upload endpoint returning both legacy fields ('extracted_text', 'filename')
+    and complete Parsli structured document schema ('document', 'extracted_data', 'pages', 'engine').
+    """
+    if not file.filename.lower().endswith(".pdf"):
+        return JSONResponse(status_code=400, content={"error": "Only PDF files are supported."})
+    try:
+        file_bytes = await file.read()
+        if len(file_bytes) == 0:
+            return JSONResponse(status_code=400, content={"error": "Uploaded PDF file is empty."})
+        result = extract_pdf_structured(file_bytes, filename=file.filename, mode="auto")
+        extracted_text = result.get("extracted_text", "")
+        if not extracted_text:
+            return JSONResponse(status_code=422, content={"error": "Could not extract any text from this PDF."})
+        return {
+            "message": "PDF processed successfully!",
+            "filename": file.filename,
+            "extracted_text": extracted_text,
+            **result
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})

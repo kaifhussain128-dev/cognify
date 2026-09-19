@@ -286,25 +286,38 @@
         <!-- Scrollable Sidebar Content -->
         <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-5">
             
-            <!-- Active Document Widget -->
-            <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-sage-50/80 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-500/30 shadow-sm">
+            <!-- Active Document Widget (Parsli Structured) -->
+            <div id="active-document-card" class="hidden flex-col p-3.5 rounded-2xl bg-sage-50/80 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-500/30 shadow-sm transition-all">
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-sage-500 animate-ping"></span>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-sage-700 dark:text-sage-300">Active Document</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="doc-engine-badge" class="text-[9px] font-bold uppercase tracking-wider text-sage-700 dark:text-sage-300">Parsli Engine</span>
                     </div>
-                    <button id="remove-pdf-btn" class="text-dusk-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-black/5 dark:hover:bg-white/5" title="Remove PDF">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <button id="view-parsli-json-btn" type="button" class="text-[10px] text-terra-600 dark:text-terra-400 hover:text-terra-700 dark:hover:text-terra-300 font-mono px-1.5 py-0.5 rounded hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="View Parsli structured JSON schema">
+                            {JSON}
+                        </button>
+                        <button id="remove-pdf-btn" type="button" class="text-dusk-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-black/5 dark:hover:bg-white/5" title="Remove PDF">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-sage-500/15 text-sage-700 dark:text-sage-300 flex items-center justify-center shrink-0">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                     </div>
-                    <div class="overflow-hidden">
+                    <div class="overflow-hidden flex-1">
                         <p id="doc-card-title" class="text-xs font-semibold text-dusk-800 dark:text-sand-100 truncate">Document.pdf</p>
-                        <p id="doc-card-status" class="text-[10px] text-dusk-500 dark:text-dusk-400">Indexed & ready for study</p>
+                        <p id="doc-card-status" class="text-[10px] text-dusk-500 dark:text-dusk-400 truncate">Indexed & ready for study</p>
                     </div>
+                </div>
+
+                <!-- Parsli Key Concepts Chips -->
+                <div id="parsli-concepts-section" class="mt-2.5 pt-2 border-t border-sage-200/60 dark:border-sage-800/40 hidden flex-col gap-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-dusk-500 dark:text-dusk-400">Key Concepts (Click to Study)</span>
+                    </div>
+                    <div id="parsli-concepts-chips" class="flex flex-wrap gap-1 max-h-28 overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
@@ -704,9 +717,57 @@
         </div>
     </div>
 
+    <!-- Parsli Structured Document JSON Modal -->
+    <div id="parsli-json-modal" class="fixed inset-0 z-50 bg-dusk-900/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-3xl max-h-[85vh] bg-sand-50 dark:bg-dusk-900 rounded-3xl border border-sand-200 dark:border-dusk-700/80 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-sand-200 dark:border-dusk-800 flex items-center justify-between bg-sand-100/60 dark:bg-dusk-950/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-terra-500/10 dark:bg-terra-500/20 text-terra-600 dark:text-terra-400 flex items-center justify-center">
+                        <i data-lucide="file-json" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-dusk-900 dark:text-sand-100 flex items-center gap-2">
+                            <span>Parsli Structured Extraction Output</span>
+                            <span id="parsli-modal-engine-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-terra-100 dark:bg-terra-950/60 text-terra-700 dark:text-terra-300">cognify-parsli-ai-v1</span>
+                        </h3>
+                        <p class="text-[11px] text-dusk-500 dark:text-dusk-400">Structured JSON schema returned by /upload-pdf & /api/extract-pdf</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="copy-parsli-json-btn" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-200/90 hover:bg-sand-300 dark:bg-dusk-800 dark:hover:bg-dusk-700 text-xs font-semibold text-dusk-700 dark:text-sand-200 transition-colors shadow-sm">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <span id="copy-json-text">Copy JSON</span>
+                    </button>
+                    <button id="close-parsli-json-modal" type="button" class="p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content (JSON Code Viewer) -->
+            <div class="p-5 overflow-y-auto flex-1 font-mono text-xs bg-sand-50/50 dark:bg-dusk-950/70">
+                <pre id="parsli-json-code" class="text-dusk-800 dark:text-sand-200 whitespace-pre-wrap break-all select-all font-mono leading-relaxed"></pre>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         const MAX_PROMPT_CHARS = 4000;
+
+        // Parsli Engine Elements & State
+        const docEngineBadge = document.getElementById('doc-engine-badge');
+        const viewParsliJsonBtn = document.getElementById('view-parsli-json-btn');
+        const parsliConceptsSection = document.getElementById('parsli-concepts-section');
+        const parsliConceptsChips = document.getElementById('parsli-concepts-chips');
+        const parsliJsonModal = document.getElementById('parsli-json-modal');
+        const closeParsliJsonModal = document.getElementById('close-parsli-json-modal');
+        const parsliJsonCode = document.getElementById('parsli-json-code');
+        const copyParsliJsonBtn = document.getElementById('copy-parsli-json-btn');
+        const copyJsonText = document.getElementById('copy-json-text');
+        const parsliModalEngineBadge = document.getElementById('parsli-modal-engine-badge');
+        let currentParsliData = null;
 
         // DOM Elements
         const chatMessages = document.getElementById('chat-messages');
@@ -946,7 +1007,7 @@
             }
         });
 
-        // Handle PDF Upload API
+        // Handle PDF Upload API (Parsli Structured Extraction)
         async function handlePdfFile(file) {
             if (file.size > 15 * 1024 * 1024) {
                 alert("File is too large (Maximum 15 MB). Please select a smaller PDF.");
@@ -954,7 +1015,7 @@
             }
 
             capsuleAttachBtn.classList.add('animate-spin', 'text-terra-600');
-            docCardStatus.innerText = "Extracting text...";
+            docCardStatus.innerText = "Extracting via Parsli...";
             
             const formData = new FormData();
             formData.append('file', file);
@@ -969,11 +1030,54 @@
                 if (data.error) {
                     alert("PDF Processing Error: " + data.error);
                 } else {
-                    currentPdfText = data.extracted_text;
+                    currentPdfText = data.extracted_text || "";
                     currentPdfFileName = file.name;
+                    currentParsliData = data;
 
-                    docCardTitle.innerText = file.name;
-                    docCardStatus.innerText = `${(file.size / 1024).toFixed(0)} KB • Indexed`;
+                    const title = data.extracted_data?.title || file.name;
+                    const pageCount = data.document?.page_count || 1;
+                    const wordCount = (data.document?.total_words || 0).toLocaleString();
+                    const engineName = data.engine || "cognify-parsli-ai-v1";
+
+                    docCardTitle.innerText = title;
+                    docCardTitle.title = title;
+                    docCardStatus.innerText = `${pageCount} pgs • ${wordCount} words`;
+
+                    if (docEngineBadge) {
+                        docEngineBadge.innerText = engineName.includes("ai") ? "✨ Parsli AI" : "⚡ Parsli Fast";
+                    }
+                    if (parsliModalEngineBadge) {
+                        parsliModalEngineBadge.innerText = engineName;
+                    }
+
+                    // Render Key Concept Chips
+                    if (parsliConceptsChips) {
+                        parsliConceptsChips.innerHTML = '';
+                        const concepts = data.extracted_data?.key_concepts || [];
+                        if (concepts.length > 0) {
+                            parsliConceptsSection.classList.remove('hidden');
+                            parsliConceptsSection.classList.add('flex');
+
+                            concepts.slice(0, 10).forEach(concept => {
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.className = "text-[10px] px-2 py-0.5 rounded-full bg-sand-200/90 hover:bg-terra-100 dark:bg-dusk-800 dark:hover:bg-terra-950/60 text-dusk-700 dark:text-sand-300 hover:text-terra-700 dark:hover:text-terra-300 font-medium transition-colors text-left truncate max-w-full border border-sand-300/40 dark:border-dusk-700/50";
+                                btn.innerText = concept.term;
+                                btn.title = concept.definition ? `${concept.term}: ${concept.definition}` : concept.term;
+                                btn.addEventListener('click', () => {
+                                    userPromptInput.value = `Explain the core concept "${concept.term}" from this document in detail with clear examples:`;
+                                    validatePromptLength();
+                                    userPromptInput.focus();
+                                    if (window.innerWidth < 768) closeSidebar();
+                                });
+                                parsliConceptsChips.appendChild(btn);
+                            });
+                        } else {
+                            parsliConceptsSection.classList.add('hidden');
+                            parsliConceptsSection.classList.remove('flex');
+                        }
+                    }
+
                     activeDocCard.classList.remove('hidden');
                     activeDocCard.classList.add('flex');
 
@@ -981,11 +1085,21 @@
                     inputDocBadge.classList.remove('hidden');
                     inputDocBadge.classList.add('flex');
 
-                    userPromptInput.placeholder = `Ask Cognify anything about ${file.name}...`;
+                    userPromptInput.placeholder = `Ask Cognify anything about ${title}...`;
+
+                    // Generate rich overview message with Parsli metadata and summary
+                    let systemMsg = `📄 **${title}** (${pageCount} pages, ${wordCount} words) was successfully parsed and indexed via **${engineName}**!`;
+                    if (data.extracted_data?.summary) {
+                        systemMsg += `\n\n**Executive Summary**:\n${data.extracted_data.summary}`;
+                    }
+                    if (data.extracted_data?.suggested_questions && data.extracted_data.suggested_questions.length > 0) {
+                        systemMsg += `\n\n**Suggested Practice Questions**:\n` + data.extracted_data.suggested_questions.map(q => `• ${q}`).join('\n');
+                    }
+                    systemMsg += `\n\n*Tip: Click any key concept chip in the sidebar to review definitions, or ask questions directly.*`;
 
                     appendMessage({
                         role: 'system',
-                        content: `📄 **${file.name}** was successfully attached and indexed into your SQLite study session. You can now ask for summaries, practice quizzes, or concept breakdowns.`
+                        content: systemMsg
                     });
                 }
             } catch (err) {
@@ -1000,8 +1114,16 @@
         function detachPdf() {
             currentPdfText = "";
             currentPdfFileName = "";
+            currentParsliData = null;
             activeDocCard.classList.add('hidden');
             activeDocCard.classList.remove('flex');
+            if (parsliConceptsSection) {
+                parsliConceptsSection.classList.add('hidden');
+                parsliConceptsSection.classList.remove('flex');
+            }
+            if (parsliConceptsChips) {
+                parsliConceptsChips.innerHTML = '';
+            }
             inputDocBadge.classList.add('hidden');
             inputDocBadge.classList.remove('flex');
             userPromptInput.placeholder = "Ask Cognify anything or query your study material...";
@@ -1537,6 +1659,46 @@
 
         tabLogin.addEventListener('click', () => switchAuthTab('login'));
         tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+        // Parsli JSON Viewer Modal Events
+        if (viewParsliJsonBtn) {
+            viewParsliJsonBtn.addEventListener('click', () => {
+                if (!currentParsliData) return;
+                // Clean schema for preview - truncate massive extracted_text if needed for modal performance
+                const displayData = { ...currentParsliData };
+                if (displayData.extracted_text && displayData.extracted_text.length > 600) {
+                    displayData.extracted_text = displayData.extracted_text.slice(0, 400) + `... [${displayData.extracted_text.length.toLocaleString()} characters total]`;
+                }
+                parsliJsonCode.textContent = JSON.stringify(displayData, null, 2);
+                parsliJsonModal.classList.remove('hidden');
+                parsliJsonModal.classList.add('flex');
+            });
+        }
+        if (closeParsliJsonModal) {
+            closeParsliJsonModal.addEventListener('click', () => {
+                parsliJsonModal.classList.add('hidden');
+                parsliJsonModal.classList.remove('flex');
+            });
+        }
+        if (parsliJsonModal) {
+            parsliJsonModal.addEventListener('click', (e) => {
+                if (e.target === parsliJsonModal) {
+                    parsliJsonModal.classList.add('hidden');
+                    parsliJsonModal.classList.remove('flex');
+                }
+            });
+        }
+        if (copyParsliJsonBtn) {
+            copyParsliJsonBtn.addEventListener('click', () => {
+                if (!currentParsliData) return;
+                navigator.clipboard.writeText(JSON.stringify(currentParsliData, null, 2)).then(() => {
+                    copyJsonText.innerText = "Copied!";
+                    setTimeout(() => { copyJsonText.innerText = "Copy JSON"; }, 2000);
+                }).catch(() => {
+                    alert("Unable to copy to clipboard.");
+                });
+            });
+        }
 
         // Check Auth on Page Load
         async function checkAuthSession() {
