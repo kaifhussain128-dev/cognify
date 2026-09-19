@@ -348,13 +348,19 @@
             </div>
 
             <!-- Session History -->
-            <div class="flex-1">
-                <p class="text-[11px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 mb-2 px-1 flex items-center justify-between">
-                    <span>Active Session</span>
-                    <i data-lucide="clock" class="w-3 h-3 text-dusk-400"></i>
-                </p>
-                <div id="session-history-list" class="flex flex-col gap-1">
-                    <div class="px-3 py-2 rounded-lg bg-terra-500/10 border border-terra-500/20 text-xs text-terra-700 dark:text-terra-300 font-medium flex items-center justify-between">
+            <div class="flex-1 flex flex-col min-h-0 pt-2 border-t border-sand-200/60 dark:border-dusk-800/60">
+                <div class="flex items-center justify-between px-1 mb-2">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 flex items-center gap-1.5">
+                        <i data-lucide="history" class="w-3 h-3 text-dusk-400"></i>
+                        <span>Previous Sessions</span>
+                        <span id="sessions-count-badge" class="px-1.5 py-0.5 rounded-full text-[9px] bg-sand-200 dark:bg-dusk-800 text-dusk-600 dark:text-dusk-300 font-mono font-bold">0</span>
+                    </p>
+                    <button id="open-insights-btn" type="button" class="p-1 rounded-md text-dusk-400 hover:text-terra-600 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="View Study Insights & Analytics">
+                        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+                <div id="session-history-list" class="flex flex-col gap-1.5 overflow-y-auto max-h-[360px] pr-1">
+                    <div class="px-3 py-2 rounded-xl bg-terra-500/10 border border-terra-500/20 text-xs text-terra-700 dark:text-terra-300 font-medium flex items-center justify-between">
                         <div class="flex items-center gap-2 truncate">
                             <i data-lucide="message-square" class="w-3.5 h-3.5 text-terra-500 shrink-0"></i>
                             <span class="truncate">Current Study Session</span>
@@ -366,7 +372,7 @@
         </div>
 
         <!-- Sidebar Footer -->
-        <div class="p-4 border-t border-sand-200/80 dark:border-dusk-800/60 bg-sand-100/50 dark:bg-dusk-950/40">
+        <div class="p-3.5 border-t border-sand-200/80 dark:border-dusk-800/60 bg-sand-100/50 dark:bg-dusk-950/40">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <button id="focus-chime-btn" class="w-8 h-8 rounded-full bg-terra-50 dark:bg-dusk-800 border border-terra-200 dark:border-dusk-700 flex items-center justify-center text-xs text-terra-600 dark:text-terra-400 hover:scale-105 transition-transform" title="Play Singing Bowl Focus Chime">
@@ -380,9 +386,14 @@
                         </p>
                     </div>
                 </div>
-                <button id="clear-all-btn" class="p-2 rounded-lg text-dusk-400 hover:text-red-500 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="Reset Session Memory">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                </button>
+                <div class="flex items-center gap-1">
+                    <button id="sidebar-insights-btn" type="button" class="p-1.5 rounded-lg text-dusk-400 hover:text-terra-600 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="Study History Analytics & Insights">
+                        <i data-lucide="line-chart" class="w-4 h-4"></i>
+                    </button>
+                    <button id="clear-all-btn" class="p-1.5 rounded-lg text-dusk-400 hover:text-red-500 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors" title="Reset Session Memory">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </aside>
@@ -893,6 +904,101 @@
         </div>
     </div>
 
+    <!-- Study History & Collected Data Analytics Modal -->
+    <div id="study-insights-modal" class="fixed inset-0 z-50 bg-dusk-900/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-xl bg-sand-50 dark:bg-dusk-900 rounded-3xl border border-sand-200 dark:border-dusk-700/80 shadow-2xl p-6 sm:p-7 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            <button id="close-insights-modal" type="button" class="absolute top-5 right-5 p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-2xl bg-terra-500/15 text-terra-600 dark:text-terra-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-dusk-900 dark:text-sand-100 font-serif">Study History & Collected Analytics</h3>
+                    <p class="text-xs text-dusk-500 dark:text-dusk-400">Aggregated metrics and learning data from your past study sessions</p>
+                </div>
+            </div>
+
+            <!-- Scrollable content -->
+            <div class="overflow-y-auto space-y-5 pr-1 -mr-1 flex-1">
+                <!-- 6 Metric Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">Sessions</span>
+                        <span id="stat-total-sessions" class="text-xl font-bold font-serif text-terra-600 dark:text-terra-400 mt-0.5">0</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">Saved in SQLite</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">Questions</span>
+                        <span id="stat-user-questions" class="text-xl font-bold font-serif text-dusk-800 dark:text-sand-200 mt-0.5">0</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">User prompts</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">AI Syntheses</span>
+                        <span id="stat-ai-answers" class="text-xl font-bold font-serif text-dusk-800 dark:text-sand-200 mt-0.5">0</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">Explanations given</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">Words Analyzed</span>
+                        <span id="stat-total-words" class="text-xl font-bold font-serif text-sage-600 dark:text-sage-400 mt-0.5">0</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">Academic dialogue</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">Documents</span>
+                        <span id="stat-total-docs" class="text-xl font-bold font-serif text-dusk-800 dark:text-sand-200 mt-0.5">0</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">PDFs referenced</span>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-dusk-800/60 border border-sand-200/80 dark:border-dusk-700/80 flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-dusk-400 dark:text-dusk-500">Avg. Speed</span>
+                        <span id="stat-avg-latency" class="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">0ms</span>
+                        <span class="text-[9px] text-dusk-400 mt-auto">AI Inference</span>
+                    </div>
+                </div>
+
+                <!-- AI Engine Usage Breakdown -->
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-dusk-800/40 border border-sand-200/70 dark:border-dusk-700/60">
+                    <h4 class="text-xs font-bold text-dusk-800 dark:text-sand-200 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                        <span>AI Inference Engines Used</span>
+                        <i data-lucide="cpu" class="w-3.5 h-3.5 text-dusk-400"></i>
+                    </h4>
+                    <div id="insights-engine-list" class="space-y-2">
+                        <p class="text-xs text-dusk-400 italic">No study sessions recorded yet.</p>
+                    </div>
+                </div>
+
+                <!-- Referenced Documents -->
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-dusk-800/40 border border-sand-200/70 dark:border-dusk-700/60">
+                    <h4 class="text-xs font-bold text-dusk-800 dark:text-sand-200 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                        <span>Studied Document Archive</span>
+                        <i data-lucide="folder-open" class="w-3.5 h-3.5 text-dusk-400"></i>
+                    </h4>
+                    <div id="insights-docs-list" class="flex flex-wrap gap-1.5">
+                        <p class="text-xs text-dusk-400 italic">No PDF documents attached in past sessions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="pt-4 mt-2 border-t border-sand-200/80 dark:border-dusk-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2">
+                    <button id="export-all-json-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-200/90 hover:bg-sand-300/80 dark:bg-dusk-800 dark:hover:bg-dusk-700 text-xs font-semibold text-dusk-700 dark:text-sand-300 transition-colors">
+                        <i data-lucide="download" class="w-3.5 h-3.5 text-terra-500"></i>
+                        <span>Export All (JSON)</span>
+                    </button>
+                    <button id="export-all-md-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-200/90 hover:bg-sand-300/80 dark:bg-dusk-800 dark:hover:bg-dusk-700 text-xs font-semibold text-dusk-700 dark:text-sand-300 transition-colors">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-terra-500"></i>
+                        <span>Export All (MD)</span>
+                    </button>
+                </div>
+                <button id="btn-close-insights" type="button" class="px-4 py-1.5 rounded-xl bg-terra-500 hover:bg-terra-600 text-white text-xs font-bold transition-colors">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         const MAX_PROMPT_CHARS = 4000;
@@ -995,6 +1101,30 @@
         let isProcessing = false;
         let currentUser = null;
         const conversationHistory = [];
+
+        // Guest Identifier & Persistent Session Management
+        function getGuestId() {
+            let gid = localStorage.getItem('cognify_guest_id');
+            if (!gid) {
+                gid = 'guest_' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
+                localStorage.setItem('cognify_guest_id', gid);
+            }
+            return gid;
+        }
+
+        let currentSessionId = localStorage.getItem('cognify_active_session_id') || ('sess_' + Date.now());
+        localStorage.setItem('cognify_active_session_id', currentSessionId);
+
+        // History & Insights DOM Elements
+        const sessionHistoryList = document.getElementById('session-history-list');
+        const sessionsCountBadge = document.getElementById('sessions-count-badge');
+        const openInsightsBtn = document.getElementById('open-insights-btn');
+        const sidebarInsightsBtn = document.getElementById('sidebar-insights-btn');
+        const studyInsightsModal = document.getElementById('study-insights-modal');
+        const closeInsightsModal = document.getElementById('close-insights-modal');
+        const btnCloseInsights = document.getElementById('btn-close-insights');
+        const exportAllJsonBtn = document.getElementById('export-all-json-btn');
+        const exportAllMdBtn = document.getElementById('export-all-md-btn');
 
         // Focus Chime
         function playFocusChime() {
@@ -1259,6 +1389,14 @@
                         role: 'system',
                         content: systemMsg
                     });
+
+                    if (currentSessionId) {
+                        fetch(`/api/sessions/${encodeURIComponent(currentSessionId)}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ pdf_filename: file.name })
+                        }).then(() => loadSessionsList()).catch(() => {});
+                    }
                 }
             } catch (err) {
                 alert("Failed to connect to backend server. Make sure FastAPI is running.");
@@ -1285,6 +1423,14 @@
             inputDocBadge.classList.add('hidden');
             inputDocBadge.classList.remove('flex');
             userPromptInput.placeholder = "Ask Cognify anything or query your study material...";
+
+            if (currentSessionId) {
+                fetch(`/api/sessions/${encodeURIComponent(currentSessionId)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pdf_filename: "" })
+                }).then(() => loadSessionsList()).catch(() => {});
+            }
         }
         removePdfBtn.addEventListener('click', detachPdf);
         inputRemovePdf.addEventListener('click', detachPdf);
@@ -1347,13 +1493,23 @@
                         message: text,
                         history: conversationHistory.slice(-10),
                         pdf_text: currentPdfText,
+                        pdf_filename: currentPdfFileName || '',
                         search_mode: activeSearchMode,
                         user_groq_key: localStorage.getItem('cognify_user_groq_key') || '',
-                        user_gemini_key: localStorage.getItem('cognify_user_gemini_key') || ''
+                        user_gemini_key: localStorage.getItem('cognify_user_gemini_key') || '',
+                        session_id: currentSessionId,
+                        guest_id: getGuestId(),
+                        token: localStorage.getItem('cognify_token') || ''
                     })
                 });
                 const data = await response.json();
                 typingIndicator.remove();
+
+                if (data.session_id) {
+                    currentSessionId = data.session_id;
+                    localStorage.setItem('cognify_active_session_id', currentSessionId);
+                }
+                loadSessionsList();
 
                 if (data.success && data.reply) {
                     appendMessage({
@@ -1765,8 +1921,205 @@
             }
         });
 
-        // Reset Session
-        function resetSession() {
+        // ==================== PERSISTENT SESSION & CHAT HISTORY ====================
+
+        async function loadSessionsList() {
+            try {
+                const token = localStorage.getItem('cognify_token') || '';
+                const guestId = getGuestId();
+                const url = `/api/sessions?guest_id=${encodeURIComponent(guestId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data || !data.sessions) return;
+                const sessions = data.sessions;
+
+                if (sessionsCountBadge) {
+                    sessionsCountBadge.innerText = sessions.length;
+                }
+
+                if (!sessionHistoryList) return;
+                sessionHistoryList.innerHTML = '';
+
+                if (sessions.length === 0) {
+                    sessionHistoryList.innerHTML = `
+                        <div class="px-3 py-4 rounded-xl border border-dashed border-sand-300 dark:border-dusk-800 text-center">
+                            <i data-lucide="book-open" class="w-4 h-4 text-dusk-400 mx-auto mb-1.5 opacity-60"></i>
+                            <p class="text-[11px] font-medium text-dusk-500 dark:text-dusk-400">No past sessions yet</p>
+                            <p class="text-[10px] text-dusk-400 dark:text-dusk-500 mt-0.5">Ask Cognify anything to start learning!</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Group by relative date: Today, This Week, Older
+                const now = new Date();
+                const today = [];
+                const thisWeek = [];
+                const older = [];
+
+                sessions.forEach(sess => {
+                    const sessDate = new Date(sess.updated_at || sess.created_at);
+                    const diffHours = (now - sessDate) / (1000 * 60 * 60);
+                    if (diffHours < 24) {
+                        today.push(sess);
+                    } else if (diffHours < 24 * 7) {
+                        thisWeek.push(sess);
+                    } else {
+                        older.push(sess);
+                    }
+                });
+
+                const renderGroup = (title, items) => {
+                    if (!items.length) return;
+                    const groupHeader = document.createElement('div');
+                    groupHeader.className = "text-[9px] font-bold uppercase tracking-wider text-dusk-400 dark:text-dusk-500 px-1 pt-2 pb-0.5";
+                    groupHeader.innerText = title;
+                    sessionHistoryList.appendChild(groupHeader);
+
+                    items.forEach(s => {
+                        const isActive = s.id === currentSessionId;
+                        const itemWrapper = document.createElement('div');
+                        itemWrapper.className = `group relative px-2.5 py-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                            isActive
+                                ? 'bg-terra-500/15 border-terra-500/40 text-terra-700 dark:text-terra-300 ring-1 ring-terra-500/30 shadow-2xs'
+                                : 'bg-white/60 dark:bg-dusk-800/40 hover:bg-sand-100/90 dark:hover:bg-dusk-800/80 border-sand-200/70 dark:border-dusk-700/60 text-dusk-700 dark:text-dusk-300'
+                        }`;
+                        itemWrapper.setAttribute('data-session-id', s.id);
+                        itemWrapper.title = s.title || 'Study Session';
+
+                        const turnsLabel = s.message_count > 0 ? `${s.message_count} turn${s.message_count > 1 ? 's' : ''}` : 'Empty';
+                        const docBadgeHtml = s.pdf_filename ? `
+                            <span class="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.2 rounded-md bg-sand-200/90 dark:bg-dusk-700/90 text-dusk-600 dark:text-sand-300 truncate max-w-[90px]" title="${escapeHtml(s.pdf_filename)}">
+                                <i data-lucide="file-text" class="w-2.5 h-2.5 text-terra-500 shrink-0"></i>
+                                <span class="truncate">${escapeHtml(s.pdf_filename)}</span>
+                            </span>
+                        ` : '';
+
+                        itemWrapper.innerHTML = `
+                            <div class="flex items-center gap-2 truncate flex-1 min-w-0">
+                                <i data-lucide="${isActive ? 'message-square' : 'message-circle'}" class="w-3.5 h-3.5 shrink-0 ${isActive ? 'text-terra-500' : 'text-dusk-400 group-hover:text-terra-500'}"></i>
+                                <div class="flex flex-col truncate flex-1">
+                                    <span class="text-xs font-medium truncate leading-tight">${escapeHtml(s.title || 'Study Session')}</span>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <span class="text-[9px] text-dusk-400 font-mono">${turnsLabel}</span>
+                                        ${docBadgeHtml}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
+                                <button type="button" class="btn-rename-session p-1 rounded-md text-dusk-400 hover:text-terra-600 hover:bg-sand-200/70 dark:hover:bg-dusk-700 transition-colors" title="Rename Session">
+                                    <i data-lucide="pencil" class="w-3 h-3"></i>
+                                </button>
+                                <button type="button" class="btn-delete-session p-1 rounded-md text-dusk-400 hover:text-red-500 hover:bg-sand-200/70 dark:hover:bg-dusk-700 transition-colors" title="Delete Session">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        `;
+
+                        itemWrapper.addEventListener('click', (e) => {
+                            if (e.target.closest('.btn-rename-session') || e.target.closest('.btn-delete-session')) return;
+                            loadSession(s.id);
+                        });
+
+                        const renameBtn = itemWrapper.querySelector('.btn-rename-session');
+                        if (renameBtn) {
+                            renameBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                renameSession(s.id, s.title || 'Study Session');
+                            });
+                        }
+
+                        const deleteBtn = itemWrapper.querySelector('.btn-delete-session');
+                        if (deleteBtn) {
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                deleteSessionHandler(s.id);
+                            });
+                        }
+
+                        sessionHistoryList.appendChild(itemWrapper);
+                    });
+                };
+
+                renderGroup("Today", today);
+                renderGroup("Previous 7 Days", thisWeek);
+                renderGroup("Older", older);
+
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Failed to load session list:", err);
+            }
+        }
+
+        async function loadSession(sessionId) {
+            if (!sessionId) return;
+            try {
+                const res = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`);
+                const data = await res.json();
+                if (!data || !data.session) return;
+
+                const session = data.session;
+                currentSessionId = session.id;
+                localStorage.setItem('cognify_active_session_id', currentSessionId);
+
+                // Reset chat window
+                conversationHistory.length = 0;
+                chatMessages.innerHTML = '';
+
+                if (!session.messages || session.messages.length === 0) {
+                    if (heroWelcome) {
+                        chatMessages.appendChild(heroWelcome);
+                        heroWelcome.classList.remove('hidden');
+                    }
+                } else {
+                    if (heroWelcome) heroWelcome.classList.add('hidden');
+                    session.messages.forEach(m => {
+                        if (m.role === 'user') {
+                            appendMessage({ role: 'user', content: m.content });
+                            conversationHistory.push({ role: 'user', text: m.content });
+                        } else if (m.role === 'assistant') {
+                            appendMessage({
+                                role: 'ai',
+                                content: m.content,
+                                engine: m.engine || '',
+                                latency_ms: m.latency_ms || null,
+                                sources: m.sources || []
+                            });
+                            conversationHistory.push({ role: 'assistant', text: m.content });
+                        } else if (m.role === 'system') {
+                            appendMessage({ role: 'system', content: m.content });
+                        }
+                    });
+                }
+
+                // Restore attached PDF state if present
+                if (session.pdf_filename) {
+                    currentPdfFileName = session.pdf_filename;
+                    inputDocName.innerText = session.pdf_filename;
+                    inputDocBadge.classList.remove('hidden');
+                    inputDocBadge.classList.add('flex');
+                    userPromptInput.placeholder = `Ask Cognify anything about ${session.pdf_filename}...`;
+                } else {
+                    detachPdf();
+                }
+
+                // Update active highlight in sidebar
+                loadSessionsList();
+                if (window.innerWidth < 768) closeSidebar();
+                scrollToBottom();
+            } catch (err) {
+                console.error("Error loading session:", err);
+            }
+        }
+
+        async function startNewStudySession() {
+            const freshId = 'sess_' + Date.now();
+            currentSessionId = freshId;
+            localStorage.setItem('cognify_active_session_id', freshId);
+
             conversationHistory.length = 0;
             chatMessages.innerHTML = '';
             if (heroWelcome) {
@@ -1776,11 +2129,219 @@
             detachPdf();
             userPromptInput.value = '';
             validatePromptLength();
-            fetch('/clear-chat', { method: 'POST' }).catch(() => {});
+
+            try {
+                await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: freshId,
+                        guest_id: getGuestId(),
+                        token: localStorage.getItem('cognify_token') || '',
+                        title: 'New Study Session'
+                    })
+                });
+            } catch (e) {}
+
+            await loadSessionsList();
+            if (window.innerWidth < 768) closeSidebar();
+            userPromptInput.focus();
         }
-        newSessionBtn.addEventListener('click', resetSession);
+
+        async function renameSession(sessionId, oldTitle) {
+            const newTitle = prompt("Enter a new title for this study session:", oldTitle);
+            if (!newTitle || !newTitle.trim() || newTitle.trim() === oldTitle) return;
+
+            try {
+                const res = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle.trim() })
+                });
+                if (res.ok) {
+                    await loadSessionsList();
+                }
+            } catch (err) {
+                alert("Failed to rename session.");
+            }
+        }
+
+        async function deleteSessionHandler(sessionId) {
+            if (!confirm("Are you sure you want to delete this study session and all its messages? This action cannot be undone.")) return;
+
+            try {
+                const res = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    if (currentSessionId === sessionId) {
+                        await startNewStudySession();
+                    } else {
+                        await loadSessionsList();
+                    }
+                }
+            } catch (err) {
+                alert("Failed to delete session.");
+            }
+        }
+
+        // ==================== STUDY ANALYTICS & INSIGHTS ====================
+
+        async function openStudyInsights() {
+            try {
+                const token = localStorage.getItem('cognify_token') || '';
+                const guestId = getGuestId();
+                const url = `/api/sessions-analytics?guest_id=${encodeURIComponent(guestId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data && data.analytics) {
+                    const a = data.analytics;
+                    document.getElementById('stat-total-sessions').innerText = (a.total_sessions || 0).toLocaleString();
+                    document.getElementById('stat-user-questions').innerText = (a.user_questions || 0).toLocaleString();
+                    document.getElementById('stat-ai-answers').innerText = (a.ai_answers || 0).toLocaleString();
+                    document.getElementById('stat-total-words').innerText = (a.total_words || 0).toLocaleString();
+                    document.getElementById('stat-total-docs').innerText = (a.documents_count || 0).toLocaleString();
+                    document.getElementById('stat-avg-latency').innerText = `${a.avg_latency_ms || 0}ms`;
+
+                    // Render Engine Breakdown
+                    const engineList = document.getElementById('insights-engine-list');
+                    const engines = a.engine_breakdown || {};
+                    const engineKeys = Object.keys(engines);
+                    if (engineKeys.length > 0) {
+                        const totalRuns = Object.values(engines).reduce((acc, v) => acc + v, 0);
+                        engineList.innerHTML = engineKeys.map(k => {
+                            const count = engines[k];
+                            const pct = Math.round((count / totalRuns) * 100);
+                            return `
+                                <div>
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="font-medium text-dusk-700 dark:text-sand-300">${escapeHtml(k)}</span>
+                                        <span class="font-mono text-dusk-500 dark:text-dusk-400">${count} (${pct}%)</span>
+                                    </div>
+                                    <div class="w-full h-1.5 rounded-full bg-sand-200 dark:bg-dusk-800 overflow-hidden">
+                                        <div class="h-full rounded-full bg-gradient-to-r from-terra-500 to-terra-600" style="width: ${pct}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        engineList.innerHTML = `<p class="text-xs text-dusk-400 italic">No AI inquiries recorded yet.</p>`;
+                    }
+
+                    // Render Documents Archive
+                    const docsList = document.getElementById('insights-docs-list');
+                    const docs = a.documents_list || [];
+                    if (docs.length > 0) {
+                        docsList.innerHTML = docs.map(d => `
+                            <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-xl bg-sand-200/80 dark:bg-dusk-800 text-dusk-700 dark:text-sand-300 border border-sand-300/40 dark:border-dusk-700">
+                                <i data-lucide="file-text" class="w-3 h-3 text-terra-500"></i>
+                                <span class="truncate max-w-[200px]">${escapeHtml(d)}</span>
+                            </span>
+                        `).join('');
+                    } else {
+                        docsList.innerHTML = `<p class="text-xs text-dusk-400 italic">No PDF lecture documents referenced yet.</p>`;
+                    }
+
+                    lucide.createIcons();
+                }
+
+                studyInsightsModal.classList.remove('hidden');
+                studyInsightsModal.classList.add('flex');
+            } catch (err) {
+                console.error("Failed to load study analytics:", err);
+            }
+        }
+
+        function closeStudyInsights() {
+            if (studyInsightsModal) {
+                studyInsightsModal.classList.add('hidden');
+                studyInsightsModal.classList.remove('flex');
+            }
+        }
+
+        if (openInsightsBtn) openInsightsBtn.addEventListener('click', openStudyInsights);
+        if (sidebarInsightsBtn) sidebarInsightsBtn.addEventListener('click', openStudyInsights);
+        if (closeInsightsModal) closeInsightsModal.addEventListener('click', closeStudyInsights);
+        if (btnCloseInsights) btnCloseInsights.addEventListener('click', closeStudyInsights);
+        if (studyInsightsModal) {
+            studyInsightsModal.addEventListener('click', (e) => {
+                if (e.target === studyInsightsModal) closeStudyInsights();
+            });
+        }
+
+        // Export All Sessions (JSON / MD)
+        async function exportAllSessionsData(format) {
+            try {
+                const token = localStorage.getItem('cognify_token') || '';
+                const guestId = getGuestId();
+                const listRes = await fetch(`/api/sessions?guest_id=${encodeURIComponent(guestId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`);
+                const listData = await listRes.json();
+                const sessions = listData.sessions || [];
+
+                if (!sessions.length) {
+                    alert("No study sessions to export yet!");
+                    return;
+                }
+
+                const fullSessions = [];
+                for (const s of sessions) {
+                    const dRes = await fetch(`/api/sessions/${encodeURIComponent(s.id)}`);
+                    const dData = await dRes.json();
+                    if (dData && dData.session) fullSessions.push(dData.session);
+                }
+
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+                if (format === 'json') {
+                    const exportObj = {
+                        application: "Cognify StudyMate AI",
+                        exported_at: new Date().toISOString(),
+                        total_sessions: fullSessions.length,
+                        sessions: fullSessions
+                    };
+                    downloadStudyFile(`Cognify-All-Sessions-${timestamp}.json`, JSON.stringify(exportObj, null, 2), 'application/json;charset=utf-8');
+                } else if (format === 'md') {
+                    let md = `# Cognify Complete Study Archive\n*Exported on ${new Date().toLocaleString()}*\n\n`;
+                    fullSessions.forEach((sess, sIdx) => {
+                        md += `## Session ${sIdx + 1}: ${sess.title || 'Study Session'}\n`;
+                        md += `*Date: ${new Date(sess.created_at).toLocaleString()}*`;
+                        if (sess.pdf_filename) md += ` • *Document: ${sess.pdf_filename}*`;
+                        md += `\n\n`;
+
+                        (sess.messages || []).forEach((m, mIdx) => {
+                            const sender = m.role === 'user' ? '👤 Student' : '🤖 Cognify Copilot';
+                            const engineLabel = m.engine ? ` *(${m.engine})*` : '';
+                            md += `### ${mIdx + 1}. ${sender}${engineLabel}\n\n${m.content}\n\n---\n\n`;
+                        });
+                        md += `\n=======================================================\n\n`;
+                    });
+                    downloadStudyFile(`Cognify-All-Sessions-${timestamp}.md`, md, 'text/markdown;charset=utf-8');
+                }
+            } catch (err) {
+                alert("Failed to export all study sessions.");
+            }
+        }
+
+        if (exportAllJsonBtn) exportAllJsonBtn.addEventListener('click', () => exportAllSessionsData('json'));
+        if (exportAllMdBtn) exportAllMdBtn.addEventListener('click', () => exportAllSessionsData('md'));
+
+        // Guest Session Migration
+        async function migrateGuestSessions(userToken) {
+            const guestId = localStorage.getItem('cognify_guest_id');
+            if (!guestId || !userToken) return;
+            try {
+                await fetch('/api/sessions/migrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ guest_id: guestId, token: userToken })
+                });
+            } catch (e) {}
+        }
+
+        newSessionBtn.addEventListener('click', startNewStudySession);
         clearAllBtn.addEventListener('click', () => {
-            if (confirm("Reset current study session?")) resetSession();
+            if (confirm("Reset current study session?")) startNewStudySession();
         });
 
         // ==================== REAL DATABASE AUTHENTICATION ====================
@@ -1894,6 +2455,8 @@
                     closeAuthModalHandler();
                     gInputEmail.value = '';
                     gInputName.value = '';
+                    await migrateGuestSessions(data.token);
+                    await loadSessionsList();
                 } else {
                     showAuthAlert(data.error || "Could not sign in with Google.");
                 }
@@ -1931,6 +2494,8 @@
                     updateAuthUI(userObj);
                     closeAuthModalHandler();
                     formLogin.reset();
+                    await migrateGuestSessions(data.token);
+                    await loadSessionsList();
                 } else {
                     showAuthAlert(data.error || "Invalid email or password.");
                 }
@@ -1982,6 +2547,8 @@
                     updateAuthUI(userObj);
                     closeAuthModalHandler();
                     formRegister.reset();
+                    await migrateGuestSessions(data.token);
+                    await loadSessionsList();
                 } else {
                     showAuthAlert(data.error || "Could not create account with this email.");
                 }
@@ -2010,6 +2577,7 @@
             localStorage.removeItem('cognify_user');
             updateAuthUI(null);
             userProfileMenu.classList.add('hidden');
+            await loadSessionsList();
         });
 
         // Open Auth Modal Event
@@ -2176,7 +2744,17 @@
                 }
             } catch(e) {}
         }
-        checkAuthSession();
+
+        // Initialize Application State on Page Load
+        async function initApp() {
+            await checkAuthSession();
+            await loadSessionsList();
+            const savedSessionId = localStorage.getItem('cognify_active_session_id');
+            if (savedSessionId) {
+                await loadSession(savedSessionId);
+            }
+        }
+        initApp();
 
         function escapeHtml(text) {
             const div = document.createElement('div');

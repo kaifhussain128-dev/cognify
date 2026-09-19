@@ -14,6 +14,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf, extract_pdf_structured
 from auth import register_user, login_user, get_user_by_token, logout_user, google_auth_user
 from fast_search import execute_fast_search, get_available_engines
+from sessions_db import (
+    create_session,
+    add_session_message,
+    get_user_sessions,
+    get_session_details,
+    update_session_title,
+    update_session_doc,
+    delete_session,
+    migrate_guest_sessions,
+    get_study_analytics
+)
 
 load_dotenv()
 
@@ -111,9 +122,28 @@ class StudyRequest(BaseModel):
     message: str
     history: list[StudyMessage] = []
     pdf_text: str = ""
+    pdf_filename: str = ""
     search_mode: str = "auto"
     user_groq_key: str = ""
     user_gemini_key: str = ""
+    session_id: Optional[str] = None
+    guest_id: Optional[str] = None
+    token: Optional[str] = None
+
+class CreateSessionRequest(BaseModel):
+    session_id: Optional[str] = None
+    title: Optional[str] = None
+    pdf_filename: Optional[str] = None
+    token: Optional[str] = None
+    guest_id: Optional[str] = None
+
+class UpdateSessionRequest(BaseModel):
+    title: Optional[str] = None
+    pdf_filename: Optional[str] = None
+
+class MigrateSessionsRequest(BaseModel):
+    guest_id: str
+    token: str
 
 # Keep Sage models for backwards compatibility
 class SageMessage(BaseModel):
@@ -248,6 +278,24 @@ def study_chat(req: StudyRequest):
             "error": f"Text written in search bar is too long ({len(clean_msg):,} / {MAX_PROMPT_CHARS:,} characters). Please condense your question or attach large passages as a PDF document using the paperclip button."
         }
 
+    # Resolve user and session
+    user = get_user_by_token(req.token) if req.token else None
+    user_id = user["id"] if user else None
+    session_id = req.session_id or f"sess_{int(time.time() * 1000)}"
+
+    # Auto-persist user question in SQLite
+    try:
+        add_session_message(
+            session_id=session_id,
+            role="user",
+            content=clean_msg,
+            user_id=user_id,
+            guest_id=req.guest_id,
+            pdf_filename=req.pdf_filename or None
+        )
+    except Exception as e:
+        print(f"[Warning] Failed to persist user message: {e}")
+
     # If explicit fast search mode requested (web, doc, groq), route to execute_fast_search
     if req.search_mode in ["web", "doc", "groq"]:
         res = execute_fast_search(
@@ -257,12 +305,27 @@ def study_chat(req: StudyRequest):
             user_groq_key=req.user_groq_key,
             user_gemini_key=req.user_gemini_key
         )
+        try:
+            add_session_message(
+                session_id=session_id,
+                role="assistant",
+                content=res["reply"],
+                engine=res["engine"],
+                latency_ms=res["latency_ms"],
+                sources=res.get("sources", []),
+                user_id=user_id,
+                guest_id=req.guest_id
+            )
+        except Exception as e:
+            print(f"[Warning] Failed to persist AI message: {e}")
+
         return {
             "success": True,
             "reply": res["reply"],
             "engine": res["engine"],
             "latency_ms": res["latency_ms"],
-            "sources": res.get("sources", [])
+            "sources": res.get("sources", []),
+            "session_id": session_id
         }
 
     contents = []
@@ -289,12 +352,29 @@ def study_chat(req: StudyRequest):
             config=types.GenerateContentConfig(system_instruction=COGNIFY_SYSTEM_PROMPT),
         )
         latency_ms = int((time.time() - start_time) * 1000)
+        engine_label = f"✨ Google {model_name}"
+
+        try:
+            add_session_message(
+                session_id=session_id,
+                role="assistant",
+                content=response.text,
+                engine=engine_label,
+                latency_ms=latency_ms,
+                sources=[],
+                user_id=user_id,
+                guest_id=req.guest_id
+            )
+        except Exception as e:
+            print(f"[Warning] Failed to persist AI message: {e}")
+
         return {
             "success": True,
             "reply": response.text,
-            "engine": f"✨ Google {model_name}",
+            "engine": engine_label,
             "latency_ms": latency_ms,
-            "sources": []
+            "sources": [],
+            "session_id": session_id
         }
     except Exception as e:
         # Seamless zero-quota failover to fast search engine
@@ -305,6 +385,20 @@ def study_chat(req: StudyRequest):
             user_groq_key=req.user_groq_key,
             user_gemini_key=req.user_gemini_key
         )
+        try:
+            add_session_message(
+                session_id=session_id,
+                role="assistant",
+                content=fallback_res["reply"],
+                engine=fallback_res["engine"],
+                latency_ms=fallback_res["latency_ms"],
+                sources=fallback_res.get("sources", []),
+                user_id=user_id,
+                guest_id=req.guest_id
+            )
+        except Exception as err:
+            print(f"[Warning] Failed to persist fallback AI message: {err}")
+
         return {
             "success": True,
             "reply": fallback_res["reply"],
@@ -312,13 +406,105 @@ def study_chat(req: StudyRequest):
             "latency_ms": fallback_res["latency_ms"],
             "sources": fallback_res.get("sources", []),
             "failover": True,
-            "original_notice": str(e)
+            "original_notice": str(e),
+            "session_id": session_id
         }
 
 # Backwards compatibility alias for /api/sage
 @app.post("/api/sage")
 def sage_alias(req: SageRequest):
     return study_chat(StudyRequest(message=req.message, history=[StudyMessage(role=m.role, text=m.text) for m in req.history]))
+
+# ==================== SESSION HISTORY & ANALYTICS ====================
+
+@app.get("/api/sessions", tags=["Session History"])
+def api_list_sessions(
+    token: Optional[str] = Query(default=None),
+    guest_id: Optional[str] = Query(default=None)
+):
+    """
+    Lists all previous study sessions for an authenticated user or guest,
+    sorted by recent activity with message count and document metadata.
+    """
+    user = get_user_by_token(token) if token else None
+    user_id = user["id"] if user else None
+    sessions = get_user_sessions(user_id=user_id, guest_id=guest_id)
+    return {"status": "success", "sessions": sessions}
+
+@app.get("/api/sessions/{session_id}", tags=["Session History"])
+def api_get_session(session_id: str):
+    """
+    Retrieves the complete dialogue, message history, engine badges, latency,
+    and citations for a specific study session.
+    """
+    session = get_session_details(session_id)
+    if not session:
+        return JSONResponse(status_code=404, content={"status": "error", "error": "Study session not found."})
+    return {"status": "success", "session": session}
+
+@app.post("/api/sessions", tags=["Session History"])
+def api_create_session(req: CreateSessionRequest):
+    """
+    Explicitly creates a new study session in the SQLite database.
+    """
+    user = get_user_by_token(req.token) if req.token else None
+    user_id = user["id"] if user else None
+    session_id = req.session_id or f"sess_{int(time.time() * 1000)}"
+    sess = create_session(
+        session_id=session_id,
+        user_id=user_id,
+        guest_id=req.guest_id,
+        title=req.title,
+        pdf_filename=req.pdf_filename
+    )
+    return {"status": "success", "session": sess}
+
+@app.put("/api/sessions/{session_id}", tags=["Session History"])
+def api_update_session(session_id: str, req: UpdateSessionRequest):
+    """
+    Renames session title or updates attached document reference.
+    """
+    if req.title is not None:
+        update_session_title(session_id, req.title)
+    if req.pdf_filename is not None:
+        update_session_doc(session_id, req.pdf_filename)
+    sess = get_session_details(session_id)
+    if not sess:
+        return JSONResponse(status_code=404, content={"status": "error", "error": "Study session not found."})
+    return {"status": "success", "session": sess}
+
+@app.delete("/api/sessions/{session_id}", tags=["Session History"])
+def api_delete_session(session_id: str):
+    """
+    Deletes a study session and cascade-deletes all its messages.
+    """
+    deleted = delete_session(session_id)
+    return {"status": "success" if deleted else "not_found", "deleted": deleted}
+
+@app.get("/api/sessions-analytics", tags=["Session History"])
+def api_sessions_analytics(
+    token: Optional[str] = Query(default=None),
+    guest_id: Optional[str] = Query(default=None)
+):
+    """
+    Collects and aggregates study statistics across all previous sessions:
+    total sessions, questions asked, AI answers, word counts, engine distribution, and documents analyzed.
+    """
+    user = get_user_by_token(token) if token else None
+    user_id = user["id"] if user else None
+    analytics = get_study_analytics(user_id=user_id, guest_id=guest_id)
+    return {"status": "success", "analytics": analytics}
+
+@app.post("/api/sessions/migrate", tags=["Session History"])
+def api_migrate_sessions(req: MigrateSessionsRequest):
+    """
+    Transfers all previous guest sessions to an authenticated account upon login or registration.
+    """
+    user = get_user_by_token(req.token)
+    if not user:
+        return JSONResponse(status_code=401, content={"status": "error", "error": "Invalid user token."})
+    count = migrate_guest_sessions(req.guest_id, user["id"])
+    return {"status": "success", "migrated_count": count}
 
 # ==================== LEGACY STUDY ENDPOINTS ====================
 
