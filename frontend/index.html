@@ -413,11 +413,66 @@
                     <span id="theme-text" class="hidden sm:inline">Dark Mode</span>
                 </button>
 
-                <!-- Export Notes Button -->
-                <button id="export-chat-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Export Study Session Notes">
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Export Notes</span>
-                </button>
+                <!-- Export Notes Multi-Format Dropdown -->
+                <div class="relative" id="export-container">
+                    <button id="export-chat-btn" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Export Study Session Notes in Multiple Formats">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Export Notes</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-dusk-400"></i>
+                    </button>
+
+                    <!-- Export Formats Dropdown -->
+                    <div id="export-menu" class="hidden absolute right-0 mt-2 w-60 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95 animate-in fade-in zoom-in-95 duration-150">
+                        <div class="px-3.5 py-1.5 border-b border-sand-200/60 dark:border-dusk-800/60 flex items-center justify-between">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-dusk-400">Export Format</span>
+                            <span class="text-[9px] font-mono text-terra-600 dark:text-terra-400 font-semibold">6 Options</span>
+                        </div>
+                        <div class="py-1">
+                            <button type="button" data-format="md" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-terra-500/15 text-terra-600 dark:text-terra-400 flex items-center justify-center font-mono font-bold text-[10px]">MD</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">Markdown (.md)</p>
+                                    <p class="text-[10px] text-dusk-400">Notion, Obsidian, GitHub</p>
+                                </div>
+                            </button>
+                            <button type="button" data-format="pdf" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-red-500/15 text-red-600 dark:text-red-400 flex items-center justify-center font-mono font-bold text-[10px]">PDF</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">PDF Document (.pdf)</p>
+                                    <p class="text-[10px] text-dusk-400">Printable study handout</p>
+                                </div>
+                            </button>
+                            <button type="button" data-format="html" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-mono font-bold text-[10px]">HTML</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">HTML Webpage (.html)</p>
+                                    <p class="text-[10px] text-dusk-400">Standalone offline viewer</p>
+                                </div>
+                            </button>
+                            <button type="button" data-format="txt" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-mono font-bold text-[10px]">TXT</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">Plain Text (.txt)</p>
+                                    <p class="text-[10px] text-dusk-400">Universal transcript</p>
+                                </div>
+                            </button>
+                            <button type="button" data-format="json" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-mono font-bold text-[10px]">JSON</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">Structured JSON (.json)</p>
+                                    <p class="text-[10px] text-dusk-400">Full conversation archive</p>
+                                </div>
+                            </button>
+                            <button type="button" data-format="csv" class="export-format-item w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-dusk-700 dark:text-sand-200 hover:bg-sand-200/60 dark:hover:bg-dusk-800 text-left transition-colors">
+                                <span class="w-6 h-6 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-mono font-bold text-[10px]">CSV</span>
+                                <div>
+                                    <p class="font-semibold leading-tight">Spreadsheet (.csv)</p>
+                                    <p class="text-[10px] text-dusk-400">Excel / Google Sheets</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Audio TTS Toggle -->
                 <button id="tts-toggle-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-dusk-800/60 hover:bg-sand-200 dark:hover:bg-dusk-700/60 border border-sand-200 dark:border-dusk-700/50 text-dusk-700 dark:text-dusk-300 hover:text-dusk-900 dark:hover:text-white text-xs font-medium transition-all" title="Toggle Text-to-Speech Readout">
@@ -889,6 +944,8 @@
         const newSessionBtn = document.getElementById('new-session-btn');
         const clearAllBtn = document.getElementById('clear-all-btn');
         const exportChatBtn = document.getElementById('export-chat-btn');
+        const exportMenu = document.getElementById('export-menu');
+        const exportContainer = document.getElementById('export-container');
         const ttsToggleBtn = document.getElementById('tts-toggle-btn');
         const voiceInputBtn = document.getElementById('voice-input-btn');
         const focusChimeBtn = document.getElementById('focus-chime-btn');
@@ -1513,24 +1570,199 @@
             voiceInputBtn.style.display = 'none';
         }
 
-        // Export Notes
-        exportChatBtn.addEventListener('click', () => {
-            if (!conversationHistory.length) {
-                alert("No study session notes to export yet.");
-                return;
-            }
-            let md = `# Cognify Study Session Notes\n*Exported on ${new Date().toLocaleString()}*\n\n`;
-            if (currentPdfFileName) md += `**Referenced Document**: ${currentPdfFileName}\n\n---\n\n`;
-            conversationHistory.forEach(m => {
-                md += `### ${m.role === 'user' ? 'Student' : 'Cognify Study Copilot'}\n${m.text}\n\n`;
-            });
-            const blob = new Blob([md], { type: 'text/markdown' });
+        // Multi-Format Export Functions (Markdown, PDF, HTML, TXT, JSON, CSV)
+        function downloadStudyFile(filename, content, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Cognify-Study-Notes-${Date.now()}.md`;
+            a.download = filename;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        function exportStudyNotes(format) {
+            if (!conversationHistory.length) {
+                alert("No study session notes to export yet. Ask Cognify a question or upload notes first!");
+                return;
+            }
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const dateDisplay = new Date().toLocaleString();
+
+            if (format === 'md') {
+                let md = `# Cognify Study Session Notes\n*Exported on ${dateDisplay}*\n\n`;
+                if (currentPdfFileName) md += `**Referenced Document**: ${currentPdfFileName}\n\n---\n\n`;
+                conversationHistory.forEach((m, idx) => {
+                    const title = m.role === 'user' ? '👤 Student Question' : '🤖 Cognify Study Copilot';
+                    md += `### ${idx + 1}. ${title}\n\n${m.text}\n\n---\n\n`;
+                });
+                downloadStudyFile(`Cognify-Notes-${timestamp}.md`, md, 'text/markdown;charset=utf-8');
+            } else if (format === 'txt') {
+                let txt = `=======================================================\n`;
+                txt += `COGNIFY STUDY SESSION NOTES\n`;
+                txt += `Exported: ${dateDisplay}\n`;
+                if (currentPdfFileName) txt += `Referenced Document: ${currentPdfFileName}\n`;
+                txt += `Total Turns: ${conversationHistory.length}\n`;
+                txt += `=======================================================\n\n`;
+                conversationHistory.forEach((m, idx) => {
+                    const title = m.role === 'user' ? '[STUDENT]' : '[COGNIFY STUDY COPILOT]';
+                    txt += `${idx + 1}. ${title}\n${m.text}\n\n-------------------------------------------------------\n\n`;
+                });
+                downloadStudyFile(`Cognify-Notes-${timestamp}.txt`, txt, 'text/plain;charset=utf-8');
+            } else if (format === 'json') {
+                const jsonObj = {
+                    application: "Cognify StudyMate AI",
+                    exported_at: new Date().toISOString(),
+                    referenced_document: currentPdfFileName || null,
+                    total_messages: conversationHistory.length,
+                    conversation: conversationHistory.map((m, idx) => ({
+                        turn: idx + 1,
+                        role: m.role,
+                        text: m.text
+                    }))
+                };
+                downloadStudyFile(`Cognify-Notes-${timestamp}.json`, JSON.stringify(jsonObj, null, 2), 'application/json;charset=utf-8');
+            } else if (format === 'csv') {
+                let csv = `"Turn","Role","Timestamp","Message"\n`;
+                const isoTime = new Date().toISOString();
+                conversationHistory.forEach((m, idx) => {
+                    const roleLabel = m.role === 'user' ? 'Student' : 'Cognify';
+                    const escaped = m.text.replace(/"/g, '""');
+                    csv += `"${idx + 1}","${roleLabel}","${isoTime}","${escaped}"\n`;
+                });
+                downloadStudyFile(`Cognify-Notes-${timestamp}.csv`, csv, 'text/csv;charset=utf-8');
+            } else if (format === 'html') {
+                const messagesHtml = conversationHistory.map((m, idx) => {
+                    const isUser = m.role === 'user';
+                    const title = isUser ? '👤 Student Question' : '🤖 Cognify Study Copilot';
+                    const body = marked.parse(m.text);
+                    return `
+                        <div class="message ${isUser ? 'user-box' : 'ai-box'}">
+                            <div class="sender">${idx + 1}. ${title}</div>
+                            <div class="content">${body}</div>
+                        </div>
+                    `;
+                }).join('\n');
+
+                const htmlDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognify Study Session Notes</title>
+<style>
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #FAF6EE; color: #1E2229; padding: 2rem 1rem; margin: 0; line-height: 1.6; }
+  .sheet { max-width: 820px; margin: 0 auto; background: #FFFFFF; padding: 2.5rem; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid #DECBA4; }
+  h1 { font-size: 1.8rem; color: #C1683F; margin-top: 0; font-family: Georgia, serif; }
+  .meta { font-size: 0.85rem; color: #63724D; margin-bottom: 2rem; border-bottom: 2px solid #EADFC8; padding-bottom: 1rem; }
+  .message { margin-bottom: 1.5rem; padding: 1.25rem 1.5rem; border-radius: 14px; }
+  .user-box { background: #FAF6EE; border-left: 4px solid #C1683F; }
+  .ai-box { background: #F4F6F0; border-left: 4px solid #7D8F63; }
+  .sender { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; color: #85693C; margin-bottom: 0.5rem; }
+  .content pre { background: #1E2229; color: #FAF6EE; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.9em; }
+  .content code { font-family: monospace; background: rgba(0,0,0,0.05); padding: 0.2em 0.4em; border-radius: 4px; }
+  .content pre code { background: transparent; padding: 0; }
+  @media print { body { background: #fff; padding: 0; } .sheet { box-shadow: none; border: none; padding: 0; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Cognify Study Session Notes</h1>
+  <div class="meta">
+    <div><strong>Exported:</strong> ${dateDisplay}</div>
+    ${currentPdfFileName ? `<div><strong>Referenced Document:</strong> ${escapeHtml(currentPdfFileName)}</div>` : ''}
+    <div><strong>Total Dialogue Turns:</strong> ${conversationHistory.length}</div>
+  </div>
+  ${messagesHtml}
+</div>
+</body>
+</html>`;
+                downloadStudyFile(`Cognify-Notes-${timestamp}.html`, htmlDoc, 'text/html;charset=utf-8');
+            } else if (format === 'pdf') {
+                const printWin = window.open('', '_blank');
+                if (!printWin) {
+                    alert("Please allow popups in your browser to generate the printable PDF document.");
+                    return;
+                }
+                const printableMessages = conversationHistory.map((m, idx) => {
+                    const isUser = m.role === 'user';
+                    const title = isUser ? 'Student Question' : 'Cognify Study Copilot';
+                    const parsed = marked.parse(m.text);
+                    return `
+                        <div style="margin-bottom: 18px; padding: 14px 18px; border-radius: 8px; background: ${isUser ? '#FAF6EE' : '#F4F6F0'}; border-left: 4px solid ${isUser ? '#C1683F' : '#7D8F63'};">
+                            <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #666; margin-bottom: 6px;">
+                                ${idx + 1}. ${title}
+                            </div>
+                            <div style="font-size: 13.5px; line-height: 1.6; color: #1E2229;">
+                                ${parsed}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                printWin.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Cognify Study Notes - Printable PDF</title>
+                        <style>
+                            @media print {
+                                body { padding: 0; background: #fff; }
+                                .no-print { display: none !important; }
+                            }
+                            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; max-width: 820px; margin: 0 auto; color: #222; }
+                            h1 { color: #C1683F; margin-bottom: 4px; font-size: 22px; font-family: Georgia, serif; }
+                            .meta { font-size: 12px; color: #666; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+                            pre { background: #f4f4f4; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+                            code { font-family: monospace; font-size: 0.9em; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="no-print" style="margin-bottom: 20px; padding: 12px 18px; background: #FAF6EE; border-radius: 10px; border: 1px solid #DECBA4; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: #C1683F; font-size: 14px;">Print / Save as PDF</strong>
+                                <p style="font-size: 11px; color: #666; margin: 2px 0 0 0;">In the print preview, select Destination: <strong>Save as PDF</strong></p>
+                            </div>
+                            <button onclick="window.print()" style="background: #C1683F; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Print / Save as PDF</button>
+                        </div>
+                        <h1>Cognify Study Session Notes</h1>
+                        <div class="meta">
+                            Exported: ${dateDisplay} ${currentPdfFileName ? `• Document: ${escapeHtml(currentPdfFileName)}` : ''} • ${conversationHistory.length} turns
+                        </div>
+                        ${printableMessages}
+                    </body>
+                    </html>
+                `);
+                printWin.document.close();
+                setTimeout(() => { printWin.print(); }, 400);
+            }
+        }
+
+        // Toggle Export Menu
+        if (exportChatBtn && exportMenu) {
+            exportChatBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                exportMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Handle clicks on each format item
+        document.querySelectorAll('.export-format-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const format = item.getAttribute('data-format');
+                if (exportMenu) exportMenu.classList.add('hidden');
+                exportStudyNotes(format);
+            });
+        });
+
+        // Close export menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (exportMenu && exportContainer && !exportContainer.contains(e.target)) {
+                exportMenu.classList.add('hidden');
+            }
         });
 
         // Reset Session
