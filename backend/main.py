@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+from typing import Optional
 from fastapi import FastAPI, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -11,15 +13,33 @@ from google.genai import errors, types
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf, extract_pdf_structured
 from auth import register_user, login_user, get_user_by_token, logout_user, google_auth_user
+from fast_search import execute_fast_search, get_available_engines
 
 load_dotenv()
 
 app = FastAPI(
     title="Cognify StudyMate AI API",
-    description="Intelligent AI study companion featuring Parsli-grade structured PDF document extraction, active recall synthesis, and member authentication."
+    description="Intelligent AI study companion featuring Parsli-grade structured PDF document extraction, active recall synthesis, member authentication, and multi-engine Fast AI Search."
 )
 
 # ---------- Request & Response models ----------
+
+class FastSearchRequest(BaseModel):
+    query: str = Field(description="Search question or academic topic")
+    search_mode: str = Field(default="auto", description="Engine mode: 'auto', 'web', 'doc', 'groq', 'gemini'")
+    pdf_text: str = Field(default="", description="Optional attached document context")
+    user_groq_key: Optional[str] = Field(default=None, description="Optional custom Groq API key")
+    user_gemini_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key")
+
+class FastSearchResponse(BaseModel):
+    status: str = Field(default="success")
+    reply: str = Field(description="Synthesized search answer with citations")
+    engine: str = Field(description="AI engine used for inference")
+    latency_ms: int = Field(description="Inference latency in milliseconds")
+    total_time_ms: int = Field(description="Total end-to-end time including retrieval in milliseconds")
+    mode: str = Field(description="Search mode executed")
+    sources: list = Field(default_factory=list, description="Grounding citations (web or document)")
+    source_count: int = Field(default=0)
 
 class DocumentMetadataSchema(BaseModel):
     filename: str = Field(description="Original filename of the PDF")
@@ -91,6 +111,9 @@ class StudyRequest(BaseModel):
     message: str
     history: list[StudyMessage] = []
     pdf_text: str = ""
+    search_mode: str = "auto"
+    user_groq_key: str = ""
+    user_gemini_key: str = ""
 
 # Keep Sage models for backwards compatibility
 class SageMessage(BaseModel):
@@ -184,6 +207,35 @@ STYLE:
 
 MAX_PROMPT_CHARS = 4000
 
+@app.get("/api/engines", tags=["Fast AI Search"])
+def api_get_engines():
+    """
+    Returns list of available high-speed AI inference and search engines.
+    """
+    return {"status": "success", "engines": get_available_engines()}
+
+@app.post("/api/fast-search", response_model=FastSearchResponse, tags=["Fast AI Search"])
+def api_fast_search(req: FastSearchRequest):
+    """
+    Ultra-Fast AI Search Endpoint.
+    Routes queries to the fastest responsive engine (Groq Llama 3.3, Gemini 3.6 Flash, or Local Heuristic),
+    grounds answers with live web or PDF document citations, and tracks latency in milliseconds.
+    """
+    clean_q = req.query.strip()
+    if not clean_q:
+        return JSONResponse(status_code=400, content={"status": "error", "error": "Search query cannot be empty."})
+    if len(clean_q) > MAX_PROMPT_CHARS:
+        return JSONResponse(status_code=400, content={"status": "error", "error": f"Search query exceeds {MAX_PROMPT_CHARS} characters."})
+    
+    result = execute_fast_search(
+        query=clean_q,
+        search_mode=req.search_mode,
+        pdf_text=req.pdf_text,
+        user_groq_key=req.user_groq_key,
+        user_gemini_key=req.user_gemini_key
+    )
+    return result
+
 @app.post("/api/study")
 def study_chat(req: StudyRequest):
     clean_msg = req.message.strip()
@@ -194,6 +246,23 @@ def study_chat(req: StudyRequest):
         return {
             "success": False,
             "error": f"Text written in search bar is too long ({len(clean_msg):,} / {MAX_PROMPT_CHARS:,} characters). Please condense your question or attach large passages as a PDF document using the paperclip button."
+        }
+
+    # If explicit fast search mode requested (web, doc, groq), route to execute_fast_search
+    if req.search_mode in ["web", "doc", "groq"]:
+        res = execute_fast_search(
+            query=clean_msg,
+            search_mode=req.search_mode,
+            pdf_text=req.pdf_text,
+            user_groq_key=req.user_groq_key,
+            user_gemini_key=req.user_gemini_key
+        )
+        return {
+            "success": True,
+            "reply": res["reply"],
+            "engine": res["engine"],
+            "latency_ms": res["latency_ms"],
+            "sources": res.get("sources", [])
         }
 
     contents = []
@@ -210,17 +279,41 @@ def study_chat(req: StudyRequest):
     user_message = doc_prefix + clean_msg if doc_prefix and not contents else clean_msg
     contents.append({"role": "user", "parts": [{"text": user_message}]})
 
+    start_time = time.time()
     try:
         client = get_genai_client()
-        model_name = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
         response = client.models.generate_content(
             model=model_name,
             contents=contents,
             config=types.GenerateContentConfig(system_instruction=COGNIFY_SYSTEM_PROMPT),
         )
-        return {"success": True, "reply": response.text}
+        latency_ms = int((time.time() - start_time) * 1000)
+        return {
+            "success": True,
+            "reply": response.text,
+            "engine": f"✨ Google {model_name}",
+            "latency_ms": latency_ms,
+            "sources": []
+        }
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        # Seamless zero-quota failover to fast search engine
+        fallback_res = execute_fast_search(
+            query=clean_msg,
+            search_mode="auto",
+            pdf_text=req.pdf_text,
+            user_groq_key=req.user_groq_key,
+            user_gemini_key=req.user_gemini_key
+        )
+        return {
+            "success": True,
+            "reply": fallback_res["reply"],
+            "engine": fallback_res["engine"],
+            "latency_ms": fallback_res["latency_ms"],
+            "sources": fallback_res.get("sources", []),
+            "failover": True,
+            "original_notice": str(e)
+        }
 
 # Backwards compatibility alias for /api/sage
 @app.post("/api/sage")
