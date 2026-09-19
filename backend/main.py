@@ -12,7 +12,17 @@ from google.genai import errors, types
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf, extract_pdf_structured
-from auth import register_user, login_user, get_user_by_token, logout_user, google_auth_user
+from auth import (
+    register_user,
+    login_user,
+    get_user_by_token,
+    logout_user,
+    google_auth_user,
+    get_user_profile,
+    update_user_profile,
+    get_admin_dashboard_data,
+    record_visit
+)
 from fast_search import execute_fast_search, get_available_engines
 from sessions_db import (
     create_session,
@@ -145,6 +155,16 @@ class MigrateSessionsRequest(BaseModel):
     guest_id: str
     token: str
 
+class TrackVisitRequest(BaseModel):
+    visitor_id: str
+    path: str = "/"
+
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+    field_of_study: Optional[str] = None
+    study_goal: Optional[str] = None
+    preferred_engine: Optional[str] = None
+
 # Keep Sage models for backwards compatibility
 class SageMessage(BaseModel):
     role: str
@@ -213,6 +233,66 @@ def auth_logout(req: LogoutRequest):
     logout_user(req.token)
     return {"success": True, "message": "Logged out successfully."}
 
+@app.get("/auth/profile", tags=["User Profile"])
+def auth_profile(token: str = Query(...)):
+    """
+    Retrieves full user profile, branded User ID, academic settings, and personal learning statistics.
+    """
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"success": False, "error": "Invalid or expired session."})
+    try:
+        profile = get_user_profile(user["id"])
+        return {"success": True, "profile": profile}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+@app.put("/auth/profile", tags=["User Profile"])
+def auth_update_profile(req: UpdateProfileRequest, token: str = Query(...)):
+    """
+    Updates the authenticated user's name, field of study, study goal, or preferred engine in SQLite.
+    """
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"success": False, "error": "Invalid or expired session."})
+    try:
+        updated = update_user_profile(
+            user_id=user["id"],
+            name=req.name,
+            field_of_study=req.field_of_study,
+            study_goal=req.study_goal,
+            preferred_engine=req.preferred_engine
+        )
+        return {"success": True, "profile": updated}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+# ==================== VISITOR TELEMETRY & ADMINISTRATION ====================
+
+@app.post("/api/track-visit", tags=["Telemetry"])
+def api_track_visit(req: TrackVisitRequest):
+    """
+    Records page visits and unique visitor sessions into SQLite.
+    """
+    stats = record_visit(req.visitor_id, req.path)
+    return {"status": "success", **stats}
+
+@app.get("/api/admin/dashboard", tags=["Administration"])
+def api_admin_dashboard(token: str = Query(...)):
+    """
+    Administrator Console API:
+    Returns platform-wide metrics: total visits, unique visitors, registered user accounts directory,
+    and real-time login activity audit logs. Protected by is_admin verification.
+    """
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"success": False, "error": "Authentication required."})
+    if not user.get("is_admin"):
+        return JSONResponse(status_code=403, content={"success": False, "error": "Access denied. Administrator privileges required."})
+    
+    data = get_admin_dashboard_data()
+    return {"success": True, "dashboard": data}
+
 # ==================== COGNIFY STUDY COPILOT ====================
 
 def get_genai_client():
@@ -278,9 +358,29 @@ def study_chat(req: StudyRequest):
             "error": f"Text written in search bar is too long ({len(clean_msg):,} / {MAX_PROMPT_CHARS:,} characters). Please condense your question or attach large passages as a PDF document using the paperclip button."
         }
 
-    # Resolve user and session
-    user = get_user_by_token(req.token) if req.token else None
-    user_id = user["id"] if user else None
+    # Enforce sign-in before chatting with AI
+    if not req.token:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "success": False,
+                "error": "Please sign in or create an account to start chatting with Cognify AI.",
+                "auth_required": True
+            }
+        )
+
+    user = get_user_by_token(req.token)
+    if not user:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "success": False,
+                "error": "Your session has expired or is invalid. Please sign in again to continue.",
+                "auth_required": True
+            }
+        )
+
+    user_id = user["id"]
     session_id = req.session_id or f"sess_{int(time.time() * 1000)}"
 
     # Auto-persist user question in SQLite

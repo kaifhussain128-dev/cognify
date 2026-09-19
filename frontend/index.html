@@ -216,6 +216,41 @@
             color: var(--text-muted);
             font-style: italic;
         }
+
+        /* Smooth Page & Component Transitions */
+        @keyframes msgEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(12px) scale(0.985);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .message-bubble-anim {
+            animation: msgEntrance 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes modalScaleFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.96) translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-animated-card {
+            animation: modalScaleFadeIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .chat-crossfade {
+            transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden select-none">
@@ -491,6 +526,12 @@
                     <span class="hidden sm:inline">Audio Read</span>
                 </button>
 
+                <!-- Admin Console Header Button (Shown for Administrator accounts) -->
+                <button id="admin-console-btn" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 to-terra-500/15 hover:from-amber-500/25 hover:to-terra-500/25 border border-amber-500/40 text-amber-800 dark:text-amber-300 text-xs font-bold transition-all shadow-sm" title="Administrator Telemetry & User Controls">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"></i>
+                    <span class="hidden sm:inline">Admin Console</span>
+                </button>
+
                 <div class="h-5 w-[1px] bg-sand-200 dark:bg-dusk-700/60 mx-1"></div>
 
                 <!-- Sign In / User Profile Pill & Dropdown -->
@@ -501,16 +542,34 @@
                     </button>
 
                     <!-- User Profile Dropdown -->
-                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95">
+                    <div id="user-profile-menu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl py-2 z-50 backdrop-blur-xl bg-sand-50/95 dark:bg-dusk-900/95 modal-animated-card">
                         <div class="px-4 py-2.5 border-b border-sand-100 dark:border-dusk-800/80">
                             <div class="flex items-center justify-between">
                                 <p id="user-display-name" class="text-xs font-bold font-serif text-dusk-900 dark:text-sand-100 truncate">Student Name</p>
                                 <span id="user-auth-badge" class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300">Database</span>
                             </div>
                             <p id="user-display-email" class="text-[11px] text-dusk-500 dark:text-dusk-400 truncate mt-0.5">student@email.com</p>
+                            <!-- Branded User ID Pill with Copy Action -->
+                            <div class="mt-2 flex items-center justify-between bg-sand-100/90 dark:bg-dusk-800/80 px-2.5 py-1.5 rounded-xl border border-sand-200/70 dark:border-dusk-700/60">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider text-dusk-400">ID:</span>
+                                    <span id="user-display-id" class="text-[11px] font-mono font-bold text-terra-600 dark:text-terra-400 truncate select-all">COG-000000</span>
+                                </div>
+                                <button id="btn-copy-user-id" type="button" class="p-1 rounded-md text-dusk-400 hover:text-terra-600 dark:hover:text-terra-300 hover:bg-sand-200/60 dark:hover:bg-dusk-700 transition-colors" title="Copy User ID">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="px-2 py-1">
-                            <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
+                        <div class="px-2 py-1.5 space-y-0.5">
+                            <button id="btn-open-user-profile" type="button" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-dusk-700 dark:text-sand-200 hover:bg-sand-100 dark:hover:bg-dusk-800 flex items-center gap-2 transition-colors">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 text-terra-500"></i>
+                                <span>My Account Profile</span>
+                            </button>
+                            <button id="btn-open-admin-from-menu" type="button" class="hidden w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 items-center gap-2 transition-colors">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-500"></i>
+                                <span>Admin Console</span>
+                            </button>
+                            <button id="logout-btn" type="button" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2 transition-colors">
                                 <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                                 <span>Sign Out</span>
                             </button>
@@ -521,10 +580,10 @@
         </header>
 
         <!-- Chat Conversation Messages Container -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-6 chat-crossfade">
             
             <!-- Hero Welcome Card -->
-            <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6">
+            <div id="hero-welcome" class="max-w-3xl mx-auto pt-6 sm:pt-10 text-center flex flex-col items-center gap-6 chat-crossfade">
                 
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sand-100 dark:bg-dusk-800 border border-sand-200 dark:border-dusk-700 text-terra-700 dark:text-terra-300 text-xs font-semibold shadow-sm">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-terra-500"></i>
@@ -682,7 +741,7 @@
 
     <!-- Real Database Auth Modal (No Demo Accounts) -->
     <div id="auth-modal" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="relative w-full max-w-md rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden">
+        <div class="relative w-full max-w-md rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden modal-animated-card">
             
             <!-- Close Button -->
             <button id="close-auth-modal" class="absolute top-5 right-5 p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-colors">
@@ -812,6 +871,243 @@
                     <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- User Account Profile Modal -->
+    <div id="user-profile-modal" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-lg rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden modal-animated-card">
+            <!-- Close Button -->
+            <button id="close-user-profile-modal" type="button" class="absolute top-5 right-5 p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Header with Avatar & User ID -->
+            <div class="flex items-center gap-4 mb-6 pb-5 border-b border-sand-200 dark:border-dusk-800">
+                <div id="profile-avatar-circle" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-terra-500 to-terra-700 text-white font-serif font-bold text-2xl flex items-center justify-center shadow-lg shadow-terra-500/25 ring-4 ring-terra-500/10 shrink-0">
+                    S
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 id="profile-modal-name" class="text-xl font-bold font-serif text-dusk-900 dark:text-sand-100 truncate">Student Name</h3>
+                        <span id="profile-badge-role" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/50 dark:text-sage-300">Verified Scholar</span>
+                    </div>
+                    <p id="profile-modal-email" class="text-xs text-dusk-500 dark:text-dusk-400 truncate mt-0.5">student@email.com</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-dusk-400">User ID:</span>
+                        <span id="profile-modal-userid" class="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-sand-200/90 dark:bg-dusk-800 text-terra-600 dark:text-terra-400 border border-sand-300/40 dark:border-dusk-700 select-all">COG-000000</span>
+                        <button id="btn-copy-profile-userid" type="button" class="text-xs text-dusk-400 hover:text-terra-600 dark:hover:text-terra-300 px-2 py-0.5 rounded-lg bg-sand-200/60 dark:bg-dusk-800 hover:bg-sand-200 transition-colors inline-flex items-center gap-1" title="Copy User ID">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            <span id="copy-userid-text" class="text-[10px] font-medium">Copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Alert -->
+            <div id="profile-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium border items-center gap-2"></div>
+
+            <!-- Profile Details Form -->
+            <form id="form-user-profile" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-dusk-600 dark:text-dusk-400 mb-1">Full Name</label>
+                        <input type="text" id="profile-input-name" required class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-dusk-600 dark:text-dusk-400 mb-1">Field of Study / Major</label>
+                        <input type="text" id="profile-input-field" placeholder="e.g. Computer Science, Medicine, Law" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-dusk-600 dark:text-dusk-400 mb-1">Study Goal & Focus Bio</label>
+                    <textarea id="profile-input-goal" rows="2" placeholder="e.g. Master Operating Systems and prepare for university examinations" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-dusk-600 dark:text-dusk-400 mb-1">Preferred AI Engine</label>
+                        <select id="profile-input-engine" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                            <option value="auto">Auto Adaptive (Recommended)</option>
+                            <option value="groq">Groq Fast AI (Llama 3.3 @ 500+ tok/s)</option>
+                            <option value="gemini">Gemini 2.5 Flash Deep Synthesis</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-dusk-600 dark:text-dusk-400 mb-1">Member Since</label>
+                        <div id="profile-member-since" class="w-full px-3 py-2 rounded-xl border border-sand-200/60 dark:border-dusk-800 bg-sand-100/50 dark:bg-dusk-800/40 text-dusk-500 dark:text-dusk-400 text-xs font-mono">
+                            September 2026
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Telemetry Mini-Cards -->
+                <div class="p-3 rounded-2xl bg-sand-100/60 dark:bg-dusk-800/50 border border-sand-200/80 dark:border-dusk-700/60">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-dusk-500 dark:text-dusk-400 block mb-2">Account Study Statistics</span>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="p-2 rounded-xl bg-white dark:bg-dusk-900 border border-sand-200/60 dark:border-dusk-800">
+                            <span id="profile-stat-sessions" class="text-sm font-bold font-serif text-terra-600 dark:text-terra-400">0</span>
+                            <p class="text-[9px] text-dusk-400">Sessions</p>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white dark:bg-dusk-900 border border-sand-200/60 dark:border-dusk-800">
+                            <span id="profile-stat-messages" class="text-sm font-bold font-serif text-sage-600 dark:text-sage-400">0</span>
+                            <p class="text-[9px] text-dusk-400">Questions</p>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white dark:bg-dusk-900 border border-sand-200/60 dark:border-dusk-800">
+                            <span id="profile-stat-docs" class="text-sm font-bold font-serif text-dusk-700 dark:text-sand-200">0</span>
+                            <p class="text-[9px] text-dusk-400">PDFs Studied</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-sand-200 dark:border-dusk-800 flex items-center justify-between gap-3">
+                    <button type="button" id="profile-modal-logout-btn" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors">
+                        Sign Out
+                    </button>
+                    <button type="submit" id="btn-save-profile" class="px-5 py-2 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all">
+                        Save Profile Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Administrator Dashboard Modal -->
+    <div id="admin-dashboard-modal" class="fixed inset-0 z-50 bg-dusk-900/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="relative w-full max-w-4xl max-h-[90vh] rounded-3xl glass-panel border border-amber-500/30 dark:border-amber-500/20 shadow-2xl p-6 sm:p-8 bg-sand-50/98 dark:bg-dusk-900/98 flex flex-col overflow-hidden modal-animated-card">
+            <!-- Close Button -->
+            <button id="close-admin-dashboard-modal" type="button" class="absolute top-5 right-5 p-2 rounded-xl text-dusk-400 hover:text-dusk-700 dark:hover:text-sand-200 hover:bg-sand-100 dark:hover:bg-dusk-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-sand-200 dark:border-dusk-800 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-terra-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold font-serif text-dusk-900 dark:text-sand-100">Administrator Console</h3>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Live Telemetry</span>
+                        </div>
+                        <p class="text-xs text-dusk-500 dark:text-dusk-400">Site traffic metrics, user logins, and scholar directory</p>
+                    </div>
+                </div>
+                <button id="btn-refresh-admin-data" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sand-200/80 hover:bg-sand-300/80 dark:bg-dusk-800 dark:hover:bg-dusk-700 text-xs font-semibold text-dusk-700 dark:text-sand-300 transition-colors">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+
+            <!-- Scrollable Analytics Content -->
+            <div class="flex-1 overflow-y-auto space-y-6 pt-5 pr-1">
+                <!-- 4 Top KPI Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    <div class="p-4 rounded-2xl bg-white dark:bg-dusk-800/80 border border-sand-200 dark:border-dusk-700 shadow-sm">
+                        <div class="flex items-center justify-between text-dusk-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Total Visits</span>
+                            <i data-lucide="globe" class="w-4 h-4 text-blue-500"></i>
+                        </div>
+                        <div id="admin-kpi-visits" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">0</div>
+                        <p class="text-[10px] text-dusk-400 mt-0.5">Page views recorded</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-white dark:bg-dusk-800/80 border border-sand-200 dark:border-dusk-700 shadow-sm">
+                        <div class="flex items-center justify-between text-dusk-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Unique Visitors</span>
+                            <i data-lucide="users" class="w-4 h-4 text-sage-500"></i>
+                        </div>
+                        <div id="admin-kpi-uniques" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">0</div>
+                        <p class="text-[10px] text-dusk-400 mt-0.5">Distinct devices</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-white dark:bg-dusk-800/80 border border-sand-200 dark:border-dusk-700 shadow-sm">
+                        <div class="flex items-center justify-between text-dusk-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Registered Users</span>
+                            <i data-lucide="user-check" class="w-4 h-4 text-terra-500"></i>
+                        </div>
+                        <div id="admin-kpi-users" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">0</div>
+                        <p class="text-[10px] text-dusk-400 mt-0.5">Total accounts</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-white dark:bg-dusk-800/80 border border-sand-200 dark:border-dusk-700 shadow-sm">
+                        <div class="flex items-center justify-between text-dusk-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Login Events</span>
+                            <i data-lucide="log-in" class="w-4 h-4 text-amber-500"></i>
+                        </div>
+                        <div id="admin-kpi-logins" class="text-2xl font-bold font-serif text-dusk-900 dark:text-sand-100">0</div>
+                        <p class="text-[10px] text-dusk-400 mt-0.5">Successful sign-ins</p>
+                    </div>
+                </div>
+
+                <!-- Recent Login Activity Feed -->
+                <div class="p-4 rounded-2xl bg-white/70 dark:bg-dusk-800/50 border border-sand-200 dark:border-dusk-700/80">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-dusk-800 dark:text-sand-200 flex items-center gap-1.5">
+                            <i data-lucide="activity" class="w-3.5 h-3.5 text-terra-500"></i>
+                            <span>Recent Login Audit Feed (Who Logged In)</span>
+                        </h4>
+                        <span id="admin-logins-count" class="text-[10px] font-mono text-dusk-400">0 entries</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-sand-200/80 dark:border-dusk-700/80 text-[10px] font-bold uppercase tracking-wider text-dusk-400">
+                                    <th class="pb-2">Time</th>
+                                    <th class="pb-2">User Email</th>
+                                    <th class="pb-2">User ID</th>
+                                    <th class="pb-2">Auth Method</th>
+                                    <th class="pb-2">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-logins-table-body" class="divide-y divide-sand-100 dark:divide-dusk-800/60 font-mono text-[11px]">
+                                <tr>
+                                    <td colspan="5" class="py-3 text-center text-dusk-400 italic">No logins recorded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Registered Scholars Directory -->
+                <div class="p-4 rounded-2xl bg-white/70 dark:bg-dusk-800/50 border border-sand-200 dark:border-dusk-700/80">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-dusk-800 dark:text-sand-200 flex items-center gap-1.5">
+                            <i data-lucide="folder-kanban" class="w-3.5 h-3.5 text-sage-500"></i>
+                            <span>Registered Scholars Directory</span>
+                        </h4>
+                        <span id="admin-users-count" class="text-[10px] font-mono text-dusk-400">0 users</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-sand-200/80 dark:border-dusk-700/80 text-[10px] font-bold uppercase tracking-wider text-dusk-400">
+                                    <th class="pb-2">User ID</th>
+                                    <th class="pb-2">Name</th>
+                                    <th class="pb-2">Email</th>
+                                    <th class="pb-2">Role</th>
+                                    <th class="pb-2">Field of Study</th>
+                                    <th class="pb-2">Joined Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table-body" class="divide-y divide-sand-100 dark:divide-dusk-800/60 text-[11px]">
+                                <tr>
+                                    <td colspan="6" class="py-3 text-center text-dusk-400 italic">No users found.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-4 mt-2 border-t border-sand-200/80 dark:border-dusk-800 flex justify-end shrink-0">
+                <button id="btn-close-admin-dash" type="button" class="px-5 py-2 rounded-xl bg-dusk-900 hover:bg-black dark:bg-sand-100 dark:text-dusk-900 dark:hover:bg-white text-white text-xs font-bold transition-colors">
+                    Close Console
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1094,6 +1390,34 @@
         const gSigning = document.getElementById('g-signing');
         const gChoose = document.getElementById('g-choose');
 
+        // User Profile DOM Elements
+        const userDisplayId = document.getElementById('user-display-id');
+        const btnCopyUserId = document.getElementById('btn-copy-user-id');
+        const btnOpenUserProfile = document.getElementById('btn-open-user-profile');
+        const userProfileModal = document.getElementById('user-profile-modal');
+        const closeUserProfileModal = document.getElementById('close-user-profile-modal');
+        const formUserProfile = document.getElementById('form-user-profile');
+        const btnCopyProfileUserId = document.getElementById('btn-copy-profile-userid');
+        const copyUseridText = document.getElementById('copy-userid-text');
+        const profileModalLogoutBtn = document.getElementById('profile-modal-logout-btn');
+
+        // Administrator Console DOM Elements
+        const adminConsoleBtn = document.getElementById('admin-console-btn');
+        const btnOpenAdminFromMenu = document.getElementById('btn-open-admin-from-menu');
+        const adminDashboardModal = document.getElementById('admin-dashboard-modal');
+        const closeAdminDashboardModal = document.getElementById('close-admin-dashboard-modal');
+        const btnCloseAdminDash = document.getElementById('btn-close-admin-dash');
+        const btnRefreshAdminData = document.getElementById('btn-refresh-admin-data');
+
+        // Auth Gating Helper: Require Sign In before interacting with AI
+        function requireAuth(reason = "Please sign in or create an account to start chatting with Cognify AI.") {
+            const token = localStorage.getItem('cognify_token');
+            if (currentUser && token) return true;
+            openAuthModal('login');
+            showAuthAlert(reason);
+            return false;
+        }
+
         // Application State
         let currentPdfText = "";
         let currentPdfFileName = "";
@@ -1262,8 +1586,14 @@
         sidebarBackdrop.addEventListener('click', closeSidebar);
 
         // PDF File Picker Triggers
-        uploadPdfTrigger.addEventListener('click', () => pdfFileInput.click());
-        capsuleAttachBtn.addEventListener('click', () => pdfFileInput.click());
+        uploadPdfTrigger.addEventListener('click', () => {
+            if (!requireAuth("Please sign in to upload and analyze study materials.")) return;
+            pdfFileInput.click();
+        });
+        capsuleAttachBtn.addEventListener('click', () => {
+            if (!requireAuth("Please sign in to upload and analyze study materials.")) return;
+            pdfFileInput.click();
+        });
 
         pdfFileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -1289,6 +1619,7 @@
             dragOverlay.classList.remove('flex');
             const file = e.dataTransfer.files[0];
             if (file && file.name.endsWith('.pdf')) {
+                if (!requireAuth("Please sign in to upload and analyze study materials.")) return;
                 handlePdfFile(file);
             } else {
                 alert("Please drop a valid PDF study document.");
@@ -1441,6 +1772,9 @@
                 const prompt = card.getAttribute('data-prompt');
                 userPromptInput.value = prompt;
                 validatePromptLength();
+                if (!requireAuth("Please sign in or create an account to start chatting with Cognify AI.")) {
+                    return;
+                }
                 chatForm.dispatchEvent(new Event('submit'));
                 if (window.innerWidth < 768) closeSidebar();
             });
@@ -1468,6 +1802,11 @@
             if (text.length > MAX_PROMPT_CHARS) {
                 validatePromptLength();
                 alert(`The text in the search bar is too long (${text.length.toLocaleString()} characters). The maximum allowed is ${MAX_PROMPT_CHARS.toLocaleString()} characters.\n\nPlease shorten your question or attach large notes/documents using the paperclip button.`);
+                return;
+            }
+
+            // Check 3: Authentication Gate - Require sign in before chatting with AI
+            if (!requireAuth("Please sign in or create an account to start chatting with Cognify AI.")) {
                 return;
             }
 
@@ -1504,6 +1843,13 @@
                 });
                 const data = await response.json();
                 typingIndicator.remove();
+
+                if (response.status === 401 || data.auth_required) {
+                    isProcessing = false;
+                    sendButton.disabled = false;
+                    requireAuth("Authentication required to chat with Cognify AI. Please sign in or create an account.");
+                    return;
+                }
 
                 if (data.session_id) {
                     currentSessionId = data.session_id;
@@ -1551,7 +1897,7 @@
         // Message Rendering
         function appendMessage({ role, content, isError = false, engine = "", latency_ms = null, sources = [] }) {
             const messageWrapper = document.createElement('div');
-            messageWrapper.className = `flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            messageWrapper.className = `flex gap-3 sm:gap-4 max-w-3xl mx-auto w-full message-bubble-anim ${role === 'user' ? 'justify-end' : 'justify-start'}`;
             const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             if (role === 'user') {
@@ -2065,51 +2411,55 @@
                 currentSessionId = session.id;
                 localStorage.setItem('cognify_active_session_id', currentSessionId);
 
-                // Reset chat window
-                conversationHistory.length = 0;
-                chatMessages.innerHTML = '';
+                // Smooth cross-fade transition
+                chatMessages.classList.add('opacity-0');
+                setTimeout(() => {
+                    conversationHistory.length = 0;
+                    chatMessages.innerHTML = '';
 
-                if (!session.messages || session.messages.length === 0) {
-                    if (heroWelcome) {
-                        chatMessages.appendChild(heroWelcome);
-                        heroWelcome.classList.remove('hidden');
-                    }
-                } else {
-                    if (heroWelcome) heroWelcome.classList.add('hidden');
-                    session.messages.forEach(m => {
-                        if (m.role === 'user') {
-                            appendMessage({ role: 'user', content: m.content });
-                            conversationHistory.push({ role: 'user', text: m.content });
-                        } else if (m.role === 'assistant') {
-                            appendMessage({
-                                role: 'ai',
-                                content: m.content,
-                                engine: m.engine || '',
-                                latency_ms: m.latency_ms || null,
-                                sources: m.sources || []
-                            });
-                            conversationHistory.push({ role: 'assistant', text: m.content });
-                        } else if (m.role === 'system') {
-                            appendMessage({ role: 'system', content: m.content });
+                    if (!session.messages || session.messages.length === 0) {
+                        if (heroWelcome) {
+                            chatMessages.appendChild(heroWelcome);
+                            heroWelcome.classList.remove('hidden');
                         }
-                    });
-                }
+                    } else {
+                        if (heroWelcome) heroWelcome.classList.add('hidden');
+                        session.messages.forEach(m => {
+                            if (m.role === 'user') {
+                                appendMessage({ role: 'user', content: m.content });
+                                conversationHistory.push({ role: 'user', text: m.content });
+                            } else if (m.role === 'assistant') {
+                                appendMessage({
+                                    role: 'ai',
+                                    content: m.content,
+                                    engine: m.engine || '',
+                                    latency_ms: m.latency_ms || null,
+                                    sources: m.sources || []
+                                });
+                                conversationHistory.push({ role: 'assistant', text: m.content });
+                            } else if (m.role === 'system') {
+                                appendMessage({ role: 'system', content: m.content });
+                            }
+                        });
+                    }
 
-                // Restore attached PDF state if present
-                if (session.pdf_filename) {
-                    currentPdfFileName = session.pdf_filename;
-                    inputDocName.innerText = session.pdf_filename;
-                    inputDocBadge.classList.remove('hidden');
-                    inputDocBadge.classList.add('flex');
-                    userPromptInput.placeholder = `Ask Cognify anything about ${session.pdf_filename}...`;
-                } else {
-                    detachPdf();
-                }
+                    // Restore attached PDF state if present
+                    if (session.pdf_filename) {
+                        currentPdfFileName = session.pdf_filename;
+                        inputDocName.innerText = session.pdf_filename;
+                        inputDocBadge.classList.remove('hidden');
+                        inputDocBadge.classList.add('flex');
+                        userPromptInput.placeholder = `Ask Cognify anything about ${session.pdf_filename}...`;
+                    } else {
+                        detachPdf();
+                    }
 
-                // Update active highlight in sidebar
-                loadSessionsList();
-                if (window.innerWidth < 768) closeSidebar();
-                scrollToBottom();
+                    // Update active highlight in sidebar
+                    loadSessionsList();
+                    if (window.innerWidth < 768) closeSidebar();
+                    scrollToBottom();
+                    chatMessages.classList.remove('opacity-0');
+                }, 80);
             } catch (err) {
                 console.error("Error loading session:", err);
             }
@@ -2120,15 +2470,20 @@
             currentSessionId = freshId;
             localStorage.setItem('cognify_active_session_id', freshId);
 
-            conversationHistory.length = 0;
-            chatMessages.innerHTML = '';
-            if (heroWelcome) {
-                chatMessages.appendChild(heroWelcome);
-                heroWelcome.classList.remove('hidden');
-            }
-            detachPdf();
-            userPromptInput.value = '';
-            validatePromptLength();
+            // Smooth crossfade to welcome
+            chatMessages.classList.add('opacity-0');
+            setTimeout(() => {
+                conversationHistory.length = 0;
+                chatMessages.innerHTML = '';
+                if (heroWelcome) {
+                    chatMessages.appendChild(heroWelcome);
+                    heroWelcome.classList.remove('hidden');
+                }
+                detachPdf();
+                userPromptInput.value = '';
+                validatePromptLength();
+                chatMessages.classList.remove('opacity-0');
+            }, 80);
 
             try {
                 await fetch('/api/sessions', {
@@ -2403,7 +2758,7 @@
             currentUser = user;
             if (user) {
                 const firstName = (user.name || 'Student').split(' ')[0];
-                const methodBadge = user.method === 'google' ? 'Google' : 'Database';
+                const methodBadge = user.is_admin ? 'Admin' : (user.method === 'google' ? 'Google' : 'Database');
                 authLoginBtn.innerHTML = `
                     <div class="w-5 h-5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-[10px] uppercase">
                         ${(user.name || 'S').charAt(0)}
@@ -2412,14 +2767,46 @@
                     <i data-lucide="chevron-down" class="w-3 h-3 opacity-70"></i>
                 `;
                 userDisplayName.innerText = user.name || 'Student';
-                userDisplayEmail.innerText = user.email;
+                userDisplayEmail.innerText = user.email || '';
                 userAuthBadge.innerText = methodBadge;
+
+                const publicId = user.public_id || ('COG-' + String(user.id || 1).padStart(6, '0'));
+                if (userDisplayId) userDisplayId.innerText = publicId;
+
+                // Admin Controls Visibility
+                if (user.is_admin === 1) {
+                    if (adminConsoleBtn) {
+                        adminConsoleBtn.classList.remove('hidden');
+                        adminConsoleBtn.classList.add('inline-flex');
+                    }
+                    if (btnOpenAdminFromMenu) {
+                        btnOpenAdminFromMenu.classList.remove('hidden');
+                        btnOpenAdminFromMenu.classList.add('flex');
+                    }
+                } else {
+                    if (adminConsoleBtn) {
+                        adminConsoleBtn.classList.add('hidden');
+                        adminConsoleBtn.classList.remove('inline-flex');
+                    }
+                    if (btnOpenAdminFromMenu) {
+                        btnOpenAdminFromMenu.classList.add('hidden');
+                        btnOpenAdminFromMenu.classList.remove('flex');
+                    }
+                }
             } else {
                 authLoginBtn.innerHTML = `
                     <i data-lucide="user" class="w-3.5 h-3.5"></i>
                     <span>Sign In</span>
                 `;
                 userProfileMenu.classList.add('hidden');
+                if (adminConsoleBtn) {
+                    adminConsoleBtn.classList.add('hidden');
+                    adminConsoleBtn.classList.remove('inline-flex');
+                }
+                if (btnOpenAdminFromMenu) {
+                    btnOpenAdminFromMenu.classList.add('hidden');
+                    btnOpenAdminFromMenu.classList.remove('flex');
+                }
             }
             lucide.createIcons();
         }
@@ -2605,6 +2992,353 @@
         tabLogin.addEventListener('click', () => switchAuthTab('login'));
         tabRegister.addEventListener('click', () => switchAuthTab('register'));
 
+        // ==================== USER ID COPY HANDLERS ====================
+        function copyUserId(idToCopy, textSpan) {
+            if (!idToCopy) return;
+            navigator.clipboard.writeText(idToCopy).then(() => {
+                if (textSpan) {
+                    const orig = textSpan.innerText;
+                    textSpan.innerText = "Copied!";
+                    setTimeout(() => { textSpan.innerText = orig; }, 2000);
+                }
+            }).catch(() => {
+                alert("User ID: " + idToCopy);
+            });
+        }
+
+        if (btnCopyUserId) {
+            btnCopyUserId.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const uid = currentUser?.public_id || (userDisplayId ? userDisplayId.innerText : '');
+                copyUserId(uid, null);
+                btnCopyUserId.classList.add('text-sage-600');
+                setTimeout(() => { btnCopyUserId.classList.remove('text-sage-600'); }, 1500);
+            });
+        }
+
+        if (btnCopyProfileUserId) {
+            btnCopyProfileUserId.addEventListener('click', () => {
+                const uid = currentUser?.public_id || (userDisplayId ? userDisplayId.innerText : '');
+                copyUserId(uid, copyUseridText);
+            });
+        }
+
+        // ==================== USER PROFILE MODAL ====================
+        async function openProfileModal() {
+            if (!currentUser) {
+                openAuthModal('login');
+                return;
+            }
+            if (userProfileMenu) userProfileMenu.classList.add('hidden');
+            if (userProfileModal) {
+                userProfileModal.classList.remove('hidden');
+                userProfileModal.classList.add('flex');
+            }
+
+            const token = localStorage.getItem('cognify_token') || '';
+            const publicId = currentUser.public_id || ('COG-' + String(currentUser.id || 1).padStart(6, '0'));
+
+            const avatarCircle = document.getElementById('profile-avatar-circle');
+            if (avatarCircle) avatarCircle.innerText = (currentUser.name || 'S').charAt(0).toUpperCase();
+
+            const profileName = document.getElementById('profile-modal-name');
+            if (profileName) profileName.innerText = currentUser.name || 'Student';
+
+            const profileEmail = document.getElementById('profile-modal-email');
+            if (profileEmail) profileEmail.innerText = currentUser.email || '';
+
+            const profileUserId = document.getElementById('profile-modal-userid');
+            if (profileUserId) profileUserId.innerText = publicId;
+
+            const inputName = document.getElementById('profile-input-name');
+            if (inputName) inputName.value = currentUser.name || '';
+
+            const inputField = document.getElementById('profile-input-field');
+            if (inputField) inputField.value = currentUser.field_of_study || '';
+
+            const inputGoal = document.getElementById('profile-input-goal');
+            if (inputGoal) inputGoal.value = currentUser.study_goal || '';
+
+            const inputEngine = document.getElementById('profile-input-engine');
+            if (inputEngine) inputEngine.value = currentUser.preferred_engine || 'auto';
+
+            const roleBadge = document.getElementById('profile-badge-role');
+            if (roleBadge) {
+                if (currentUser.is_admin === 1) {
+                    roleBadge.innerText = "Administrator";
+                    roleBadge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300";
+                } else {
+                    roleBadge.innerText = "Verified Scholar";
+                    roleBadge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sage-100 text-sage-700 dark:bg-sage-900/50 dark:text-sage-300";
+                }
+            }
+
+            // Live fetch user details from /auth/profile
+            try {
+                const res = await fetch(`/auth/profile?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (data.success && data.user) {
+                    const u = data.user;
+                    currentUser = { ...currentUser, ...u };
+                    localStorage.setItem('cognify_user', JSON.stringify(currentUser));
+                    if (profileName) profileName.innerText = u.name || 'Student';
+                    if (profileUserId) profileUserId.innerText = u.public_id || publicId;
+                    if (inputName) inputName.value = u.name || '';
+                    if (inputField) inputField.value = u.field_of_study || '';
+                    if (inputGoal) inputGoal.value = u.study_goal || '';
+                    if (inputEngine) inputEngine.value = u.preferred_engine || 'auto';
+                    if (u.created_at) {
+                        try {
+                            const d = new Date(u.created_at);
+                            const memberSince = document.getElementById('profile-member-since');
+                            if (memberSince) memberSince.innerText = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                        } catch(e) {}
+                    }
+                }
+            } catch (err) {}
+
+            // Populate study statistics
+            try {
+                const aRes = await fetch(`/api/sessions-analytics?guest_id=${encodeURIComponent(getGuestId())}&token=${encodeURIComponent(token)}`);
+                const aData = await aRes.json();
+                if (aData.success && aData.analytics) {
+                    const statSessions = document.getElementById('profile-stat-sessions');
+                    const statMsgs = document.getElementById('profile-stat-messages');
+                    const statDocs = document.getElementById('profile-stat-docs');
+                    if (statSessions) statSessions.innerText = aData.analytics.total_sessions || 0;
+                    if (statMsgs) statMsgs.innerText = aData.analytics.total_messages || 0;
+                    if (statDocs) statDocs.innerText = (aData.analytics.studied_documents || []).length;
+                }
+            } catch(e) {}
+            lucide.createIcons();
+        }
+
+        function closeProfileModalHandler() {
+            if (userProfileModal) {
+                userProfileModal.classList.add('hidden');
+                userProfileModal.classList.remove('flex');
+            }
+            const alertEl = document.getElementById('profile-alert');
+            if (alertEl) alertEl.classList.add('hidden');
+        }
+
+        async function saveProfileHandler(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('cognify_token') || '';
+            if (!token) return;
+
+            const inputName = document.getElementById('profile-input-name');
+            const inputField = document.getElementById('profile-input-field');
+            const inputGoal = document.getElementById('profile-input-goal');
+            const inputEngine = document.getElementById('profile-input-engine');
+            const btn = document.getElementById('btn-save-profile');
+            const alertEl = document.getElementById('profile-alert');
+
+            const name = inputName ? inputName.value.trim() : '';
+            const field = inputField ? inputField.value.trim() : '';
+            const goal = inputGoal ? inputGoal.value.trim() : '';
+            const engine = inputEngine ? inputEngine.value : 'auto';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<span>Saving...</span>`;
+            }
+
+            try {
+                const res = await fetch('/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token,
+                        name,
+                        field_of_study: field,
+                        study_goal: goal,
+                        preferred_engine: engine
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.user) {
+                    currentUser = { ...currentUser, ...data.user };
+                    localStorage.setItem('cognify_user', JSON.stringify(currentUser));
+                    updateAuthUI(currentUser);
+                    const profileName = document.getElementById('profile-modal-name');
+                    if (profileName) profileName.innerText = currentUser.name || 'Student';
+                    if (alertEl) {
+                        alertEl.classList.remove('hidden');
+                        alertEl.className = "mb-4 p-3 rounded-xl text-xs font-medium border flex items-center gap-2 bg-sage-50 text-sage-800 border-sage-200 dark:bg-sage-950/40 dark:text-sage-300 dark:border-sage-800";
+                        alertEl.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span>Profile changes saved successfully!</span>`;
+                        lucide.createIcons();
+                        setTimeout(() => { alertEl.classList.add('hidden'); }, 3000);
+                    }
+                } else {
+                    if (alertEl) {
+                        alertEl.classList.remove('hidden');
+                        alertEl.className = "mb-4 p-3 rounded-xl text-xs font-medium border flex items-center gap-2 bg-red-50 text-red-800 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800";
+                        alertEl.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i><span>${escapeHtml(data.error || "Failed to update profile.")}</span>`;
+                        lucide.createIcons();
+                    }
+                }
+            } catch (err) {
+                alert("Network error updating profile.");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Save Profile Changes</span>`;
+                }
+            }
+        }
+
+        // ==================== ADMINISTRATOR CONSOLE ====================
+        async function openAdminDashboard() {
+            const token = localStorage.getItem('cognify_token') || '';
+            if (!token) {
+                requireAuth("Please sign in with administrator credentials.");
+                return;
+            }
+            if (userProfileMenu) userProfileMenu.classList.add('hidden');
+            if (adminDashboardModal) {
+                adminDashboardModal.classList.remove('hidden');
+                adminDashboardModal.classList.add('flex');
+            }
+            await loadAdminDashboardData();
+        }
+
+        function closeAdminDashboardHandler() {
+            if (adminDashboardModal) {
+                adminDashboardModal.classList.add('hidden');
+                adminDashboardModal.classList.remove('flex');
+            }
+        }
+
+        async function loadAdminDashboardData() {
+            const token = localStorage.getItem('cognify_token') || '';
+            if (btnRefreshAdminData) btnRefreshAdminData.classList.add('opacity-50');
+
+            try {
+                const res = await fetch(`/api/admin/dashboard?token=${encodeURIComponent(token)}`);
+                if (res.status === 403) {
+                    alert("Access Denied: Administrator privileges required.");
+                    closeAdminDashboardHandler();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    const kpiVisits = document.getElementById('admin-kpi-visits');
+                    const kpiUniques = document.getElementById('admin-kpi-uniques');
+                    const kpiUsers = document.getElementById('admin-kpi-users');
+                    const kpiLogins = document.getElementById('admin-kpi-logins');
+
+                    if (kpiVisits) kpiVisits.innerText = (data.total_visits || 0).toLocaleString();
+                    if (kpiUniques) kpiUniques.innerText = (data.unique_visitors || 0).toLocaleString();
+                    if (kpiUsers) kpiUsers.innerText = (data.total_users || 0).toLocaleString();
+                    if (kpiLogins) kpiLogins.innerText = (data.recent_logins ? data.recent_logins.length : 0).toLocaleString();
+
+                    // Render Recent Logins Table
+                    const loginsBody = document.getElementById('admin-logins-table-body');
+                    const loginsCount = document.getElementById('admin-logins-count');
+                    if (data.recent_logins && data.recent_logins.length > 0) {
+                        if (loginsCount) loginsCount.innerText = `${data.recent_logins.length} entries`;
+                        if (loginsBody) {
+                            loginsBody.innerHTML = data.recent_logins.map(log => {
+                                const timeStr = log.logged_at ? new Date(log.logged_at).toLocaleString() : 'Just now';
+                                const methodBadge = log.auth_method === 'google' 
+                                    ? '<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-bold uppercase text-[9px]">Google</span>'
+                                    : '<span class="px-1.5 py-0.5 rounded bg-sand-200 text-dusk-700 dark:bg-dusk-700 dark:text-sand-300 font-bold uppercase text-[9px]">Database</span>';
+                                return `
+                                    <tr class="hover:bg-sand-100/60 dark:hover:bg-dusk-800/40 transition-colors">
+                                        <td class="py-2.5 text-dusk-500 dark:text-dusk-400">${escapeHtml(timeStr)}</td>
+                                        <td class="py-2.5 font-bold text-dusk-900 dark:text-sand-100">${escapeHtml(log.email || '')}</td>
+                                        <td class="py-2.5 text-terra-600 dark:text-terra-400 font-bold">${escapeHtml(log.public_id || '—')}</td>
+                                        <td class="py-2.5">${methodBadge}</td>
+                                        <td class="py-2.5 text-dusk-400">${escapeHtml(log.ip_address || '127.0.0.1')}</td>
+                                    </tr>
+                                `;
+                            }).join('');
+                        }
+                    } else {
+                        if (loginsCount) loginsCount.innerText = '0 entries';
+                        if (loginsBody) loginsBody.innerHTML = `<tr><td colspan="5" class="py-3 text-center text-dusk-400 italic">No login events recorded yet.</td></tr>`;
+                    }
+
+                    // Render Registered Users Directory
+                    const usersBody = document.getElementById('admin-users-table-body');
+                    const usersCount = document.getElementById('admin-users-count');
+                    if (data.users && data.users.length > 0) {
+                        if (usersCount) usersCount.innerText = `${data.users.length} registered scholars`;
+                        if (usersBody) {
+                            usersBody.innerHTML = data.users.map(u => {
+                                const joinedStr = u.created_at ? new Date(u.created_at).toLocaleDateString() : '—';
+                                const roleBadge = u.is_admin === 1
+                                    ? '<span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 font-bold uppercase text-[9px]">Administrator</span>'
+                                    : '<span class="px-1.5 py-0.5 rounded-full bg-sage-100 text-sage-700 dark:bg-sage-900/50 dark:text-sage-300 font-bold uppercase text-[9px]">Scholar</span>';
+                                return `
+                                    <tr class="hover:bg-sand-100/60 dark:hover:bg-dusk-800/40 transition-colors">
+                                        <td class="py-2.5 font-mono font-bold text-terra-600 dark:text-terra-400">${escapeHtml(u.public_id || 'COG-000000')}</td>
+                                        <td class="py-2.5 font-bold text-dusk-900 dark:text-sand-100">${escapeHtml(u.name || '')}</td>
+                                        <td class="py-2.5 text-dusk-600 dark:text-dusk-300">${escapeHtml(u.email || '')}</td>
+                                        <td class="py-2.5">${roleBadge}</td>
+                                        <td class="py-2.5 text-dusk-500 dark:text-dusk-400 italic">${escapeHtml(u.field_of_study || 'General Studies')}</td>
+                                        <td class="py-2.5 font-mono text-dusk-400">${escapeHtml(joinedStr)}</td>
+                                    </tr>
+                                `;
+                            }).join('');
+                        }
+                    } else {
+                        if (usersCount) usersCount.innerText = '0 users';
+                        if (usersBody) usersBody.innerHTML = `<tr><td colspan="6" class="py-3 text-center text-dusk-400 italic">No users found.</td></tr>`;
+                    }
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                console.error("Admin dashboard fetch error:", err);
+            } finally {
+                if (btnRefreshAdminData) btnRefreshAdminData.classList.remove('opacity-50');
+            }
+        }
+
+        // Event Listeners for Profile & Admin
+        if (btnOpenUserProfile) btnOpenUserProfile.addEventListener('click', openProfileModal);
+        if (closeUserProfileModal) closeUserProfileModal.addEventListener('click', closeProfileModalHandler);
+        if (userProfileModal) {
+            userProfileModal.addEventListener('click', (e) => {
+                if (e.target === userProfileModal) closeProfileModalHandler();
+            });
+        }
+        if (formUserProfile) formUserProfile.addEventListener('submit', saveProfileHandler);
+        if (profileModalLogoutBtn) {
+            profileModalLogoutBtn.addEventListener('click', () => {
+                closeProfileModalHandler();
+                logoutBtn.click();
+            });
+        }
+
+        if (adminConsoleBtn) adminConsoleBtn.addEventListener('click', openAdminDashboard);
+        if (btnOpenAdminFromMenu) btnOpenAdminFromMenu.addEventListener('click', openAdminDashboard);
+        if (closeAdminDashboardModal) closeAdminDashboardModal.addEventListener('click', closeAdminDashboardHandler);
+        if (btnCloseAdminDash) btnCloseAdminDash.addEventListener('click', closeAdminDashboardHandler);
+        if (adminDashboardModal) {
+            adminDashboardModal.addEventListener('click', (e) => {
+                if (e.target === adminDashboardModal) closeAdminDashboardHandler();
+            });
+        }
+        if (btnRefreshAdminData) btnRefreshAdminData.addEventListener('click', loadAdminDashboardData);
+
+        // ==================== VISITOR TELEMETRY TRACKING ====================
+        function trackSiteVisit() {
+            try {
+                let vid = localStorage.getItem('cognify_visitor_id');
+                if (!vid) {
+                    vid = 'vis_' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
+                    localStorage.setItem('cognify_visitor_id', vid);
+                }
+                fetch('/api/track-visit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visitor_id: vid, path: window.location.pathname || '/' })
+                }).catch(() => {});
+            } catch (e) {}
+        }
+
         // Parsli JSON Viewer Modal Events
         if (viewParsliJsonBtn) {
             viewParsliJsonBtn.addEventListener('click', () => {
@@ -2741,12 +3475,17 @@
                     const userObj = { ...data.user, method: currentUser?.method || 'email', token };
                     updateAuthUI(userObj);
                     localStorage.setItem('cognify_user', JSON.stringify(userObj));
+                } else if (res.status === 401 || !data.authenticated) {
+                    localStorage.removeItem('cognify_token');
+                    localStorage.removeItem('cognify_user');
+                    updateAuthUI(null);
                 }
             } catch(e) {}
         }
 
         // Initialize Application State on Page Load
         async function initApp() {
+            trackSiteVisit();
             await checkAuthSession();
             await loadSessionsList();
             const savedSessionId = localStorage.getItem('cognify_active_session_id');

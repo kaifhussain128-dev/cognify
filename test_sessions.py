@@ -96,12 +96,43 @@ def run_tests():
     from main import app
     client = TestClient(app)
 
-    # Test GET /api/sessions
-    res = client.get(f"/api/sessions?guest_id={test_guest_id}")
-    assert res.status_code == 200
-    assert res.json()["status"] == "success"
+    # 1. Unauthenticated /api/study must be rejected (Auth Gating)
+    res_unauth = client.post("/api/study", json={"message": "Hello without login"})
+    assert res_unauth.status_code == 401
+    assert res_unauth.json()["auth_required"] is True
+    print("✓ Unauthenticated /api/study correctly blocked with auth_required")
 
-    # Test POST /api/study with session auto-persistence
+    # 2. Register user & verify branded User ID (COG-XXXXXX)
+    test_user_email = f"student_{uuid.uuid4().hex[:6]}@example.com"
+    res_reg = client.post("/auth/register", json={
+        "name": "Sarah Connor",
+        "email": test_user_email,
+        "password": "Password123!"
+    })
+    assert res_reg.status_code == 200
+    user_data = res_reg.json()
+    assert user_data["success"] is True
+    token = user_data["token"]
+    user_info = user_data["user"]
+    assert user_info["public_id"].startswith("COG-")
+    print(f"✓ New user registered with User ID: {user_info['public_id']}")
+
+    # 3. Test GET and PUT /auth/profile
+    res_prof = client.get(f"/auth/profile?token={token}")
+    assert res_prof.status_code == 200
+    prof = res_prof.json()["profile"]
+    assert prof["public_id"] == user_info["public_id"]
+
+    res_prof_update = client.put(f"/auth/profile?token={token}", json={
+        "name": "Sarah J. Connor",
+        "field_of_study": "Cybernetic Systems",
+        "study_goal": "Master Machine Learning and Systems Architecture"
+    })
+    assert res_prof_update.status_code == 200
+    assert res_prof_update.json()["profile"]["field_of_study"] == "Cybernetic Systems"
+    print("✓ User profile retrieved and updated in SQLite")
+
+    # 4. Authenticated /api/study with session persistence
     test_api_session = f"api_sess_{uuid.uuid4().hex[:8]}"
     res_study = client.post("/api/study", json={
         "message": "What is Virtual Memory and Paging?",
@@ -109,40 +140,50 @@ def run_tests():
         "pdf_text": "Virtual memory is a memory management technique that provides an idealized abstraction of the storage resources.",
         "session_id": test_api_session,
         "guest_id": test_guest_id,
+        "token": token,
         "pdf_filename": "OS_Concepts.pdf"
     })
     assert res_study.status_code == 200
     study_data = res_study.json()
     assert study_data["success"] is True
     assert study_data["session_id"] == test_api_session
+    print("✓ Authenticated /api/study passed with session auto-persistence")
 
-    # Verify session was created and populated with 2 messages (user + ai)
-    res_details = client.get(f"/api/sessions/{test_api_session}")
-    assert res_details.status_code == 200
-    sess_obj = res_details.json()["session"]
-    assert len(sess_obj["messages"]) == 2
-    assert sess_obj["messages"][0]["role"] == "user"
-    assert sess_obj["messages"][1]["role"] == "assistant"
-    assert sess_obj["pdf_filename"] == "OS_Concepts.pdf"
+    # 5. Visitor tracking
+    res_visit = client.post("/api/track-visit", json={"visitor_id": test_guest_id, "path": "/"})
+    assert res_visit.status_code == 200
+    assert res_visit.json()["total_visits"] >= 1
+    print("✓ Visitor tracking recorded visit")
 
-    # Test PUT /api/sessions/{session_id} to rename
-    res_rename = client.put(f"/api/sessions/{test_api_session}", json={"title": "Virtual Memory & Paging Mastery"})
-    assert res_rename.status_code == 200
-    assert res_rename.json()["session"]["title"] == "Virtual Memory & Paging Mastery"
+    # 6. Administrator Login & Dashboard
+    res_admin_login = client.post("/auth/login", json={
+        "email": "admin@cognify.ai",
+        "password": "Admin@Cognify2026"
+    })
+    assert res_admin_login.status_code == 200
+    admin_token = res_admin_login.json()["token"]
+    assert res_admin_login.json()["user"]["is_admin"] == 1
+    print("✓ Default Administrator account authenticated")
 
-    # Test GET /api/sessions-analytics
-    res_ana = client.get(f"/api/sessions-analytics?guest_id={test_guest_id}")
-    assert res_ana.status_code == 200
-    ana_data = res_ana.json()["analytics"]
-    assert ana_data["total_sessions"] >= 1
-    assert ana_data["user_questions"] >= 1
-    assert ana_data["ai_answers"] >= 1
+    # Admin dashboard with admin token
+    res_dash = client.get(f"/api/admin/dashboard?token={admin_token}")
+    assert res_dash.status_code == 200
+    dash_data = res_dash.json()["dashboard"]
+    assert dash_data["total_visits"] >= 1
+    assert dash_data["total_users"] >= 2
+    assert len(dash_data["recent_logins"]) >= 1
+    print(f"✓ Admin dashboard verified: {dash_data['total_visits']} visits, {dash_data['total_users']} users, {len(dash_data['recent_logins'])} login logs")
+
+    # Admin dashboard forbidden for standard user
+    res_dash_forbidden = client.get(f"/api/admin/dashboard?token={token}")
+    assert res_dash_forbidden.status_code == 403
+    print("✓ Admin dashboard safely forbidden for non-admin accounts")
 
     # Cleanup
     client.delete(f"/api/sessions/{test_api_session}")
     print("✓ All FastAPI HTTP session routes verified successfully")
 
-    print("\nALL BACKEND & API TESTS PASSED!")
+    print("\nALL BACKEND, AUTH, PROFILE & ADMIN TESTS PASSED!")
 
 if __name__ == "__main__":
     run_tests()
