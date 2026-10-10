@@ -43,6 +43,20 @@ Render offers a generous free tier for Python web services with automatic SSL (`
 Render will build the app and give you a permanent live URL like:
 👉 **`https://cognify-studymate.onrender.com`**
 
+### Step 3: Enable Real Google Sign-In (Recommended)
+
+Cognify uses **Google Identity Services** — only a public Client ID is needed (no client secret, no backend redirect).
+
+1. Open the [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services** → **Credentials** → **+ CREATE CREDENTIALS** → **OAuth client ID**.
+2. Application type: **Web application**.
+3. **Authorized JavaScript origins**: `https://cognify-studymate.onrender.com` (add `http://localhost:8000` for local development).
+4. Copy the **Client ID** (looks like `1234567890-abc123xyz.apps.googleusercontent.com`) and add it as an environment variable on Render:
+   - **Key**: `GOOGLE_CLIENT_ID`
+   - **Value**: *(your Client ID)*
+5. Redeploy. The "Sign in with Google" button now opens Google's real OAuth consent screen; the backend verifies the returned ID token with Google's public keys before creating or finding the account.
+
+> Without `GOOGLE_CLIENT_ID`, Google sign-in shows a "not configured" notice and email/password sign-in keeps working.
+
 ---
 
 ## 🚆 Option 2: Deploy on Railway (Alternative)

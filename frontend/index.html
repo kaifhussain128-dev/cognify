@@ -35,6 +35,8 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services (real OAuth sign-in) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Marked.js for Markdown Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Highlight.js for Syntax Highlighting -->
@@ -247,6 +249,13 @@
         .modal-animated-card {
             animation: modalScaleFadeIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
+        @keyframes authShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .auth-shake { animation: authShake 0.4s ease; }
 
         .chat-crossfade {
             transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -740,7 +749,7 @@
     </main>
 
     <!-- Real Database Auth Modal (No Demo Accounts) -->
-    <div id="auth-modal" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
+    <div id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" class="fixed inset-0 z-50 bg-dusk-900/60 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="relative w-full max-w-md rounded-3xl glass-panel border border-sand-200/90 dark:border-dusk-800/90 shadow-2xl p-6 sm:p-8 bg-sand-50/95 dark:bg-dusk-900/95 overflow-hidden modal-animated-card">
             
             <!-- Close Button -->
@@ -775,14 +784,7 @@
                             </svg>
                             <span class="text-xs font-bold text-dusk-800 dark:text-sand-100">Sign in with your Google Account</span>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Google Email</label>
-                            <input type="email" id="g-input-email" required placeholder="you@gmail.com or university email" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Full Name (optional)</label>
-                            <input type="text" id="g-input-name" placeholder="Full name (e.g. Sarah Connor)" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
-                        </div>
+                        <p class="text-[11px] text-dusk-400 dark:text-dusk-500 leading-relaxed">Verify your account securely through Google — we never see or store your Google password.</p>
                         <button type="button" id="btn-google-submit" class="w-full py-2.5 px-4 rounded-xl bg-dusk-900 hover:bg-black dark:bg-terra-600 dark:hover:bg-terra-700 text-white font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -792,13 +794,14 @@
                             </svg>
                             <span>Sign in with Google</span>
                         </button>
+                        <p id="g-config-note" class="hidden text-[11px] font-medium text-amber-600 dark:text-amber-400 text-center">Google sign-in is not configured on this server. Please sign in with email below.</p>
                     </div>
                 </div>
 
                 <!-- Google Connecting State -->
                 <div id="g-signing" class="hidden flex-col items-center justify-center py-4 gap-2 bg-sand-100/50 dark:bg-dusk-800/50 rounded-xl border border-sand-200 dark:border-dusk-700">
                     <div class="w-5 h-5 rounded-full border-2 border-terra-500 border-t-transparent animate-spin"></div>
-                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Connecting to authentication database...</p>
+                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Verifying your Google account...</p>
                 </div>
             </div>
 
@@ -834,8 +837,12 @@
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Password</label>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-1 text-dusk-400 hover:text-dusk-600 dark:hover:text-sand-300 transition-colors" title="Show password">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
                     </div>
+                    <p id="login-caps-hint" class="hidden mt-1 text-[10px] font-semibold text-amber-500 dark:text-amber-400 items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i>Caps Lock is on</p>
                 </div>
                 <button type="submit" id="btn-submit-login" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
                     <span>Sign In to Cognify</span>
@@ -863,7 +870,20 @@
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Create Password</label>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-1 text-dusk-400 hover:text-dusk-600 dark:hover:text-sand-300 transition-colors" title="Show password">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <p id="register-caps-hint" class="hidden mt-1 text-[10px] font-semibold text-amber-500 dark:text-amber-400 items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i>Caps Lock is on</p>
+                    <div id="pw-strength" class="hidden mt-2 px-1">
+                        <div class="flex gap-1.5 mb-1">
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                        </div>
+                        <p id="pw-strength-text" class="text-[10px] font-semibold text-dusk-400"></p>
                     </div>
                 </div>
                 <button type="submit" id="btn-submit-register" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
@@ -871,6 +891,15 @@
                     <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                 </button>
             </form>
+
+            <!-- Continue as Guest -->
+            <div class="mt-5 pt-4 border-t border-sand-200 dark:border-dusk-800 text-center">
+                <p class="text-[11px] text-dusk-400 dark:text-dusk-500 mb-2">Just exploring? Your guest sessions stay on this device.</p>
+                <button type="button" id="btn-continue-guest" class="text-xs font-semibold text-terra-600 dark:text-terra-400 hover:text-terra-700 dark:hover:text-terra-300 hover:underline underline-offset-2 inline-flex items-center gap-1.5 transition-colors">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Continue as guest — no account needed</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1385,8 +1414,6 @@
         const authModalTitle = document.getElementById('auth-modal-title');
         const authModalDesc = document.getElementById('auth-modal-desc');
         const btnGoogleSubmit = document.getElementById('btn-google-submit');
-        const gInputEmail = document.getElementById('g-input-email');
-        const gInputName = document.getElementById('g-input-name');
         const gSigning = document.getElementById('g-signing');
         const gChoose = document.getElementById('g-choose');
 
@@ -2708,6 +2735,19 @@
             gSigning.classList.add('hidden');
             gChoose.style.display = 'block';
             hideAuthAlert();
+            const pwMeter = document.getElementById('pw-strength');
+            if (pwMeter) pwMeter.classList.add('hidden');
+            setTimeout(() => {
+                let firstField;
+                if (tab === 'register') {
+                    firstField = document.getElementById('register-name');
+                } else if (googleClientId) {
+                    firstField = document.getElementById('btn-google-submit');
+                } else {
+                    firstField = document.getElementById('login-email');
+                }
+                if (firstField) firstField.focus();
+            }, 60);
         }
 
         function closeAuthModalHandler() {
@@ -2727,6 +2767,14 @@
                 <i data-lucide="${isSuccess ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 shrink-0"></i>
                 <span>${escapeHtml(msg)}</span>
             `;
+            if (!isSuccess) {
+                const card = authModal.querySelector('.glass-panel');
+                if (card) {
+                    card.classList.remove('auth-shake');
+                    void card.offsetWidth;
+                    card.classList.add('auth-shake');
+                }
+            }
             lucide.createIcons();
         }
 
@@ -2811,50 +2859,97 @@
             lucide.createIcons();
         }
 
-        // Real Google Account Sign-In (No Demo Accounts)
-        btnGoogleSubmit.addEventListener('click', async () => {
-            const email = gInputEmail.value.trim().toLowerCase();
-            const name = gInputName.value.trim();
+        // Real Google Sign-In via Google Identity Services (OAuth ID token)
+        let googleClientId = "";
 
-            if (!email || !email.includes('@') || !email.includes('.')) {
-                showAuthAlert("Please enter a valid Google email address (e.g. name@gmail.com).");
-                gInputEmail.focus();
+        async function loadAppConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                googleClientId = cfg.google_client_id || "";
+            } catch (err) {
+                googleClientId = "";
+            }
+            initGoogleSignIn();
+        }
+
+        function initGoogleSignIn(retries = 0) {
+            const note = document.getElementById('g-config-note');
+            if (!googleClientId) {
+                if (note) note.classList.remove('hidden');
+                if (btnGoogleSubmit) {
+                    btnGoogleSubmit.disabled = true;
+                    btnGoogleSubmit.title = 'Google sign-in is not configured on this server';
+                }
                 return;
             }
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                if (retries < 20) setTimeout(() => initGoogleSignIn(retries + 1), 250);
+                return;
+            }
+            if (note) note.classList.add('hidden');
+            if (btnGoogleSubmit) {
+                btnGoogleSubmit.disabled = false;
+                btnGoogleSubmit.title = '';
+            }
+            google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback: handleGoogleCredential,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+            });
+        }
 
+        function resetGoogleSigning() {
+            gSigning.classList.add('hidden');
+            gSigning.classList.remove('flex');
+            gChoose.style.display = 'block';
+        }
+
+        function handleGoogleCredential(response) {
+            const credential = response && response.credential;
+            if (!credential) {
+                resetGoogleSigning();
+                return;
+            }
             gChoose.style.display = 'none';
             gSigning.classList.remove('hidden');
             gSigning.classList.add('flex');
 
-            try {
-                const res = await fetch('/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email })
-                });
-                const data = await res.json();
-
+            fetch('/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential })
+            })
+            .then((res) => res.json())
+            .then((data) => {
                 if (data.success && data.token) {
                     const userObj = { ...data.user, method: 'google', token: data.token };
                     localStorage.setItem('cognify_user', JSON.stringify(userObj));
                     localStorage.setItem('cognify_token', data.token);
                     updateAuthUI(userObj);
                     closeAuthModalHandler();
-                    gInputEmail.value = '';
-                    gInputName.value = '';
-                    await migrateGuestSessions(data.token);
-                    await loadSessionsList();
+                    migrateGuestSessions(data.token).then(() => loadSessionsList());
                 } else {
                     showAuthAlert(data.error || "Could not sign in with Google.");
+                    resetGoogleSigning();
                 }
-            } catch(err) {
+            })
+            .catch(() => {
                 showAuthAlert("Network error connecting to authentication database.");
-            } finally {
-                gSigning.classList.add('hidden');
-                gSigning.classList.remove('flex');
-                gChoose.style.display = 'block';
+                resetGoogleSigning();
+            });
+        }
+
+        btnGoogleSubmit.addEventListener('click', () => {
+            if (!googleClientId || typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                showAuthAlert("Google sign-in is not configured on this server. Please sign in with email instead.");
+                return;
             }
+            google.accounts.id.prompt();
         });
+
+        loadAppConfig();
 
         // Email / Password Login
         formLogin.addEventListener('submit', async (e) => {
@@ -2864,7 +2959,7 @@
             const btn = document.getElementById('btn-submit-login');
 
             btn.disabled = true;
-            btn.innerHTML = `<span>Signing In...</span>`;
+            btn.innerHTML = `<span>Signing In...</span><svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M12 2a10 10 0 0 1 9.54 7" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 
             try {
                 const res = await fetch('/auth/login', {
@@ -2917,7 +3012,7 @@
             }
 
             btn.disabled = true;
-            btn.innerHTML = `<span>Creating Account...</span>`;
+            btn.innerHTML = `<span>Creating Account...</span><svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M12 2a10 10 0 0 1 9.54 7" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 
             try {
                 const res = await fetch('/auth/register', {
@@ -2991,6 +3086,97 @@
 
         tabLogin.addEventListener('click', () => switchAuthTab('login'));
         tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+        // Password visibility toggles (login + register)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.toggle-password');
+            if (!btn) return;
+            const input = btn.parentElement.querySelector('input');
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.title = show ? 'Hide password' : 'Show password';
+            btn.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+            lucide.createIcons();
+        });
+
+        // Password strength meter on registration
+        const registerPassword = document.getElementById('register-password');
+        const pwStrength = document.getElementById('pw-strength');
+        const pwStrengthText = document.getElementById('pw-strength-text');
+        const pwBars = pwStrength ? pwStrength.querySelectorAll('.pw-bar') : [];
+        const strengthMeta = [
+            { cls: 'bg-red-400', text: 'Weak — add length, numbers & symbols', textCls: 'text-red-500 dark:text-red-400' },
+            { cls: 'bg-amber-400', text: 'Fair — getting there', textCls: 'text-amber-500 dark:text-amber-400' },
+            { cls: 'bg-sage-400', text: 'Good password', textCls: 'text-sage-600 dark:text-sage-400' },
+            { cls: 'bg-emerald-500', text: 'Strong password', textCls: 'text-emerald-600 dark:text-emerald-400' },
+        ];
+        function passwordStrength(pw) {
+            if (!pw) return 0;
+            let s = 0;
+            if (pw.length >= 6) s++;
+            if (pw.length >= 10) s++;
+            if (/[a-z]/.test(pw) && (/[A-Z]/.test(pw) || /\d/.test(pw))) s++;
+            if (/[^A-Za-z0-9]/.test(pw) && /\d/.test(pw)) s++;
+            return Math.max(1, Math.min(4, s));
+        }
+        if (registerPassword && pwStrength) {
+            registerPassword.addEventListener('input', () => {
+                const pw = registerPassword.value;
+                if (!pw) {
+                    pwStrength.classList.add('hidden');
+                    return;
+                }
+                const level = passwordStrength(pw);
+                const meta = strengthMeta[level - 1];
+                pwStrength.classList.remove('hidden');
+                pwBars.forEach((bar, i) => {
+                    bar.className = `h-1 flex-1 rounded-full transition-colors duration-300 ${i < level ? meta.cls : 'bg-sand-200 dark:bg-dusk-700'}`;
+                });
+                pwStrengthText.innerText = meta.text;
+                pwStrengthText.className = `text-[10px] font-semibold ${meta.textCls}`;
+            });
+        }
+
+        // Escape key closes the auth modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !authModal.classList.contains('hidden')) {
+                closeAuthModalHandler();
+            }
+        });
+
+        // Continue as guest (guest sessions already work without an account)
+        const btnContinueGuest = document.getElementById('btn-continue-guest');
+        if (btnContinueGuest) {
+            btnContinueGuest.addEventListener('click', () => {
+                closeAuthModalHandler();
+                loadSessionsList();
+            });
+        }
+
+        // Caps Lock detection on password fields
+        [['login-password', 'login-caps-hint'], ['register-password', 'register-caps-hint']].forEach(([inputId, hintId]) => {
+            const input = document.getElementById(inputId);
+            const hint = document.getElementById(hintId);
+            if (!input || !hint) return;
+            const checkCaps = (e) => {
+                if (e.getModifierState) {
+                    hint.classList.toggle('hidden', !e.getModifierState('CapsLock'));
+                    hint.classList.toggle('flex', e.getModifierState('CapsLock'));
+                }
+            };
+            input.addEventListener('keydown', checkCaps);
+            input.addEventListener('keyup', checkCaps);
+            input.addEventListener('blur', () => {
+                hint.classList.add('hidden');
+                hint.classList.remove('flex');
+            });
+        });
+
+        // Clear the auth alert as soon as the user types again
+        [formLogin, formRegister].forEach((form) => {
+            if (form) form.addEventListener('input', hideAuthAlert);
+        });
 
         // ==================== USER ID COPY HANDLERS ====================
         function copyUserId(idToCopy, textSpan) {

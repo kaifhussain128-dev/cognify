@@ -18,6 +18,7 @@
 - `GEMINI_API_KEY` — required; loaded from `.env` via python-dotenv in `backend/main.py` (or set in the Render dashboard)
 - `GROQ_API_KEY` — optional; enables the Groq engine in Fast AI Search
 - `GEMINI_MODEL` — optional; defaults to `gemini-3.6-flash` on `/api/study`, but `gemini-3-flash-preview` on the legacy `/ask-ai`
+- `GOOGLE_CLIENT_ID` — optional; enables real Google OAuth sign-in (Google Identity Services). Without it, `/auth/google` returns 503 and the UI shows a "not configured" note; `/api/config` exposes the public client ID to the SPA
 
 ## Architecture
 
