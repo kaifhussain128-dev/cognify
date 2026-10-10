@@ -248,6 +248,13 @@
             animation: modalScaleFadeIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        @keyframes authShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .auth-shake { animation: authShake 0.4s ease; }
+
         .chat-crossfade {
             transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -834,7 +841,10 @@
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Password</label>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-1 text-dusk-400 hover:text-dusk-600 dark:hover:text-sand-300 transition-colors" title="Show password">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
                 <button type="submit" id="btn-submit-login" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
@@ -863,7 +873,19 @@
                     <label class="block text-xs font-semibold text-dusk-700 dark:text-dusk-300 mb-1.5">Create Password</label>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-dusk-400 absolute left-3.5 top-3"></i>
-                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <input type="password" id="register-password" minlength="6" required placeholder="At least 6 characters" class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-sand-200 dark:border-dusk-700 bg-white dark:bg-dusk-800/60 text-dusk-900 dark:text-white text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-1 text-dusk-400 hover:text-dusk-600 dark:hover:text-sand-300 transition-colors" title="Show password">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="pw-strength" class="hidden mt-2 px-1">
+                        <div class="flex gap-1.5 mb-1">
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                            <span class="pw-bar h-1 flex-1 rounded-full bg-sand-200 dark:bg-dusk-700 transition-colors duration-300"></span>
+                        </div>
+                        <p id="pw-strength-text" class="text-[10px] font-semibold text-dusk-400"></p>
                     </div>
                 </div>
                 <button type="submit" id="btn-submit-register" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-terra-500 to-terra-600 hover:from-terra-600 hover:to-terra-700 text-white text-xs font-bold shadow-md shadow-terra-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
@@ -2708,6 +2730,12 @@
             gSigning.classList.add('hidden');
             gChoose.style.display = 'block';
             hideAuthAlert();
+            const pwMeter = document.getElementById('pw-strength');
+            if (pwMeter) pwMeter.classList.add('hidden');
+            setTimeout(() => {
+                const firstField = document.getElementById(tab === 'register' ? 'register-name' : 'g-input-email');
+                if (firstField) firstField.focus();
+            }, 60);
         }
 
         function closeAuthModalHandler() {
@@ -2727,6 +2755,14 @@
                 <i data-lucide="${isSuccess ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 shrink-0"></i>
                 <span>${escapeHtml(msg)}</span>
             `;
+            if (!isSuccess) {
+                const card = authModal.querySelector('.glass-panel');
+                if (card) {
+                    card.classList.remove('auth-shake');
+                    void card.offsetWidth;
+                    card.classList.add('auth-shake');
+                }
+            }
             lucide.createIcons();
         }
 
@@ -2864,7 +2900,7 @@
             const btn = document.getElementById('btn-submit-login');
 
             btn.disabled = true;
-            btn.innerHTML = `<span>Signing In...</span>`;
+            btn.innerHTML = `<span>Signing In...</span><svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M12 2a10 10 0 0 1 9.54 7" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 
             try {
                 const res = await fetch('/auth/login', {
@@ -2917,7 +2953,7 @@
             }
 
             btn.disabled = true;
-            btn.innerHTML = `<span>Creating Account...</span>`;
+            btn.innerHTML = `<span>Creating Account...</span><svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/><path d="M12 2a10 10 0 0 1 9.54 7" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;
 
             try {
                 const res = await fetch('/auth/register', {
@@ -2991,6 +3027,74 @@
 
         tabLogin.addEventListener('click', () => switchAuthTab('login'));
         tabRegister.addEventListener('click', () => switchAuthTab('register'));
+
+        // Password visibility toggles (login + register)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.toggle-password');
+            if (!btn) return;
+            const input = btn.parentElement.querySelector('input');
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.title = show ? 'Hide password' : 'Show password';
+            btn.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+            lucide.createIcons();
+        });
+
+        // Password strength meter on registration
+        const registerPassword = document.getElementById('register-password');
+        const pwStrength = document.getElementById('pw-strength');
+        const pwStrengthText = document.getElementById('pw-strength-text');
+        const pwBars = pwStrength ? pwStrength.querySelectorAll('.pw-bar') : [];
+        const strengthMeta = [
+            { cls: 'bg-red-400', text: 'Weak — add length, numbers & symbols', textCls: 'text-red-500 dark:text-red-400' },
+            { cls: 'bg-amber-400', text: 'Fair — getting there', textCls: 'text-amber-500 dark:text-amber-400' },
+            { cls: 'bg-sage-400', text: 'Good password', textCls: 'text-sage-600 dark:text-sage-400' },
+            { cls: 'bg-emerald-500', text: 'Strong password', textCls: 'text-emerald-600 dark:text-emerald-400' },
+        ];
+        function passwordStrength(pw) {
+            if (!pw) return 0;
+            let s = 0;
+            if (pw.length >= 6) s++;
+            if (pw.length >= 10) s++;
+            if (/[a-z]/.test(pw) && (/[A-Z]/.test(pw) || /\d/.test(pw))) s++;
+            if (/[^A-Za-z0-9]/.test(pw) && /\d/.test(pw)) s++;
+            return Math.max(1, Math.min(4, s));
+        }
+        if (registerPassword && pwStrength) {
+            registerPassword.addEventListener('input', () => {
+                const pw = registerPassword.value;
+                if (!pw) {
+                    pwStrength.classList.add('hidden');
+                    return;
+                }
+                const level = passwordStrength(pw);
+                const meta = strengthMeta[level - 1];
+                pwStrength.classList.remove('hidden');
+                pwBars.forEach((bar, i) => {
+                    bar.className = `h-1 flex-1 rounded-full transition-colors duration-300 ${i < level ? meta.cls : 'bg-sand-200 dark:bg-dusk-700'}`;
+                });
+                pwStrengthText.innerText = meta.text;
+                pwStrengthText.className = `text-[10px] font-semibold ${meta.textCls}`;
+            });
+        }
+
+        // Enter key submits Google sign-in
+        [gInputEmail, gInputName].forEach((el) => {
+            if (el) el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnGoogleSubmit.click();
+                }
+            });
+        });
+
+        // Escape key closes the auth modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !authModal.classList.contains('hidden')) {
+                closeAuthModalHandler();
+            }
+        });
 
         // ==================== USER ID COPY HANDLERS ====================
         function copyUserId(idToCopy, textSpan) {
