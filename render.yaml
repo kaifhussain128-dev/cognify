@@ -10,3 +10,5 @@ services:
         value: 3.11.9
       - key: GEMINI_API_KEY
         sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false

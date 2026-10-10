@@ -35,6 +35,8 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services (real OAuth sign-in) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Marked.js for Markdown Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Highlight.js for Syntax Highlighting -->
@@ -782,14 +784,7 @@
                             </svg>
                             <span class="text-xs font-bold text-dusk-800 dark:text-sand-100">Sign in with your Google Account</span>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Google Email</label>
-                            <input type="email" id="g-input-email" required placeholder="you@gmail.com or university email" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-dusk-600 dark:text-dusk-400 mb-1">Your Full Name (optional)</label>
-                            <input type="text" id="g-input-name" placeholder="Full name (e.g. Sarah Connor)" class="w-full px-3 py-2 rounded-xl border border-sand-200 dark:border-dusk-600 bg-sand-50/50 dark:bg-dusk-900 text-dusk-900 dark:text-sand-100 text-xs focus:ring-2 focus:ring-terra-500/20 focus:border-terra-600 outline-none transition-all">
-                        </div>
+                        <p class="text-[11px] text-dusk-400 dark:text-dusk-500 leading-relaxed">Verify your account securely through Google — we never see or store your Google password.</p>
                         <button type="button" id="btn-google-submit" class="w-full py-2.5 px-4 rounded-xl bg-dusk-900 hover:bg-black dark:bg-terra-600 dark:hover:bg-terra-700 text-white font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -799,13 +794,14 @@
                             </svg>
                             <span>Sign in with Google</span>
                         </button>
+                        <p id="g-config-note" class="hidden text-[11px] font-medium text-amber-600 dark:text-amber-400 text-center">Google sign-in is not configured on this server. Please sign in with email below.</p>
                     </div>
                 </div>
 
                 <!-- Google Connecting State -->
                 <div id="g-signing" class="hidden flex-col items-center justify-center py-4 gap-2 bg-sand-100/50 dark:bg-dusk-800/50 rounded-xl border border-sand-200 dark:border-dusk-700">
                     <div class="w-5 h-5 rounded-full border-2 border-terra-500 border-t-transparent animate-spin"></div>
-                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Connecting to authentication database...</p>
+                    <p class="text-xs font-medium text-dusk-600 dark:text-dusk-300">Verifying your Google account...</p>
                 </div>
             </div>
 
@@ -1418,8 +1414,6 @@
         const authModalTitle = document.getElementById('auth-modal-title');
         const authModalDesc = document.getElementById('auth-modal-desc');
         const btnGoogleSubmit = document.getElementById('btn-google-submit');
-        const gInputEmail = document.getElementById('g-input-email');
-        const gInputName = document.getElementById('g-input-name');
         const gSigning = document.getElementById('g-signing');
         const gChoose = document.getElementById('g-choose');
 
@@ -2744,7 +2738,14 @@
             const pwMeter = document.getElementById('pw-strength');
             if (pwMeter) pwMeter.classList.add('hidden');
             setTimeout(() => {
-                const firstField = document.getElementById(tab === 'register' ? 'register-name' : 'g-input-email');
+                let firstField;
+                if (tab === 'register') {
+                    firstField = document.getElementById('register-name');
+                } else if (googleClientId) {
+                    firstField = document.getElementById('btn-google-submit');
+                } else {
+                    firstField = document.getElementById('login-email');
+                }
                 if (firstField) firstField.focus();
             }, 60);
         }
@@ -2858,50 +2859,97 @@
             lucide.createIcons();
         }
 
-        // Real Google Account Sign-In (No Demo Accounts)
-        btnGoogleSubmit.addEventListener('click', async () => {
-            const email = gInputEmail.value.trim().toLowerCase();
-            const name = gInputName.value.trim();
+        // Real Google Sign-In via Google Identity Services (OAuth ID token)
+        let googleClientId = "";
 
-            if (!email || !email.includes('@') || !email.includes('.')) {
-                showAuthAlert("Please enter a valid Google email address (e.g. name@gmail.com).");
-                gInputEmail.focus();
+        async function loadAppConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                googleClientId = cfg.google_client_id || "";
+            } catch (err) {
+                googleClientId = "";
+            }
+            initGoogleSignIn();
+        }
+
+        function initGoogleSignIn(retries = 0) {
+            const note = document.getElementById('g-config-note');
+            if (!googleClientId) {
+                if (note) note.classList.remove('hidden');
+                if (btnGoogleSubmit) {
+                    btnGoogleSubmit.disabled = true;
+                    btnGoogleSubmit.title = 'Google sign-in is not configured on this server';
+                }
                 return;
             }
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                if (retries < 20) setTimeout(() => initGoogleSignIn(retries + 1), 250);
+                return;
+            }
+            if (note) note.classList.add('hidden');
+            if (btnGoogleSubmit) {
+                btnGoogleSubmit.disabled = false;
+                btnGoogleSubmit.title = '';
+            }
+            google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback: handleGoogleCredential,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+            });
+        }
 
+        function resetGoogleSigning() {
+            gSigning.classList.add('hidden');
+            gSigning.classList.remove('flex');
+            gChoose.style.display = 'block';
+        }
+
+        function handleGoogleCredential(response) {
+            const credential = response && response.credential;
+            if (!credential) {
+                resetGoogleSigning();
+                return;
+            }
             gChoose.style.display = 'none';
             gSigning.classList.remove('hidden');
             gSigning.classList.add('flex');
 
-            try {
-                const res = await fetch('/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email })
-                });
-                const data = await res.json();
-
+            fetch('/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential })
+            })
+            .then((res) => res.json())
+            .then((data) => {
                 if (data.success && data.token) {
                     const userObj = { ...data.user, method: 'google', token: data.token };
                     localStorage.setItem('cognify_user', JSON.stringify(userObj));
                     localStorage.setItem('cognify_token', data.token);
                     updateAuthUI(userObj);
                     closeAuthModalHandler();
-                    gInputEmail.value = '';
-                    gInputName.value = '';
-                    await migrateGuestSessions(data.token);
-                    await loadSessionsList();
+                    migrateGuestSessions(data.token).then(() => loadSessionsList());
                 } else {
                     showAuthAlert(data.error || "Could not sign in with Google.");
+                    resetGoogleSigning();
                 }
-            } catch(err) {
+            })
+            .catch(() => {
                 showAuthAlert("Network error connecting to authentication database.");
-            } finally {
-                gSigning.classList.add('hidden');
-                gSigning.classList.remove('flex');
-                gChoose.style.display = 'block';
+                resetGoogleSigning();
+            });
+        }
+
+        btnGoogleSubmit.addEventListener('click', () => {
+            if (!googleClientId || typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+                showAuthAlert("Google sign-in is not configured on this server. Please sign in with email instead.");
+                return;
             }
+            google.accounts.id.prompt();
         });
+
+        loadAppConfig();
 
         // Email / Password Login
         formLogin.addEventListener('submit', async (e) => {
@@ -3090,16 +3138,6 @@
             });
         }
 
-        // Enter key submits Google sign-in
-        [gInputEmail, gInputName].forEach((el) => {
-            if (el) el.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    btnGoogleSubmit.click();
-                }
-            });
-        });
-
         // Escape key closes the auth modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !authModal.classList.contains('hidden')) {
@@ -3138,9 +3176,6 @@
         // Clear the auth alert as soon as the user types again
         [formLogin, formRegister].forEach((form) => {
             if (form) form.addEventListener('input', hideAuthAlert);
-        });
-        [gInputEmail, gInputName].forEach((el) => {
-            if (el) el.addEventListener('input', hideAuthAlert);
         });
 
         // ==================== USER ID COPY HANDLERS ====================

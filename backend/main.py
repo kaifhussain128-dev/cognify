@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_processor import extract_text_from_pdf, extract_pdf_structured
@@ -118,8 +120,7 @@ class LoginRequest(BaseModel):
     password: str
 
 class GoogleAuthRequest(BaseModel):
-    name: str = ""
-    email: str
+    credential: str = Field(description="Google ID token issued by Google Identity Services")
 
 class LogoutRequest(BaseModel):
     token: str = ""
@@ -195,6 +196,19 @@ def serve_ui():
 def health_check():
     return {"status": "ok", "service": "Cognify StudyMate AI"}
 
+@app.get("/api/config")
+def api_config():
+    """
+    Public client configuration for the frontend SPA (contains no secrets).
+    """
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    return {
+        "google_client_id": google_client_id,
+        "features": {
+            "google_signin": bool(google_client_id),
+        },
+    }
+
 # ==================== AUTHENTICATION ====================
 
 @app.post("/auth/register")
@@ -213,10 +227,47 @@ def auth_login(req: LoginRequest):
     except ValueError as e:
         return {"success": False, "error": str(e)}
 
+def verify_google_id_token(credential: str) -> Optional[dict]:
+    """
+    Verifies a Google ID token (issued by Google Identity Services) against
+    Google's public keys. Returns the decoded claims on success, None on failure.
+    """
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id or not credential:
+        return None
+    try:
+        idinfo = id_token.verify_token(
+            credential,
+            request=google_requests.Request(),
+            audience=client_id,
+        )
+        if idinfo.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+            return None
+        if not idinfo.get("email_verified"):
+            return None
+        return idinfo
+    except Exception:
+        # Invalid signature, wrong audience, expired token, or network failure: fail closed
+        return None
+
 @app.post("/auth/google")
 def auth_google(req: GoogleAuthRequest):
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id:
+        return JSONResponse(
+            status_code=503,
+            content={"success": False, "error": "Google sign-in is not configured on this server."}
+        )
+    idinfo = verify_google_id_token(req.credential)
+    if not idinfo:
+        return JSONResponse(
+            status_code=401,
+            content={"success": False, "error": "Invalid or expired Google sign-in. Please try again."}
+        )
+    email = (idinfo.get("email") or "").strip().lower()
+    name = (idinfo.get("name") or "").strip() or email.split("@")[0].replace(".", " ").title()
     try:
-        result = google_auth_user(req.name, req.email)
+        result = google_auth_user(name, email)
         return {"success": True, **result}
     except ValueError as e:
         return {"success": False, "error": str(e)}
